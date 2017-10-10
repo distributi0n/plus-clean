@@ -21,12 +21,12 @@
 
         private void manager_connectionEvent(ConnectionInformation connection)
         {
-            connection.connectionChanged += connectionChanged;
+            connection.connectionChanged += ConnectionChanged;
             PlusEnvironment.GetGame().GetClientManager()
                 .CreateAndStartClient(Convert.ToInt32(connection.getConnectionID()), connection);
         }
 
-        private void connectionChanged(ConnectionInformation information, ConnectionState state)
+        private void ConnectionChanged(ConnectionInformation information, ConnectionState state)
         {
             if (state == ConnectionState.CLOSED)
             {
@@ -34,12 +34,12 @@
             }
         }
 
-        private void CloseConnection(ConnectionInformation Connection)
+        private void CloseConnection(ConnectionInformation connection)
         {
             try
             {
-                Connection.Dispose();
-                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32(Connection.getConnectionID()));
+                connection.Dispose();
+                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32(connection.getConnectionID()));
             }
             catch (Exception e)
             {
@@ -47,7 +47,7 @@
             }
         }
 
-        public void Destroy()
+        internal void Destroy()
         {
             manager.destroy();
         }

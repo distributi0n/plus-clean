@@ -22,13 +22,13 @@
 
         private bool isConnected;
 
-        private SocketManager manager;
+        private SocketManager _manager;
 
         public ConnectionInformation(int connectionID, Socket dataStream, SocketManager manager, IDataParser parser, string ip)
         {
             this.parser = parser;
             buffer = new byte[GameSocketManagerStatics.BUFFER_SIZE];
-            this.manager = manager;
+            _manager = manager;
             dataSocket = dataStream;
             dataSocket.SendBufferSize = GameSocketManagerStatics.BUFFER_SIZE;
             this.ip = ip;
@@ -70,15 +70,9 @@
             }
         }
 
-        public string getIp()
-        {
-            return ip;
-        }
+        public string GetIp() => ip;
 
-        public int getConnectionID()
-        {
-            return connectionID;
-        }
+        public int getConnectionID() => connectionID;
 
         public void disconnect()
         {
@@ -132,11 +126,13 @@
                 disconnect();
                 return;
             }
+
             if (bytesReceived == 0)
             {
                 disconnect();
                 return;
             }
+
             try
             {
                 if (!disableReceive)
@@ -177,6 +173,7 @@
                 {
                     return;
                 }
+
                 dataSocket.BeginSend(packet, 0, packet.Length, 0, sendCallback, null);
             }
             catch

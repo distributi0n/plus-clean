@@ -5,11 +5,12 @@
     using System.Net;
     using System.Net.Sockets;
     using log4net;
-    using Plus.Communication.ConnectionManager.Socket_Exceptions;
+    using Socket_Exceptions;
 
     public class SocketManager
     {
         public delegate void ConnectionEvent(ConnectionInformation connection);
+
         private static readonly ILog log = LogManager.GetLogger("Plus.Communication.ConnectionManager");
 
         private bool _acceptConnections;
@@ -104,7 +105,8 @@
                         if (ConnectionCount < maxIpConnectionCount)
                         {
                             _acceptedConnections++;
-                            var c = new ConnectionInformation(_acceptedConnections, replyFromComputer, this, parser.Clone() as IDataParser, Ip);
+                            var c = new ConnectionInformation(_acceptedConnections, replyFromComputer, this,
+                                parser.Clone() as IDataParser, Ip);
                             reportUserLogin(Ip);
                             c.connectionChanged += c_connectionChanged;
                             if (connectionEvent != null)
@@ -143,7 +145,8 @@
         public void reportDisconnect(ConnectionInformation gameConnection)
         {
             gameConnection.connectionChanged -= c_connectionChanged;
-            reportUserLogout(gameConnection.getIp());
+            reportUserLogout(gameConnection.GetIp());
+
             //activeConnections.Remove(gameConnection.getConnectionID());
         }
 
@@ -173,6 +176,7 @@
             {
                 return _ipConnectionsCount[ip];
             }
+
             return 0;
         }
     }

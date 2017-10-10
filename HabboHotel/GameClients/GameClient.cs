@@ -47,7 +47,7 @@
         private void SwitchParserRequest()
         {
             _packetParser.SetConnection(_connection);
-            _packetParser.onNewPacket += parser_onNewPacket;
+            _packetParser.OnNewPacket += parser_onNewPacket;
             var data = (_connection.parser as InitialPacketParser).currentData;
             _connection.parser.Dispose();
             _connection.parser = _packetParser;

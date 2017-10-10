@@ -1,54 +1,56 @@
 ﻿namespace Plus.Communication.Encryption.Crypto.Prng
 {
-    public sealed class ARC4
+    using System.Collections.Generic;
+
+    public sealed class Arc4
     {
-        public const int POOLSIZE = 256;
-        private readonly byte[] bytes;
-        private int i;
-        private int j;
+        private const int Poolsize = 256;
+        private readonly byte[] _bytes;
+        private int _i;
+        private int _j;
 
-        public ARC4() => bytes = new byte[POOLSIZE];
-
-        public ARC4(byte[] key)
+        internal Arc4(byte[] key)
         {
-            bytes = new byte[POOLSIZE];
+            _bytes = new byte[Poolsize];
             Initialize(key);
         }
 
-        public void Initialize(byte[] key)
+        private void Initialize(IReadOnlyList<byte> key)
         {
-            i = 0;
-            j = 0;
-            for (i = 0; i < POOLSIZE; ++i)
+            _i = 0;
+            _j = 0;
+            
+            for (_i = 0; _i < Poolsize; ++_i)
             {
-                bytes[i] = (byte) i;
+                _bytes[_i] = (byte) _i;
             }
-            for (i = 0; i < POOLSIZE; ++i)
+            
+            for (_i = 0; _i < Poolsize; ++_i)
             {
-                j = (j + bytes[i] + key[i % key.Length]) & (POOLSIZE - 1);
-                Swap(i, j);
+                _j = (_j + _bytes[_i] + key[_i % key.Count]) & (Poolsize - 1);
+                Swap(_i, _j);
             }
 
-            i = 0;
-            j = 0;
+            _i = 0;
+            _j = 0;
         }
 
         private void Swap(int a, int b)
         {
-            var t = bytes[a];
-            bytes[a] = bytes[b];
-            bytes[b] = t;
+            var t = _bytes[a];
+            _bytes[a] = _bytes[b];
+            _bytes[b] = t;
         }
 
-        public byte Next()
+        private byte Next()
         {
-            i = ++i & (POOLSIZE - 1);
-            j = (j + bytes[i]) & (POOLSIZE - 1);
-            Swap(i, j);
-            return bytes[(bytes[i] + bytes[j]) & 255];
+            _i = ++_i & (Poolsize - 1);
+            _j = (_j + _bytes[_i]) & (Poolsize - 1);
+            Swap(_i, _j);
+            return _bytes[(_bytes[_i] + _bytes[_j]) & 255];
         }
 
-        public void Encrypt(ref byte[] src)
+        private void Encrypt(ref byte[] src)
         {
             for (var k = 0; k < src.Length; k++)
             {
@@ -56,7 +58,7 @@
             }
         }
 
-        public void Decrypt(ref byte[] src)
+        internal void Decrypt(ref byte[] src)
         {
             Encrypt(ref src);
         }
