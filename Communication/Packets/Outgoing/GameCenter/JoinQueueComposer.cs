@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.GameCenter
+﻿namespace Plus.Communication.Packets.Outgoing.GameCenter
 {
-    class JoinQueueComposer : ServerPacket
+    internal class JoinQueueComposer : ServerPacket
     {
-        public JoinQueueComposer(int GameId)
-            : base(ServerPacketHeader.JoinQueueMessageComposer)
+        public JoinQueueComposer(int GameId) : base(ServerPacketHeader.JoinQueueMessageComposer)
         {
-            base.WriteInteger(GameId);
+            WriteInteger(GameId);
         }
     }
 }

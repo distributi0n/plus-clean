@@ -1,69 +1,59 @@
-﻿using System;
-using System.Data;
-using System.Collections.Generic;
-
-using Plus.Database.Interfaces;
-
-namespace Plus.HabboHotel.Users.Ignores
+﻿namespace Plus.HabboHotel.Users.Ignores
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+
     public sealed class IgnoresComponent
     {
         private readonly List<int> _ignoredUsers;
 
-        public IgnoresComponent()
-        {
-            this._ignoredUsers = new List<int>();
-        }
+        public IgnoresComponent() => _ignoredUsers = new List<int>();
 
         public bool Init(Habbo player)
         {
-            if (this._ignoredUsers.Count > 0)
+            if (_ignoredUsers.Count > 0)
+            {
                 return false;
-            
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            }
+
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `user_ignores` WHERE `user_id` = @uid;");
                 dbClient.AddParameter("uid", player.Id);
-                DataTable GetIgnores = dbClient.GetTable();
-
+                var GetIgnores = dbClient.GetTable();
                 if (GetIgnores != null)
                 {
                     foreach (DataRow Row in GetIgnores.Rows)
                     {
-                        this._ignoredUsers.Add(Convert.ToInt32(Row["ignore_id"]));
+                        _ignoredUsers.Add(Convert.ToInt32(Row["ignore_id"]));
                     }
                 }
             }
+
             return true;
         }
 
-        public bool TryGet(int userId)
-        {
-            return this._ignoredUsers.Contains(userId);
-        }
+        public bool TryGet(int userId) => _ignoredUsers.Contains(userId);
 
         public bool TryAdd(int userId)
         {
-            if (this._ignoredUsers.Contains(userId))
+            if (_ignoredUsers.Contains(userId))
+            {
                 return false;
+            }
 
-            this._ignoredUsers.Add(userId);
+            _ignoredUsers.Add(userId);
             return true;
         }
 
-        public bool TryRemove(int userId)
-        {
-            return this._ignoredUsers.Remove(userId);
-        }
+        public bool TryRemove(int userId) => _ignoredUsers.Remove(userId);
 
-        public ICollection<int> IgnoredUserIds()
-        {
-           return this._ignoredUsers;
-        }
+        public ICollection<int> IgnoredUserIds() => _ignoredUsers;
 
         public void Dispose()
         {
-            this._ignoredUsers.Clear();
+            _ignoredUsers.Clear();
         }
     }
 }

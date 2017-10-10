@@ -1,27 +1,28 @@
-﻿using Plus.Utilities;
-
-namespace Plus.HabboHotel.Rewards
+﻿namespace Plus.HabboHotel.Rewards
 {
+    using Utilities;
+
     public class Reward
     {
-        public double RewardStart { get; set; }
-        public double RewardEnd { get; set; }
-        public RewardType Type { get; set; }
-        public string RewardData { get; set; }
-        public string Message { get; set; }
         public Reward(double Start, double End, string Type, string RewardData, string Message)
         {
-            this.RewardStart = Start;
-            this.RewardEnd = End;
+            RewardStart = Start;
+            RewardEnd = End;
             this.Type = RewardTypeUtility.GetType(Type);
             this.RewardData = RewardData;
             this.Message = Message;
         }
 
+        public double RewardStart { get; set; }
+        public double RewardEnd { get; set; }
+        public RewardType Type { get; set; }
+        public string RewardData { get; set; }
+        public string Message { get; set; }
+
         public bool isActive()
         {
-            double Now = UnixTimestamp.GetNow();
-            return (Now >= RewardStart && Now <= RewardEnd);
+            var Now = UnixTimestamp.GetNow();
+            return Now >= RewardStart && Now <= RewardEnd;
         }
     }
 }

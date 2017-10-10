@@ -1,28 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class RegenMaps : IChatCommand
+    using GameClients;
+
+    internal class RegenMaps : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_regen_maps"; }
-        }
+        public string PermissionRequired => "command_regen_maps";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Is the game map of your room broken? Fix it with this command!"; }
-        }
+        public string Description => "Is the game map of your room broken? Fix it with this command!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (!Room.CheckRights(Session, true))
             {

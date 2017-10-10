@@ -1,33 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using Plus.Database.Interfaces;
-
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class SetMaxCommand : IChatCommand
+    using GameClients;
+
+    internal class SetMaxCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_setmax"; }
-        }
+        public string PermissionRequired => "command_setmax";
 
-        public string Parameters
-        {
-            get { return "%value%"; }
-        }
+        public string Parameters => "%value%";
 
-        public string Description
-        {
-            get { return "Set the visitor limit to the room."; }
-        }
+        public string Description => "Set the visitor limit to the room.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (!Room.CheckRights(Session, true))
+            {
                 return;
+            }
 
             if (Params.Length == 1)
             {
@@ -49,17 +37,21 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
                     Session.SendWhisper("visitor amount too high for your rank, visitor amount has been set to 200.");
                 }
                 else
+                {
                     Session.SendWhisper("visitor amount set to " + MaxAmount + ".");
-
+                }
                 Room.UsersMax = MaxAmount;
                 Room.RoomData.UsersMax = MaxAmount;
-                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `rooms` SET `users_max` = " + MaxAmount + " WHERE `id` = '" + Room.Id + "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `rooms` SET `users_max` = " + MaxAmount + " WHERE `id` = '" + Room.Id +
+                                      "' LIMIT 1");
                 }
             }
             else
+            {
                 Session.SendWhisper("Invalid amount, please enter a valid number.");
+            }
         }
     }
 }

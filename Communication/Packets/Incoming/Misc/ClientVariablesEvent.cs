@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Incoming.Misc
+﻿namespace Plus.Communication.Packets.Incoming.Misc
 {
-    class ClientVariablesEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal sealed class ClientVariablesEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
-            string GordanPath = Packet.PopString();
-            string ExternalVariables = Packet.PopString();
+            var GordanPath = Packet.PopString();
+            var ExternalVariables = Packet.PopString();
         }
     }
 }

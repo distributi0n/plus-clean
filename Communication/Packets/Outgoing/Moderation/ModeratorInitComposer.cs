@@ -1,43 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Plus.Utilities;
-using Plus.HabboHotel.Moderation;
-
-namespace Plus.Communication.Packets.Outgoing.Moderation
+﻿namespace Plus.Communication.Packets.Outgoing.Moderation
 {
-    class ModeratorInitComposer : ServerPacket
+    using System;
+    using System.Collections.Generic;
+    using HabboHotel.Moderation;
+    using Utilities;
+
+    internal class ModeratorInitComposer : ServerPacket
     {
-        public ModeratorInitComposer(ICollection<string> UserPresets, ICollection<string> RoomPresets, ICollection<ModerationTicket> Tickets)
-            : base(ServerPacketHeader.ModeratorInitMessageComposer)
+        public ModeratorInitComposer(ICollection<string> UserPresets, ICollection<string> RoomPresets,
+            ICollection<ModerationTicket> Tickets) : base(
+            ServerPacketHeader.ModeratorInitMessageComposer)
         {
-            base.WriteInteger(Tickets.Count);
-            foreach (ModerationTicket Ticket in Tickets)
+            WriteInteger(Tickets.Count);
+            foreach (var Ticket in Tickets)
             {
-                base.WriteInteger(Ticket.Id); // Id
-                base.WriteInteger(Ticket.GetStatus(Id)); // Tab ID
-                base.WriteInteger(Ticket.Type); // Type
-                base.WriteInteger(Ticket.Category); // Category
-                base.WriteInteger(Convert.ToInt32((DateTime.Now - UnixTimestamp.FromUnixTimestamp(Ticket.Timestamp)).TotalMilliseconds)); // This should fix the overflow?
-                base.WriteInteger(Ticket.Priority); // Priority
-                base.WriteInteger(Ticket.Sender == null ? 0 : Ticket.Sender.Id); // Sender ID
-                base.WriteInteger(1);
-                base.WriteString(Ticket.Sender == null ? string.Empty : Ticket.Sender.Username); // Sender Name
-                base.WriteInteger(Ticket.Reported == null ? 0 : Ticket.Reported.Id); // Reported ID
-                base.WriteString(Ticket.Reported == null ? string.Empty : Ticket.Reported.Username); // Reported Name
-                base.WriteInteger(Ticket.Moderator == null ? 0 : Ticket.Moderator.Id); // Moderator ID
-                base.WriteString(Ticket.Moderator == null ? string.Empty : Ticket.Moderator.Username); // Mod Name
-                base.WriteString(Ticket.Issue); // Issue
-                base.WriteInteger(Ticket.Room == null ? 0 : Ticket.Room.Id); // Room Id
-                base.WriteInteger(0);//LOOP
+                WriteInteger(Ticket.Id); // Id
+                WriteInteger(Ticket.GetStatus(Id)); // Tab ID
+                WriteInteger(Ticket.Type); // Type
+                WriteInteger(Ticket.Category); // Category
+                WriteInteger(Convert.ToInt32((DateTime.Now - UnixTimestamp.FromUnixTimestamp(Ticket.Timestamp))
+                    .TotalMilliseconds)); // This should fix the overflow?
+                WriteInteger(Ticket.Priority); // Priority
+                WriteInteger(Ticket.Sender == null ? 0 : Ticket.Sender.Id); // Sender ID
+                WriteInteger(1);
+                WriteString(Ticket.Sender == null ? string.Empty : Ticket.Sender.Username); // Sender Name
+                WriteInteger(Ticket.Reported == null ? 0 : Ticket.Reported.Id); // Reported ID
+                WriteString(Ticket.Reported == null ? string.Empty : Ticket.Reported.Username); // Reported Name
+                WriteInteger(Ticket.Moderator == null ? 0 : Ticket.Moderator.Id); // Moderator ID
+                WriteString(Ticket.Moderator == null ? string.Empty : Ticket.Moderator.Username); // Mod Name
+                WriteString(Ticket.Issue); // Issue
+                WriteInteger(Ticket.Room == null ? 0 : Ticket.Room.Id); // Room Id
+                WriteInteger(0); //LOOP
             }
 
-            base.WriteInteger(UserPresets.Count);
-            foreach (string pre in UserPresets)
+            WriteInteger(UserPresets.Count);
+            foreach (var pre in UserPresets)
             {
-                base.WriteString(pre);
+                WriteString(pre);
             }
-
             /*base.WriteInteger(UserActionPresets.Count);
             foreach (KeyValuePair<string, List<ModerationPresetActionMessages>> Cat in UserActionPresets.ToList())
             {
@@ -58,23 +58,21 @@ namespace Plus.Communication.Packets.Outgoing.Moderation
             }*/
 
             // TODO: Figure out
-            base.WriteInteger(0);
+            WriteInteger(0);
             {
                 //Loop a string.
             }
-
-            base.WriteBoolean(true); // Ticket right
-            base.WriteBoolean(true); // Chatlogs
-            base.WriteBoolean(true); // User actions alert etc
-            base.WriteBoolean(true); // Kick users
-            base.WriteBoolean(true); // Ban users
-            base.WriteBoolean(true); // Caution etc
-            base.WriteBoolean(true); // Love you, Tom
-
-            base.WriteInteger(RoomPresets.Count);
-            foreach (string pre in RoomPresets)
+            WriteBoolean(true); // Ticket right
+            WriteBoolean(true); // Chatlogs
+            WriteBoolean(true); // User actions alert etc
+            WriteBoolean(true); // Kick users
+            WriteBoolean(true); // Ban users
+            WriteBoolean(true); // Caution etc
+            WriteBoolean(true); // Love you, Tom
+            WriteInteger(RoomPresets.Count);
+            foreach (var pre in RoomPresets)
             {
-                base.WriteString(pre);
+                WriteString(pre);
             }
         }
     }

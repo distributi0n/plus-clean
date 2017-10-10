@@ -1,19 +1,19 @@
-﻿using System;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms.Games;
-using Plus.HabboHotel.Rooms.Games.Teams;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using System;
+    using GameClients;
+    using Rooms.Games.Teams;
+
     public class InteractorScoreCounter : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
         {
             if (Item.team == TEAM.NONE)
+            {
                 return;
+            }
 
-            Item.ExtraData = Item.GetRoom().GetGameManager().Points[Convert.ToInt32( Item.team)].ToString();
+            Item.ExtraData = Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)].ToString();
             Item.UpdateState(false, true);
         }
 
@@ -28,12 +28,10 @@ namespace Plus.HabboHotel.Items.Interactor
                 return;
             }
 
-            int OldValue = 0;
-
+            var OldValue = 0;
             if (!int.TryParse(Item.ExtraData, out OldValue))
             {
             }
-
             if (Request == 1)
             {
                 OldValue++;
@@ -46,21 +44,17 @@ namespace Plus.HabboHotel.Items.Interactor
             {
                 OldValue = 0;
             }
-
             Item.ExtraData = OldValue.ToString();
             Item.UpdateState(false, true);
         }
 
         public void OnWiredTrigger(Item Item)
         {
-            int OldValue = 0;
-
+            var OldValue = 0;
             if (!int.TryParse(Item.ExtraData, out OldValue))
             {
             }
-
             OldValue++;
-
             Item.ExtraData = OldValue.ToString();
             Item.UpdateState(false, true);
         }

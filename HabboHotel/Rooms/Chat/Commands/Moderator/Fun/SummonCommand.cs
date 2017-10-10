@@ -1,31 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Outgoing.Rooms.Session;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
 {
-    class SummonCommand : IChatCommand
+    using Communication.Packets.Outgoing.Rooms.Session;
+    using GameClients;
+
+    internal class SummonCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_summon"; }
-        }
+        public string PermissionRequired => "command_summon";
 
-        public string Parameters
-        {
-            get { return "%username%"; }
-        }
+        public string Parameters => "%username%";
 
-        public string Description
-        {
-            get { return "Bring another user to your current room."; }
-        }
+        public string Description => "Bring another user to your current room.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -33,7 +19,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
@@ -54,9 +40,13 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
 
             TargetClient.SendNotification("You have been summoned to " + Session.GetHabbo().Username + "!");
             if (!TargetClient.GetHabbo().InRoom)
+            {
                 TargetClient.SendPacket(new RoomForwardComposer(Session.GetHabbo().CurrentRoomId));
+            }
             else
+            {
                 TargetClient.GetHabbo().PrepareRoom(Session.GetHabbo().CurrentRoomId, "");
+            }
         }
     }
 }

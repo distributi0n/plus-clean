@@ -1,31 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
 {
-    class UnFreezeCommand : IChatCommand
+    using GameClients;
+
+    internal class UnFreezeCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_unfreeze"; }
-        }
+        public string PermissionRequired => "command_unfreeze";
 
-        public string Parameters
-        {
-            get { return "%username%"; }
-        }
+        public string Parameters => "%username%";
 
-        public string Description
-        {
-            get { return "Allow another user to walk again."; }
-        }
+        public string Description => "Allow another user to walk again.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -33,17 +18,18 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            RoomUser TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Params[1]);
+            var TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Params[1]);
             if (TargetUser != null)
+            {
                 TargetUser.Frozen = false;
-
+            }
             Session.SendWhisper("Successfully unfroze " + TargetClient.GetHabbo().Username + "!");
         }
     }

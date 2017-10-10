@@ -1,7 +1,7 @@
-﻿using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using GameClients;
+
     public class InteractorHabboWheel : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)

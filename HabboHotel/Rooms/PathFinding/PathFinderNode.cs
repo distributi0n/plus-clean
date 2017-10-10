@@ -1,38 +1,23 @@
-﻿using System;
-
-namespace Plus.HabboHotel.Rooms.PathFinding
+﻿namespace Plus.HabboHotel.Rooms.PathFinding
 {
+    using System;
+
     public sealed class PathFinderNode : IComparable<PathFinderNode>
     {
-        public Vector2D Position;
-        public PathFinderNode Next;
-        public int Cost = Int32.MaxValue;
-        public bool InOpen = false;
+        public int Cost = int.MaxValue;
         public bool InClosed = false;
+        public bool InOpen = false;
+        public PathFinderNode Next;
+        public Vector2D Position;
 
-        public PathFinderNode(Vector2D Position)
-        {
-            this.Position = Position;
-        }
+        public PathFinderNode(Vector2D Position) => this.Position = Position;
 
-        public override bool Equals(object obj)
-        {
-            return (obj is PathFinderNode) && ((PathFinderNode)obj).Position.Equals(this.Position);
-        }
+        public int CompareTo(PathFinderNode Other) => Cost.CompareTo(Other.Cost);
 
-        public bool Equals(PathFinderNode Breadcrumb)
-        {
-            return Breadcrumb.Position.Equals(this.Position);
-        }
+        public override bool Equals(object obj) => obj is PathFinderNode && ((PathFinderNode) obj).Position.Equals(Position);
 
-        public override int GetHashCode()
-        {
-            return Position.GetHashCode();
-        }
+        public bool Equals(PathFinderNode Breadcrumb) => Breadcrumb.Position.Equals(Position);
 
-        public int CompareTo(PathFinderNode Other)
-        {
-            return Cost.CompareTo(Other.Cost);
-        }
+        public override int GetHashCode() => Position.GetHashCode();
     }
 }

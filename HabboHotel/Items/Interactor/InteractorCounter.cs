@@ -1,9 +1,9 @@
-﻿using System;
-using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
-    class InteractorCounter : IFurniInteractor
+    using System;
+    using GameClients;
+
+    internal class InteractorCounter : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
         {
@@ -22,14 +22,12 @@ namespace Plus.HabboHotel.Items.Interactor
                 return;
             }
 
-            int oldValue = 0;
-
+            var oldValue = 0;
             if (!int.TryParse(Item.ExtraData, out oldValue))
             {
                 Item.ExtraData = "30";
                 oldValue = 30;
             }
-
             if (Request == 0 && oldValue == 0)
             {
                 oldValue = 30;
@@ -44,19 +42,33 @@ namespace Plus.HabboHotel.Items.Interactor
                 else
                 {
                     if (oldValue < 30)
+                    {
                         oldValue = 30;
+                    }
                     else if (oldValue == 30)
+                    {
                         oldValue = 60;
+                    }
                     else if (oldValue == 60)
+                    {
                         oldValue = 120;
+                    }
                     else if (oldValue == 120)
+                    {
                         oldValue = 180;
+                    }
                     else if (oldValue == 180)
+                    {
                         oldValue = 300;
+                    }
                     else if (oldValue == 300)
+                    {
                         oldValue = 600;
+                    }
                     else
+                    {
                         oldValue = 0;
+                    }
                     Item.UpdateNeeded = false;
                 }
             }
@@ -67,32 +79,25 @@ namespace Plus.HabboHotel.Items.Interactor
                     Item.ExtraData = "30";
                     oldValue = 30;
                 }
-
                 if (!Item.GetRoom().GetSoccer().GameIsStarted)
                 {
                     Item.UpdateNeeded = !Item.UpdateNeeded;
-
                     if (Item.UpdateNeeded)
                     {
                         Item.GetRoom().GetSoccer().StartGame();
                     }
-
                     Item.pendingReset = true;
                 }
                 else
                 {
                     Item.UpdateNeeded = !Item.UpdateNeeded;
-
                     if (Item.UpdateNeeded)
                     {
                         Item.GetRoom().GetSoccer().StopGame(true);
                     }
-
                     Item.pendingReset = true;
                 }
             }
-
-
             Item.ExtraData = Convert.ToString(oldValue);
             Item.UpdateState();
         }
@@ -100,13 +105,13 @@ namespace Plus.HabboHotel.Items.Interactor
         public void OnWiredTrigger(Item Item)
         {
             if (Item.GetRoom().GetSoccer().GameIsStarted)
+            {
                 Item.GetRoom().GetSoccer().StopGame(true);
-
+            }
             Item.pendingReset = true;
             Item.UpdateNeeded = true;
             Item.ExtraData = "30";
             Item.UpdateState();
-
             Item.GetRoom().GetSoccer().StartGame();
         }
     }

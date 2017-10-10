@@ -1,29 +1,24 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Utilities;
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Users;
-
-namespace Plus.Communication.Packets.Outgoing.Moderation
+﻿namespace Plus.Communication.Packets.Outgoing.Moderation
 {
-    class ModeratorUserRoomVisitsComposer : ServerPacket
-    {
-        public ModeratorUserRoomVisitsComposer(Habbo Data, Dictionary<double, RoomData> Visits)
-            : base(ServerPacketHeader.ModeratorUserRoomVisitsMessageComposer)
-        {
-            base.WriteInteger(Data.Id);
-            base.WriteString(Data.Username);
-            base.WriteInteger(Visits.Count);
+    using System.Collections.Generic;
+    using HabboHotel.Rooms;
+    using HabboHotel.Users;
+    using Utilities;
 
-            foreach (KeyValuePair<double, RoomData> Visit in Visits)
+    internal class ModeratorUserRoomVisitsComposer : ServerPacket
+    {
+        public ModeratorUserRoomVisitsComposer(Habbo Data, Dictionary<double, RoomData> Visits) : base(ServerPacketHeader
+            .ModeratorUserRoomVisitsMessageComposer)
+        {
+            WriteInteger(Data.Id);
+            WriteString(Data.Username);
+            WriteInteger(Visits.Count);
+            foreach (var Visit in Visits)
             {
-                base.WriteInteger(Visit.Value.Id);
-                base.WriteString(Visit.Value.Name);
-                base.WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Hour);
-                base.WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Minute);
+                WriteInteger(Visit.Value.Id);
+                WriteString(Visit.Value.Name);
+                WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Hour);
+                WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Minute);
             }
         }
     }

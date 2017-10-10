@@ -1,34 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class StandCommand :IChatCommand
+    using GameClients;
+
+    internal class StandCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_stand"; }
-        }
+        public string PermissionRequired => "command_stand";
 
-        public string Parameters
-        {
-            get { return ""; ; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Allows you to stand up if not stood already."; }
-        }
+        public string Description => "Allows you to stand up if not stood already.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
             if (User == null)
+            {
                 return;
+            }
 
             if (User.isSitting)
             {

@@ -1,73 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms.AI.Speech;
-using Plus.HabboHotel.Rooms.AI.Types;
-using System.Drawing;
-using Plus.HabboHotel.Catalog.Utilities;
-
-namespace Plus.HabboHotel.Rooms.AI
+﻿namespace Plus.HabboHotel.Rooms.AI
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using Catalog.Utilities;
+    using Speech;
+    using Types;
+
     public class RoomBot
     {
-        public int Id;
-        public int BotId;
-        public int VirtualId;
-
         public BotAIType AiType;
+
+        public bool AutomaticChat;
+        public int BotId;
 
         public int DanceId;
         public string Gender;
+        public int Id;
 
         public string Look;
+        public int maxX;
+        public int maxY;
+        public int minX;
+        public int minY;
+        public bool MixSentences;
         public string Motto;
         public string Name;
-        public int RoomId;
-        public int Rot;
 
+        public int ownerID;
+        public List<RandomSpeech> RandomSpeech;
+        public int RoomId;
+
+        public RoomUser RoomUser;
+        public int Rot;
+        public int SpeakingInterval;
+        public int VirtualId;
 
         public string WalkingMode;
 
         public int X;
         public int Y;
         public double Z;
-        public int maxX;
-        public int maxY;
-        public int minX;
-        public int minY;
 
-        public int ownerID;
-
-        public bool AutomaticChat;
-        public int SpeakingInterval;
-        public bool MixSentences;
-
-        public RoomUser RoomUser;
-        public List<RandomSpeech> RandomSpeech;
-
-        private int _chatBubble;
-        public bool ForcedMovement { get; set; }
-        public int ForcedUserTargetMovement { get; set; }
-        public Point TargetCoordinate { get; set; }
-
-        public int TargetUser { get; set; }
-
-        public RoomBot(int BotId, int RoomId, string AiType, string WalkingMode, string Name, string Motto, string Look, int X, int Y, double Z, int Rot,
-            int minX, int minY, int maxX, int maxY, ref List<RandomSpeech> Speeches, string Gender, int Dance, int ownerID,
-            bool AutomaticChat, int SpeakingInterval, bool MixSentences, int ChatBubble)
+        public RoomBot(int BotId,
+            int RoomId,
+            string AiType,
+            string WalkingMode,
+            string Name,
+            string Motto,
+            string Look,
+            int X,
+            int Y,
+            double Z,
+            int Rot,
+            int minX,
+            int minY,
+            int maxX,
+            int maxY,
+            ref List<RandomSpeech> Speeches,
+            string Gender,
+            int Dance,
+            int ownerID,
+            bool AutomaticChat,
+            int SpeakingInterval,
+            bool MixSentences,
+            int ChatBubble)
         {
-            this.Id = BotId;
+            Id = BotId;
             this.BotId = BotId;
             this.RoomId = RoomId;
-
             this.Name = Name;
             this.Motto = Motto;
             this.Look = Look;
             this.Gender = Gender.ToUpper();
-
             this.AiType = BotUtility.GetAIFromString(AiType);
             this.WalkingMode = WalkingMode;
-
             this.X = X;
             this.Y = Y;
             this.Z = Z;
@@ -76,54 +83,55 @@ namespace Plus.HabboHotel.Rooms.AI
             this.minY = minY;
             this.maxX = maxX;
             this.maxY = maxY;
+            VirtualId = -1;
+            RoomUser = null;
+            DanceId = Dance;
+            LoadRandomSpeech(Speeches);
 
-            this.VirtualId = -1;
-            this.RoomUser = null;
-            this.DanceId = Dance;
-
-            this.LoadRandomSpeech(Speeches);
             //this.LoadResponses(Responses);
-
             this.ownerID = ownerID;
-
             this.AutomaticChat = AutomaticChat;
             this.SpeakingInterval = SpeakingInterval;
             this.MixSentences = MixSentences;
-
-            this._chatBubble = ChatBubble;
-            this.ForcedMovement = false;
-            this.TargetCoordinate = new Point();
-            this.TargetUser = 0;
+            this.ChatBubble = ChatBubble;
+            ForcedMovement = false;
+            TargetCoordinate = new Point();
+            TargetUser = 0;
         }
 
-        public bool IsPet
-        {
-            get { return (AiType == BotAIType.PET); }
-        }
+        public bool ForcedMovement { get; set; }
+        public int ForcedUserTargetMovement { get; set; }
+        public Point TargetCoordinate { get; set; }
 
-        #region Speech Related
+        public int TargetUser { get; set; }
+
+        public bool IsPet => AiType == BotAIType.PET;
+
+        public int ChatBubble { get; set; }
+
         public void LoadRandomSpeech(List<RandomSpeech> Speeches)
         {
             RandomSpeech = new List<RandomSpeech>();
-            foreach (RandomSpeech Speech in Speeches)
+            foreach (var Speech in Speeches)
             {
                 if (Speech.BotID == BotId)
+                {
                     RandomSpeech.Add(Speech);
+                }
             }
         }
-
 
         public RandomSpeech GetRandomSpeech()
         {
             var rand = new Random();
-
             if (RandomSpeech.Count < 1)
+            {
                 return new RandomSpeech("", 0);
-            return RandomSpeech[rand.Next(0, (RandomSpeech.Count - 1))];
-        }
-        #endregion
+            }
 
-        #region AI Related
+            return RandomSpeech[rand.Next(0, RandomSpeech.Count - 1)];
+        }
+
         public BotAI GenerateBotAI(int VirtualId)
         {
             switch (AiType)
@@ -137,13 +145,6 @@ namespace Plus.HabboHotel.Rooms.AI
                 default:
                     return new GenericBot(VirtualId);
             }
-        }
-        #endregion
-
-        public int ChatBubble
-        {
-            get { return this._chatBubble; }
-            set { this._chatBubble = value; }
         }
     }
 }

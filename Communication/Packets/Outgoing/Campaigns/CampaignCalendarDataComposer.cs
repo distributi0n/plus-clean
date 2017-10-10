@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Campaigns
+﻿namespace Plus.Communication.Packets.Outgoing.Campaigns
 {
-    class CampaignCalendarDataComposer : ServerPacket
+    using System;
+    using System.Collections.Generic;
+
+    internal class CampaignCalendarDataComposer : ServerPacket
     {
-        public CampaignCalendarDataComposer(List<int> OpenedBoxes, List<int> LateBoxes)
-            : base(ServerPacketHeader.CampaignCalendarDataMessageComposer)
+        public CampaignCalendarDataComposer(List<int> OpenedBoxes, List<int> LateBoxes) : base(ServerPacketHeader
+            .CampaignCalendarDataMessageComposer)
         {
-            base.WriteString("xmas15");//Set the campaign.
-            base.WriteString("");//No idea.
-            base.WriteInteger( DateTime.Now.Day - 1);//Start
-            base.WriteInteger(25);//End?
+            WriteString("xmas15"); //Set the campaign.
+            WriteString(""); //No idea.
+            WriteInteger(DateTime.Now.Day - 1); //Start
+            WriteInteger(25); //End?
 
             //Opened boxes
-            base.WriteInteger(OpenedBoxes.Count);
-            foreach (int Day in OpenedBoxes)
+            WriteInteger(OpenedBoxes.Count);
+            foreach (var Day in OpenedBoxes)
             {
-                base.WriteInteger(Day);
+                WriteInteger(Day);
             }
 
             //Late boxes?
-            base.WriteInteger(LateBoxes.Count);
-            foreach (int Day in LateBoxes)
+            WriteInteger(LateBoxes.Count);
+            foreach (var Day in LateBoxes)
             {
-                base.WriteInteger(Day);
+                WriteInteger(Day);
             }
         }
     }

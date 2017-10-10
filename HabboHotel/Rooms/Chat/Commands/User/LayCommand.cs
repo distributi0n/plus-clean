@@ -1,34 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class LayCommand : IChatCommand
+    using GameClients;
+
+    internal class LayCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_lay"; }
-        }
+        public string PermissionRequired => "command_lay";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Allows you to lay down in the room, without needing a bed."; }
-        }
+        public string Description => "Allows you to lay down in the room, without needing a bed.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (User == null)
+            {
                 return;
+            }
 
             if (!Room.GetGameMap().ValidTile(User.X + 2, User.Y + 2) && !Room.GetGameMap().ValidTile(User.X + 1, User.Y + 1))
             {
@@ -37,17 +25,22 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
             }
 
             if (User.Statusses.ContainsKey("sit") || User.isSitting || User.RidingHorse || User.IsWalking)
+            {
                 return;
+            }
 
             if (Session.GetHabbo().Effects().CurrentEffect > 0)
+            {
                 Session.GetHabbo().Effects().ApplyEffect(0);
-
+            }
             if (!User.Statusses.ContainsKey("lay"))
             {
-                if ((User.RotBody % 2) == 0)
+                if (User.RotBody % 2 == 0)
                 {
                     if (User == null)
+                    {
                         return;
+                    }
 
                     try
                     {
@@ -56,17 +49,18 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
                         User.isLying = true;
                         User.UpdateNeeded = true;
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
                 else
                 {
-                    User.RotBody--;//
+                    User.RotBody--; //
                     User.Statusses.Add("lay", "1.0 null");
                     User.Z -= 0.35;
                     User.isLying = true;
                     User.UpdateNeeded = true;
                 }
-
             }
             else
             {

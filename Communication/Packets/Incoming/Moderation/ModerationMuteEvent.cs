@@ -1,26 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using Plus.Database.Interfaces;
-using Plus.HabboHotel.Users;
-
-namespace Plus.Communication.Packets.Incoming.Moderation
+﻿namespace Plus.Communication.Packets.Incoming.Moderation
 {
-    class ModerationMuteEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal class ModerationMuteEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_mute"))
+            {
                 return;
+            }
 
-            int UserId = Packet.PopInt();
-            string Message = Packet.PopString();
-            double Length = (Packet.PopInt() * 60);
-            string Unknown1 = Packet.PopString();
-            string Unknown2 = Packet.PopString();
-
-            Habbo Habbo = PlusEnvironment.GetHabboById(UserId);
+            var UserId = Packet.PopInt();
+            var Message = Packet.PopString();
+            double Length = Packet.PopInt() * 60;
+            var Unknown1 = Packet.PopString();
+            var Unknown2 = Packet.PopString();
+            var Habbo = PlusEnvironment.GetHabboById(UserId);
             if (Habbo == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user in the database.");
@@ -33,11 +29,10 @@ namespace Plus.Communication.Packets.Incoming.Moderation
                 return;
             }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery("UPDATE `users` SET `time_muted` = '" + Length + "' WHERE `id` = '" + Habbo.Id + "' LIMIT 1");
             }
-
             if (Habbo.GetClient() != null)
             {
                 Habbo.TimeMuted = Length;
@@ -46,4 +41,3 @@ namespace Plus.Communication.Packets.Incoming.Moderation
         }
     }
 }
-

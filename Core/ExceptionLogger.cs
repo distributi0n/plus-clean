@@ -1,8 +1,8 @@
-﻿using log4net;
-using System;
-
-namespace Plus.Core
+﻿namespace Plus.Core
 {
+    using System;
+    using log4net;
+
     public static class ExceptionLogger
     {
         private static readonly ILog _sqlLogger = LogManager.GetLogger("MySQL");

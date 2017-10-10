@@ -1,34 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator.Fun
 {
-    class OverrideCommand : IChatCommand
+    using GameClients;
+
+    internal class OverrideCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_override"; }
-        }
+        public string PermissionRequired => "command_override";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Gives you the ability to walk over anything."; }
-        }
+        public string Description => "Gives you the ability to walk over anything.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (User == null)
+            {
                 return;
+            }
 
             User.AllowOverride = !User.AllowOverride;
             Session.SendWhisper("Override mode updated.");

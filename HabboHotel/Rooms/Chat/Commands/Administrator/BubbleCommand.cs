@@ -1,35 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Rooms.Chat.Styles;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
 {
-    class BubbleCommand : IChatCommand
+    using GameClients;
+    using Styles;
+
+    internal class BubbleCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_bubble"; }
-        }
+        public string PermissionRequired => "command_bubble";
 
-        public string Parameters
-        {
-            get { return "%id%"; }
-        }
+        public string Parameters => "%id%";
 
-        public string Description
-        {
-            get { return "Use a custom bubble to chat with."; }
-        }
+        public string Description => "Use a custom bubble to chat with.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (User == null)
+            {
                 return;
+            }
 
             if (Params.Length == 1)
             {
@@ -37,15 +25,16 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
                 return;
             }
 
-            int Bubble = 0;
-            if (!int.TryParse(Params[1].ToString(), out Bubble))
+            var Bubble = 0;
+            if (!int.TryParse(Params[1], out Bubble))
             {
                 Session.SendWhisper("Please enter a valid number.");
                 return;
             }
 
             ChatStyle Style = null;
-            if (!PlusEnvironment.GetGame().GetChatManager().GetChatStyles().TryGetStyle(Bubble, out Style) || (Style.RequiredRight.Length > 0 && !Session.GetHabbo().GetPermissions().HasRight(Style.RequiredRight)))
+            if (!PlusEnvironment.GetGame().GetChatManager().GetChatStyles().TryGetStyle(Bubble, out Style) ||
+                Style.RequiredRight.Length > 0 && !Session.GetHabbo().GetPermissions().HasRight(Style.RequiredRight))
             {
                 Session.SendWhisper("Oops, you cannot use this bubble due to a rank requirement, sorry!");
                 return;

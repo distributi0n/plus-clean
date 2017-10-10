@@ -1,30 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class RoomKickCommand : IChatCommand
+    using System.Linq;
+    using GameClients;
+
+    internal class RoomKickCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_room_kick"; }
-        }
+        public string PermissionRequired => "command_room_kick";
 
-        public string Parameters
-        {
-            get { return "%message%"; }
-        }
+        public string Parameters => "%message%";
 
-        public string Description
-        {
-            get { return "Kick the room and provide a message to the users."; }
-        }
+        public string Description => "Kick the room and provide a message to the users.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -32,14 +19,20 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            string Message = CommandManager.MergeParams(Params, 1);
-            foreach (RoomUser RoomUser in Room.GetRoomUserManager().GetUserList().ToList())
+            var Message = CommandManager.MergeParams(Params, 1);
+            foreach (var RoomUser in Room.GetRoomUserManager().GetUserList().ToList())
             {
-                if (RoomUser == null || RoomUser.IsBot || RoomUser.GetClient() == null || RoomUser.GetClient().GetHabbo() == null || RoomUser.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool") || RoomUser.GetClient().GetHabbo().Id == Session.GetHabbo().Id)
+                if (RoomUser == null ||
+                    RoomUser.IsBot ||
+                    RoomUser.GetClient() == null ||
+                    RoomUser.GetClient().GetHabbo() == null ||
+                    RoomUser.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool") ||
+                    RoomUser.GetClient().GetHabbo().Id == Session.GetHabbo().Id)
+                {
                     continue;
+                }
 
                 RoomUser.GetClient().SendNotification("You have been kicked by a moderator: " + Message);
-
                 Room.GetRoomUserManager().RemoveUserFromRoom(RoomUser.GetClient(), true, false);
             }
 

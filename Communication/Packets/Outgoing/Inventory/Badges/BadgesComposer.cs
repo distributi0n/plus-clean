@@ -1,35 +1,31 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Users.Badges;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.Badges
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.Badges
 {
-    class BadgesComposer : ServerPacket
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.GameClients;
+    using HabboHotel.Users.Badges;
+
+    internal class BadgesComposer : ServerPacket
     {
-        public BadgesComposer(GameClient Session)
-            : base(ServerPacketHeader.BadgesMessageComposer)
+        public BadgesComposer(GameClient Session) : base(ServerPacketHeader.BadgesMessageComposer)
         {
-            List<Badge> EquippedBadges = new List<Badge>();
-
-            base.WriteInteger(Session.GetHabbo().GetBadgeComponent().Count);
-            foreach (Badge Badge in Session.GetHabbo().GetBadgeComponent().GetBadges().ToList())
+            var EquippedBadges = new List<Badge>();
+            WriteInteger(Session.GetHabbo().GetBadgeComponent().Count);
+            foreach (var Badge in Session.GetHabbo().GetBadgeComponent().GetBadges().ToList())
             {
-                base.WriteInteger(1);
-                base.WriteString(Badge.Code);
-
+                WriteInteger(1);
+                WriteString(Badge.Code);
                 if (Badge.Slot > 0)
+                {
                     EquippedBadges.Add(Badge);
+                }
             }
 
-            base.WriteInteger(EquippedBadges.Count);
-            foreach (Badge Badge in EquippedBadges)
+            WriteInteger(EquippedBadges.Count);
+            foreach (var Badge in EquippedBadges)
             {
-                base.WriteInteger(Badge.Slot);
-                base.WriteString(Badge.Code);
+                WriteInteger(Badge.Slot);
+                WriteString(Badge.Code);
             }
         }
     }

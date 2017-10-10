@@ -1,63 +1,43 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Logs
+﻿namespace Plus.HabboHotel.Rooms.Chat.Logs
 {
+    using System;
+    using Users;
+
     public sealed class ChatlogEntry
     {
-        private int _playerId;
-        private int _roomId;
-        private string _message;
-        private double _timestamp;
+        private readonly WeakReference _playerReference;
+        private readonly WeakReference _roomReference;
 
-        private WeakReference _playerReference;
-        private WeakReference _roomReference;
-
-        public ChatlogEntry(int PlayerId, int RoomId, string Message, double Timestamp, Habbo Player = null, RoomData Instance = null)
+        public ChatlogEntry(int PlayerId, int RoomId, string Message, double Timestamp, Habbo Player = null,
+            RoomData Instance = null)
         {
-            this._playerId = PlayerId;
-            this._roomId = RoomId;
-            this._message = Message;
-            this._timestamp = Timestamp;
-
+            this.PlayerId = PlayerId;
+            this.RoomId = RoomId;
+            this.Message = Message;
+            this.Timestamp = Timestamp;
             if (Player != null)
-                this._playerReference = new WeakReference(Player);
-
+            {
+                _playerReference = new WeakReference(Player);
+            }
             if (Instance != null)
-                this._roomReference = new WeakReference(Instance);
+            {
+                _roomReference = new WeakReference(Instance);
+            }
         }
 
-        public int PlayerId
-        {
-            get { return this._playerId; }
-        }
+        public int PlayerId { get; }
 
-        public int RoomId
-        {
-            get { return this._roomId; }
-        }
+        public int RoomId { get; }
 
-        public string Message
-        {
-            get { return this._message; }
-        }
+        public string Message { get; }
 
-        public double Timestamp
-        {
-            get { return this._timestamp; }
-        }
+        public double Timestamp { get; }
 
         public Habbo PlayerNullable()
         {
-            if (this._playerReference.IsAlive)
+            if (_playerReference.IsAlive)
             {
-                Habbo PlayerObj = (Habbo)this._playerReference.Target;
-
+                var PlayerObj = (Habbo) _playerReference.Target;
                 return PlayerObj;
             }
 
@@ -66,13 +46,17 @@ namespace Plus.HabboHotel.Rooms.Chat.Logs
 
         public Room RoomNullable()
         {
-            if (this._roomReference.IsAlive)
+            if (_roomReference.IsAlive)
             {
-                Room RoomObj = (Room)this._roomReference.Target;
+                var RoomObj = (Room) _roomReference.Target;
                 if (RoomObj.mDisposed)
+                {
                     return null;
+                }
+
                 return RoomObj;
             }
+
             return null;
         }
     }

@@ -1,9 +1,9 @@
-﻿using Plus.Communication.Packets.Outgoing;
-using Plus.HabboHotel.Navigator;
-
-namespace Plus.HabboHotel.Rooms
+﻿namespace Plus.HabboHotel.Rooms
 {
-    static class RoomAppender
+    using Communication.Packets.Outgoing;
+    using Navigator;
+
+    internal static class RoomAppender
     {
         public static void WriteRoom(ServerPacket Packet, RoomData Data, RoomPromotion Promotion, bool NewNavigator = false)
         {
@@ -17,45 +17,47 @@ namespace Plus.HabboHotel.Rooms
             Packet.WriteString(Data.Description);
             Packet.WriteInteger(Data.TradeSettings);
             Packet.WriteInteger(Data.Score);
-            Packet.WriteInteger(0);//Top rated room rank.
+            Packet.WriteInteger(0); //Top rated room rank.
             Packet.WriteInteger(Data.Category);
-
             Packet.WriteInteger(Data.Tags.Count);
-            foreach (string tag in Data.Tags)
+            foreach (var tag in Data.Tags)
             {
                 Packet.WriteString(tag);
             }
 
-            int RoomType = 0;
+            var RoomType = 0;
             if (Data.Group != null)
+            {
                 RoomType += 2;
+            }
             if (Data.Promotion != null)
+            {
                 RoomType += 4;
+            }
             if (Data.Type == "private")
+            {
                 RoomType += 8;
+            }
             if (Data.AllowPets == 1)
+            {
                 RoomType += 16;
-
+            }
             FeaturedRoom Item = null;
             if (PlusEnvironment.GetGame().GetNavigator().TryGetFeaturedRoom(Data.Id, out Item))
             {
                 RoomType += 1;
             }
-
             Packet.WriteInteger(RoomType);
-
             if (Item != null)
             {
                 Packet.WriteString(Item.Image);
             }
-
             if (Data.Group != null)
             {
                 Packet.WriteInteger(Data.Group == null ? 0 : Data.Group.Id);
                 Packet.WriteString(Data.Group == null ? "" : Data.Group.Name);
                 Packet.WriteString(Data.Group == null ? "" : Data.Group.Badge);
             }
-
             if (Data.Promotion != null)
             {
                 Packet.WriteString(Promotion != null ? Promotion.Name : "");

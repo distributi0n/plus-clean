@@ -1,11 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.HabboHotel.Rooms.Chat.Emotions
+﻿namespace Plus.HabboHotel.Rooms.Chat.Emotions
 {
-    enum ChatEmotions
+    internal enum ChatEmotions
     {
         Smile,
         Angry,

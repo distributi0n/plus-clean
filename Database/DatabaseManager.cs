@@ -1,29 +1,25 @@
-﻿using System;
-using MySql.Data.MySqlClient;
-using Plus.Core;
-using Plus.Database.Interfaces;
-
-namespace Plus.Database
+﻿namespace Plus.Database
 {
+    using System;
+    using Core;
+    using Interfaces;
+    using MySql.Data.MySqlClient;
+
     public sealed class DatabaseManager
     {
         private readonly string _connectionStr;
 
-        public DatabaseManager(string ConnectionStr)
-        {
-            this._connectionStr = ConnectionStr;
-        }
+        public DatabaseManager(string ConnectionStr) => _connectionStr = ConnectionStr;
 
         public bool IsConnected()
         {
             try
             {
-                MySqlConnection Con = new MySqlConnection(this._connectionStr);
+                var Con = new MySqlConnection(_connectionStr);
                 Con.Open();
-                MySqlCommand CMD = Con.CreateCommand();
+                var CMD = Con.CreateCommand();
                 CMD.CommandText = "SELECT 1+1";
                 CMD.ExecuteNonQuery();
-
                 CMD.Dispose();
                 Con.Close();
             }
@@ -39,10 +35,8 @@ namespace Plus.Database
         {
             try
             {
-                IDatabaseClient DbConnection = new DatabaseConnection(this._connectionStr);
-              
+                IDatabaseClient DbConnection = new DatabaseConnection(_connectionStr);
                 DbConnection.connect();
-
                 return DbConnection.GetQueryReactor();
             }
             catch (Exception e)

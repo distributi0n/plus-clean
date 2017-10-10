@@ -1,30 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Moderation;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class StaffAlertCommand : IChatCommand
+    using Communication.Packets.Outgoing.Moderation;
+    using GameClients;
+
+    internal class StaffAlertCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_staff_alert"; }
-        }
+        public string PermissionRequired => "command_staff_alert";
 
-        public string Parameters
-        {
-            get { return "%message%"; }
-        }
+        public string Parameters => "%message%";
 
-        public string Description
-        {
-            get { return "Sends a message typed by you to the current online staff members."; }
-        }
+        public string Description => "Sends a message typed by you to the current online staff members.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -32,9 +19,11 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            string Message = CommandManager.MergeParams(Params, 1);
-            PlusEnvironment.GetGame().GetClientManager().StaffAlert(new BroadcastMessageAlertComposer("Staff Alert:\r\r" + Message + "\r\n" + "- " + Session.GetHabbo().Username));
-            return;
+            var Message = CommandManager.MergeParams(Params, 1);
+            PlusEnvironment.GetGame()
+                .GetClientManager()
+                .StaffAlert(new BroadcastMessageAlertComposer("Staff Alert:\r\r" + Message + "\r\n" + "- " +
+                                                              Session.GetHabbo().Username));
         }
     }
 }

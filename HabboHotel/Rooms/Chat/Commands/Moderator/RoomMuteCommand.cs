@@ -1,30 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class RoomMuteCommand : IChatCommand
+    using GameClients;
+
+    internal class RoomMuteCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_roommute"; }
-        }
+        public string PermissionRequired => "command_roommute";
 
-        public string Parameters
-        {
-            get { return "%message%"; }
-        }
+        public string Parameters => "%message%";
 
-        public string Description
-        {
-            get { return "Mute the room with a reason."; }
-        }
+        public string Description => "Mute the room with a reason.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -33,17 +19,22 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
             }
 
             if (!Room.RoomMuted)
+            {
                 Room.RoomMuted = true;
-
-            string Msg = CommandManager.MergeParams(Params, 1);
-
-            List<RoomUser> RoomUsers = Room.GetRoomUserManager().GetRoomUsers();
+            }
+            var Msg = CommandManager.MergeParams(Params, 1);
+            var RoomUsers = Room.GetRoomUserManager().GetRoomUsers();
             if (RoomUsers.Count > 0)
             {
-                foreach (RoomUser User in RoomUsers)
+                foreach (var User in RoomUsers)
                 {
-                    if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null || User.GetClient().GetHabbo().Username == Session.GetHabbo().Username)
+                    if (User == null ||
+                        User.GetClient() == null ||
+                        User.GetClient().GetHabbo() == null ||
+                        User.GetClient().GetHabbo().Username == Session.GetHabbo().Username)
+                    {
                         continue;
+                    }
 
                     User.GetClient().SendWhisper("This room has been muted because: " + Msg);
                 }

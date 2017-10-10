@@ -1,36 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.LandingView;
-
-namespace Plus.Communication.Packets.Incoming.LandingView
+﻿namespace Plus.Communication.Packets.Incoming.LandingView
 {
-    class RefreshCampaignEvent : IPacketEvent
+    using HabboHotel.GameClients;
+    using Outgoing.LandingView;
+
+    internal class RefreshCampaignEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             try
             {
-                String parseCampaings = Packet.PopString();
+                var parseCampaings = Packet.PopString();
                 if (parseCampaings.Contains("gamesmaker"))
-                    return;
-
-                String campaingName = "";
-                String[] parser = parseCampaings.Split(';');
-
-                for (int i = 0; i < parser.Length; i++)
                 {
-                    if (String.IsNullOrEmpty(parser[i]) || parser[i].EndsWith(","))
-                        continue;
+                    return;
+                }
 
-                    String[] data = parser[i].Split(',');
+                var campaingName = "";
+                var parser = parseCampaings.Split(';');
+                for (var i = 0; i < parser.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(parser[i]) || parser[i].EndsWith(","))
+                    {
+                        continue;
+                    }
+
+                    var data = parser[i].Split(',');
                     campaingName = data[1];
                 }
+
                 Session.SendPacket(new CampaignComposer(parseCampaings, campaingName));
             }
-            catch {  }
+            catch
+            {
+            }
         }
     }
 }

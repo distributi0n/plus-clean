@@ -2,10 +2,9 @@
 {
     public class FloodControlComposer : ServerPacket
     {
-        public FloodControlComposer(int floodTime)
-            : base(ServerPacketHeader.FloodControlMessageComposer)
+        public FloodControlComposer(int floodTime) : base(ServerPacketHeader.FloodControlMessageComposer)
         {
-            base.WriteInteger(floodTime);
+            WriteInteger(floodTime);
         }
     }
 }

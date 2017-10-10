@@ -1,37 +1,37 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.Communication.Packets.Outgoing.Rooms.AI.Bots;
-using Plus.HabboHotel.Rooms.AI.Speech;
-
-
-namespace Plus.Communication.Packets.Incoming.Rooms.AI.Bots
+﻿namespace Plus.Communication.Packets.Incoming.Rooms.AI.Bots
 {
-    class OpenBotActionEvent : IPacketEvent
+    using System.Linq;
+    using HabboHotel.GameClients;
+    using HabboHotel.Rooms;
+    using Outgoing.Rooms.AI.Bots;
+
+    internal class OpenBotActionEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (!Session.GetHabbo().InRoom)
+            {
                 return;
+            }
 
-            int BotId = Packet.PopInt();
-            int ActionId = Packet.PopInt();
-
-            Room Room = Session.GetHabbo().CurrentRoom;
+            var BotId = Packet.PopInt();
+            var ActionId = Packet.PopInt();
+            var Room = Session.GetHabbo().CurrentRoom;
             if (Room == null)
+            {
                 return;
+            }
 
             RoomUser BotUser = null;
             if (!Room.GetRoomUserManager().TryGetBot(BotId, out BotUser))
-                return;
-
-            string BotSpeech = "";
-            foreach (RandomSpeech Speech in BotUser.BotData.RandomSpeech.ToList())
             {
-                BotSpeech += (Speech.Message + "\n");
+                return;
+            }
+
+            var BotSpeech = "";
+            foreach (var Speech in BotUser.BotData.RandomSpeech.ToList())
+            {
+                BotSpeech += Speech.Message + "\n";
             }
 
             BotSpeech += ";#;";
@@ -40,9 +40,10 @@ namespace Plus.Communication.Packets.Incoming.Rooms.AI.Bots
             BotSpeech += BotUser.BotData.SpeakingInterval;
             BotSpeech += ";#;";
             BotSpeech += BotUser.BotData.MixSentences;
-
             if (ActionId == 2 || ActionId == 5)
+            {
                 Session.SendPacket(new OpenBotActionComposer(BotUser, ActionId, BotSpeech));
+            }
         }
     }
 }

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Quests
+﻿namespace Plus.Communication.Packets.Outgoing.Quests
 {
-    class QuestAbortedComposer : ServerPacket
+    internal class QuestAbortedComposer : ServerPacket
     {
-        public QuestAbortedComposer()
-            : base(ServerPacketHeader.QuestAbortedMessageComposer)
+        public QuestAbortedComposer() : base(ServerPacketHeader.QuestAbortedMessageComposer)
         {
-            base.WriteBoolean(false);
+            WriteBoolean(false);
         }
     }
 }

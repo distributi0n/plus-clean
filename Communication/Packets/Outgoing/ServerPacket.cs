@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Plus.Communication.Interfaces;
-
-namespace Plus.Communication.Packets.Outgoing
+﻿namespace Plus.Communication.Packets.Outgoing
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using Interfaces;
+
     public class ServerPacket : IServerPacket
     {
+        private readonly List<byte> Body = new List<byte>();
         private readonly Encoding Encoding = Encoding.Default;
-
-        private List<byte> Body = new List<byte>();
 
         public ServerPacket(int id)
         {
@@ -17,7 +16,7 @@ namespace Plus.Communication.Packets.Outgoing
             WriteShort(id);
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
         public byte[] GetBytes()
         {
@@ -35,14 +34,14 @@ namespace Plus.Communication.Packets.Outgoing
 
         public void WriteByte(int b)
         {
-            Body.Add((byte)b);
+            Body.Add((byte) b);
         }
 
         public void WriteBytes(byte[] b, bool IsInt) // d
         {
             if (IsInt)
             {
-                for (int i = (b.Length - 1); i > -1; i--)
+                for (var i = b.Length - 1; i > -1; i--)
                 {
                     Body.Add(b[i]);
                 }
@@ -55,13 +54,11 @@ namespace Plus.Communication.Packets.Outgoing
 
         public void WriteDouble(double d) // d
         {
-            string Raw = Math.Round(d, 1).ToString();
-
+            var Raw = Math.Round(d, 1).ToString();
             if (Raw.Length == 1)
             {
                 Raw += ".0";
             }
-
             WriteString(Raw.Replace(',', '.'));
         }
 
@@ -73,7 +70,7 @@ namespace Plus.Communication.Packets.Outgoing
 
         public void WriteShort(int s) // d
         {
-            var i = (Int16) s;
+            var i = (short) s;
             WriteBytes(BitConverter.GetBytes(i), true);
         }
 

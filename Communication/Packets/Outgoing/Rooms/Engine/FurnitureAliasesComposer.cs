@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Engine
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Engine
 {
-    class FurnitureAliasesComposer : ServerPacket
+    internal class FurnitureAliasesComposer : ServerPacket
     {
-        public FurnitureAliasesComposer()
-            : base(ServerPacketHeader.FurnitureAliasesMessageComposer)
+        public FurnitureAliasesComposer() : base(ServerPacketHeader.FurnitureAliasesMessageComposer)
         {
-            base.WriteInteger(0);          
+            WriteInteger(0);
         }
     }
 }

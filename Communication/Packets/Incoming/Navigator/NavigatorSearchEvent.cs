@@ -1,18 +1,17 @@
-﻿using System.Collections.Generic;
-using Plus.Communication.Packets.Outgoing.Navigator.New;
-using Plus.HabboHotel.Navigator;
-
-namespace Plus.Communication.Packets.Incoming.Navigator
+﻿namespace Plus.Communication.Packets.Incoming.Navigator
 {
-    class NavigatorSearchEvent : IPacketEvent
+    using System.Collections.Generic;
+    using HabboHotel.GameClients;
+    using HabboHotel.Navigator;
+    using Outgoing.Navigator.New;
+
+    internal class NavigatorSearchEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient session, ClientPacket packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            string Category = packet.PopString();
-            string Search = packet.PopString();
-
+            var Category = packet.PopString();
+            var Search = packet.PopString();
             ICollection<SearchResultList> Categories = new List<SearchResultList>();
-
             if (!string.IsNullOrEmpty(Search))
             {
                 SearchResultList QueryResult = null;

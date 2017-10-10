@@ -1,6 +1,7 @@
-﻿using System;
-namespace Plus.HabboHotel.Rooms
+﻿namespace Plus.HabboHotel.Rooms
 {
+    using System;
+
     public enum SquareState
     {
         OPEN = 0,
@@ -20,27 +21,32 @@ namespace Plus.HabboHotel.Rooms
         public int DoorY;
         public double DoorZ;
 
-        public string Heightmap;
+        public bool gotPublicPool;
 
+        public string Heightmap;
 
         public int MapSizeX;
         public int MapSizeY;
+        public byte[,] mRoomModelfx;
         public short[,] SqFloorHeight;
         public byte[,] SqSeatRot;
         public SquareState[,] SqState;
 
         public string StaticFurniMap;
 
-        public bool gotPublicPool;
-        public byte[,] mRoomModelfx;
-
         public int WallHeight;
 
         //public List<PublicRoomSquare> Furnis;
 
-
-
-        public RoomModel(int DoorX, int DoorY, double DoorZ, int DoorOrientation, string Heightmap, string StaticFurniMap, bool ClubOnly, string Poolmap, int WallHeight)
+        public RoomModel(int DoorX,
+            int DoorY,
+            double DoorZ,
+            int DoorOrientation,
+            string Heightmap,
+            string StaticFurniMap,
+            bool ClubOnly,
+            string Poolmap,
+            int WallHeight)
         {
             try
             {
@@ -48,36 +54,31 @@ namespace Plus.HabboHotel.Rooms
                 this.DoorY = DoorY;
                 this.DoorZ = DoorZ;
                 this.DoorOrientation = DoorOrientation;
-
                 this.WallHeight = WallHeight;
-
                 this.Heightmap = Heightmap.ToLower();
                 this.StaticFurniMap = StaticFurniMap;
-
-                this.gotPublicPool = !string.IsNullOrEmpty(Poolmap);
-                string[] tmpHeightmap = Heightmap.Split(Convert.ToChar(13));
-                string[] tmpFxMap = Poolmap.Split(Convert.ToChar(13));
-
-                this.MapSizeX = tmpHeightmap[0].Length;
-                this.MapSizeY = tmpHeightmap.Length;
+                gotPublicPool = !string.IsNullOrEmpty(Poolmap);
+                var tmpHeightmap = Heightmap.Split(Convert.ToChar(13));
+                var tmpFxMap = Poolmap.Split(Convert.ToChar(13));
+                MapSizeX = tmpHeightmap[0].Length;
+                MapSizeY = tmpHeightmap.Length;
                 this.ClubOnly = ClubOnly;
-
                 SqState = new SquareState[MapSizeX, MapSizeY];
                 SqFloorHeight = new short[MapSizeX, MapSizeY];
                 SqSeatRot = new byte[MapSizeX, MapSizeY];
                 if (gotPublicPool)
+                {
                     mRoomModelfx = new byte[MapSizeX, MapSizeY];
+                }
 
                 //this.Furnis = Furnis;
-
-                for (int y = 0; y < MapSizeY; y++)
+                for (var y = 0; y < MapSizeY; y++)
                 {
-                    string line = tmpHeightmap[y];
+                    var line = tmpHeightmap[y];
                     line = line.Replace("\r", "");
                     line = line.Replace("\n", "");
-
-                    int x = 0;
-                    foreach (char square in line)
+                    var x = 0;
+                    foreach (var square in line)
                     {
                         if (square == 'x')
                         {
@@ -91,7 +92,6 @@ namespace Plus.HabboHotel.Rooms
                         x++;
                     }
                 }
-
             }
             catch //(Exception e)
             {
@@ -103,7 +103,6 @@ namespace Plus.HabboHotel.Rooms
 
         public static short parse(char input)
         {
-
             switch (input)
             {
                 case '0':
@@ -172,7 +171,6 @@ namespace Plus.HabboHotel.Rooms
                     return 31;
                 case 'w':
                     return 32;
-
                 default:
                     throw new FormatException("The input was not in a correct format: input must be between (0-k)");
             }

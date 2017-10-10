@@ -1,28 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class DisableDiagonalCommand : IChatCommand
+    using GameClients;
+
+    internal class DisableDiagonalCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_disable_diagonal"; }
-        }
+        public string PermissionRequired => "command_disable_diagonal";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Want to disable diagonal walking in your room? Type this command!"; }
-        }
+        public string Description => "Want to disable diagonal walking in your room? Type this command!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (!Room.CheckRights(Session, true))
             {

@@ -1,33 +1,26 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Groups;
-
-namespace Plus.Communication.Packets.Outgoing.Users
+﻿namespace Plus.Communication.Packets.Outgoing.Users
 {
-    class HabboGroupBadgesComposer : ServerPacket
+    using System.Collections.Generic;
+    using HabboHotel.Groups;
+
+    internal class HabboGroupBadgesComposer : ServerPacket
     {
-        public HabboGroupBadgesComposer(Dictionary<int, string> Badges)
-            : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
+        public HabboGroupBadgesComposer(Dictionary<int, string> Badges) : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
         {
-            base.WriteInteger(Badges.Count);
-            foreach (KeyValuePair<int, string> Badge in Badges)
+            WriteInteger(Badges.Count);
+            foreach (var Badge in Badges)
             {
-                base.WriteInteger(Badge.Key);
-                base.WriteString(Badge.Value);
+                WriteInteger(Badge.Key);
+                WriteString(Badge.Value);
             }
         }
 
-        public HabboGroupBadgesComposer(Group Group)
-            : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
+        public HabboGroupBadgesComposer(Group Group) : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
         {
-            base.WriteInteger(1);//count
+            WriteInteger(1); //count
             {
-                base.WriteInteger(Group.Id);
-                base.WriteString(Group.Badge);
+                WriteInteger(Group.Id);
+                WriteString(Group.Badge);
             }
         }
     }

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using Plus.Core;
-using log4net;
-using log4net.Config;
-
-namespace Plus
+﻿namespace Plus
 {
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Security.Permissions;
+    using Core;
+    using log4net;
+    using log4net.Config;
+
     public class Program
     {
         private const int MF_BYCOMMAND = 0x00000000;
@@ -26,31 +26,24 @@ namespace Plus
         private static extern IntPtr GetConsoleWindow();
 
         [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
-
         public static void Main(string[] Args)
         {
             DeleteMenu(GetSystemMenu(GetConsoleWindow(), false), SC_CLOSE, MF_BYCOMMAND);
-
             XmlConfigurator.Configure();
-
             Console.ForegroundColor = ConsoleColor.White;
             Console.CursorVisible = false;
-            AppDomain currentDomain = AppDomain.CurrentDomain;
+            var currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += MyHandler;
-
             PlusEnvironment.Initialize();
-
             while (true)
             {
                 if (Console.ReadKey(true).Key == ConsoleKey.Enter)
                 {
                     Console.Write("plus> ");
-                    string Input = Console.ReadLine();
-
+                    var Input = Console.ReadLine();
                     if (Input.Length > 0)
                     {
-                        string s = Input.Split(' ')[0];
-
+                        var s = Input.Split(' ')[0];
                         ConsoleCommands.InvokeCommand(s);
                     }
                 }
@@ -60,6 +53,7 @@ namespace Plus
         private static void MyHandler(object sender, UnhandledExceptionEventArgs args)
         {
             var e = (Exception) args.ExceptionObject;
+
             //Logger.LogCriticalException("SYSTEM CRITICAL EXCEPTION: " + e);
             PlusEnvironment.PerformShutDown();
         }

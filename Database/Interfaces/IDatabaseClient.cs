@@ -1,8 +1,8 @@
-﻿using System;
-using MySql.Data.MySqlClient;
-
-namespace Plus.Database.Interfaces
+﻿namespace Plus.Database.Interfaces
 {
+    using System;
+    using MySql.Data.MySqlClient;
+
     public interface IDatabaseClient : IDisposable
     {
         void connect();

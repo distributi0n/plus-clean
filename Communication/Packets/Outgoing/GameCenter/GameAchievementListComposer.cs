@@ -1,42 +1,39 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Achievements;
-
-namespace Plus.Communication.Packets.Outgoing.GameCenter
+﻿namespace Plus.Communication.Packets.Outgoing.GameCenter
 {
-    class GameAchievementListComposer : ServerPacket
-    {
-        public GameAchievementListComposer(GameClient Session, ICollection<Achievement> Achievements, int GameId)
-            : base(ServerPacketHeader.GameAchievementListMessageComposer)
-        {
-            base.WriteInteger(GameId);
-            base.WriteInteger(Achievements.Count);
-            foreach (Achievement Ach in Achievements.ToList())
-            {
-                UserAchievement UserData = Session.GetHabbo().GetAchievementData(Ach.GroupName);
-                int TargetLevel = (UserData != null ? UserData.Level + 1 : 1);
-           
-                AchievementLevel TargetLevelData = Ach.Levels[TargetLevel];
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Achievements;
+    using HabboHotel.GameClients;
 
-                base.WriteInteger(Ach.Id); // ach id
-                base.WriteInteger(TargetLevel); // target level
-               base.WriteString(Ach.GroupName + TargetLevel); // badge
-                base.WriteInteger(TargetLevelData.Requirement); // requirement
-                base.WriteInteger(TargetLevelData.Requirement); // requirement
-                base.WriteInteger(TargetLevelData.RewardPixels); // pixels
-                base.WriteInteger(0); // ach score
-                base.WriteInteger(UserData != null ? UserData.Progress : 0); // Current progress
-                base.WriteBoolean(UserData != null ? (UserData.Level >= Ach.Levels.Count) : false); // Set 100% completed(??)
-               base.WriteString(Ach.Category);
-               base.WriteString("basejump");
-                base.WriteInteger(0); // total levels
-                base.WriteInteger(0);
+    internal class GameAchievementListComposer : ServerPacket
+    {
+        public GameAchievementListComposer(GameClient Session, ICollection<Achievement> Achievements, int GameId) : base(
+            ServerPacketHeader
+                .GameAchievementListMessageComposer)
+        {
+            WriteInteger(GameId);
+            WriteInteger(Achievements.Count);
+            foreach (var Ach in Achievements.ToList())
+            {
+                var UserData = Session.GetHabbo().GetAchievementData(Ach.GroupName);
+                var TargetLevel = UserData != null ? UserData.Level + 1 : 1;
+                var TargetLevelData = Ach.Levels[TargetLevel];
+                WriteInteger(Ach.Id); // ach id
+                WriteInteger(TargetLevel); // target level
+                WriteString(Ach.GroupName + TargetLevel); // badge
+                WriteInteger(TargetLevelData.Requirement); // requirement
+                WriteInteger(TargetLevelData.Requirement); // requirement
+                WriteInteger(TargetLevelData.RewardPixels); // pixels
+                WriteInteger(0); // ach score
+                WriteInteger(UserData != null ? UserData.Progress : 0); // Current progress
+                WriteBoolean(UserData != null ? UserData.Level >= Ach.Levels.Count : false); // Set 100% completed(??)
+                WriteString(Ach.Category);
+                WriteString("basejump");
+                WriteInteger(0); // total levels
+                WriteInteger(0);
             }
-           base.WriteString("");
+
+            WriteString("");
         }
     }
 }

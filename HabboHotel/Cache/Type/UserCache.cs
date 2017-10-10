@@ -1,25 +1,27 @@
-﻿using System;
-
-namespace Plus.HabboHotel.Cache.Type
+﻿namespace Plus.HabboHotel.Cache.Type
 {
+    using System;
+
     public class UserCache
     {
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public string Motto { get; set; }
-        public string Look { get; set; }
-        public DateTime AddedTime { get; set; }
         public UserCache(int Id, string Username, string Motto, string Look)
         {
             this.Id = Id;
             this.Username = Username;
             this.Motto = Motto;
             this.Look = Look;
-            this.AddedTime = DateTime.Now;
+            AddedTime = DateTime.Now;
         }
+
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Motto { get; set; }
+        public string Look { get; set; }
+        public DateTime AddedTime { get; set; }
+
         public bool isExpired()
         {
-            TimeSpan CacheTime = DateTime.Now - this.AddedTime;
+            var CacheTime = DateTime.Now - AddedTime;
             return CacheTime.TotalMinutes >= 30;
         }
     }

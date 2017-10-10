@@ -1,41 +1,37 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Games;
-using Plus.HabboHotel.Users;
-
-namespace Plus.Communication.Packets.Outgoing.GameCenter
+﻿namespace Plus.Communication.Packets.Outgoing.GameCenter
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Games;
+    using HabboHotel.Users;
+
     public class Game2WeeklyLeaderboardComposer : ServerPacket
     {
-        public Game2WeeklyLeaderboardComposer(GameData GameData, ICollection<Habbo> Habbos)
-            : base(ServerPacketHeader.Game2WeeklyLeaderboardMessageComposer)
+        public Game2WeeklyLeaderboardComposer(GameData GameData, ICollection<Habbo> Habbos) : base(ServerPacketHeader
+            .Game2WeeklyLeaderboardMessageComposer)
         {
-            base.WriteInteger(2014);
-            base.WriteInteger(41);
-            base.WriteInteger(0);
-            base.WriteInteger(1);
-            base.WriteInteger(1581);
+            WriteInteger(2014);
+            WriteInteger(41);
+            WriteInteger(0);
+            WriteInteger(1);
+            WriteInteger(1581);
 
             //Used to generate the ranking numbers.
-            int num = 0;
-
-            base.WriteInteger(Habbos.Count);//Count
-            foreach (Habbo Habbo in Habbos.ToList())
+            var num = 0;
+            WriteInteger(Habbos.Count); //Count
+            foreach (var Habbo in Habbos.ToList())
             {
                 num++;
-                base.WriteInteger(Habbo.Id);//Id
-                base.WriteInteger(Habbo.FastfoodScore);//Score
-                base.WriteInteger(num);//Rank
-               base.WriteString(Habbo.Username);//Username
-               base.WriteString(Habbo.Look);//Figure
-               base.WriteString(Habbo.Gender.ToLower());//Gender .ToLower()
+                WriteInteger(Habbo.Id); //Id
+                WriteInteger(Habbo.FastfoodScore); //Score
+                WriteInteger(num); //Rank
+                WriteString(Habbo.Username); //Username
+                WriteString(Habbo.Look); //Figure
+                WriteString(Habbo.Gender.ToLower()); //Gender .ToLower()
             }
 
-            base.WriteInteger(0);//
-            base.WriteInteger(GameData.GameId);//Game Id?
+            WriteInteger(0); //
+            WriteInteger(GameData.GameId); //Game Id?
         }
     }
 }

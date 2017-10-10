@@ -1,112 +1,58 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms.Chat.Logs;
-using Plus.HabboHotel.Rooms.Chat.Filter;
-using Plus.HabboHotel.Rooms.Chat.Emotions;
-using Plus.HabboHotel.Rooms.Chat.Commands;
-using Plus.HabboHotel.Rooms.Chat.Pets.Commands;
-using Plus.HabboHotel.Rooms.Chat.Pets.Locale;
-using log4net;
-using Plus.HabboHotel.Rooms.Chat.Styles;
-
-namespace Plus.HabboHotel.Rooms.Chat
+﻿namespace Plus.HabboHotel.Rooms.Chat
 {
+    using Commands;
+    using Emotions;
+    using Filter;
+    using log4net;
+    using Logs;
+    using Pets.Commands;
+    using Pets.Locale;
+    using Styles;
+
     public sealed class ChatManager
     {
         private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Rooms.Chat.ChatManager");
 
-        /// <summary>
-        /// Chat Emoticons.
-        /// </summary>
-        private ChatEmotionsManager _emotions;
+        private readonly ChatStyleManager _chatStyles;
 
-        /// <summary>
-        /// Chatlog Manager
-        /// </summary>
-        private ChatlogManager _logs;
+        private readonly CommandManager _commands;
 
-        /// <summary>
-        /// Filter Manager.
-        /// </summary>
-        private WordFilterManager _filter;
+        private readonly ChatEmotionsManager _emotions;
 
-        /// <summary>
-        /// Commands.
-        /// </summary>
-        private CommandManager _commands;
+        private readonly WordFilterManager _filter;
 
-        /// <summary>
-        /// Pet Commands.
-        /// </summary>
-        private PetCommandManager _petCommands;
+        private readonly ChatlogManager _logs;
 
-        /// <summary>
-        /// Pet Locale.
-        /// </summary>
-        private PetLocale _petLocale;
+        private readonly PetCommandManager _petCommands;
 
-        /// <summary>
-        /// Chat styles.
-        /// </summary>
-        private ChatStyleManager _chatStyles;
+        private readonly PetLocale _petLocale;
 
-        /// <summary>
-        /// Initializes a new instance of the ChatManager class.
-        /// </summary>
         public ChatManager()
         {
-            this._emotions = new ChatEmotionsManager();
-            this._logs = new ChatlogManager();
-         
-            this._filter = new WordFilterManager();
-            this._filter.Init();
-
-            this._commands = new CommandManager(":");
-            this._petCommands = new PetCommandManager();
-            this._petLocale = new PetLocale();
-      
-            this._chatStyles = new ChatStyleManager();
-            this._chatStyles.Init();
-
+            _emotions = new ChatEmotionsManager();
+            _logs = new ChatlogManager();
+            _filter = new WordFilterManager();
+            _filter.Init();
+            _commands = new CommandManager(":");
+            _petCommands = new PetCommandManager();
+            _petLocale = new PetLocale();
+            _chatStyles = new ChatStyleManager();
+            _chatStyles.Init();
             log.Info("Chat Manager -> LOADED");
         }
 
-        public ChatEmotionsManager GetEmotions()
-        {
-            return this._emotions;
-        }
+        public ChatEmotionsManager GetEmotions() => _emotions;
 
-        public ChatlogManager GetLogs()
-        {
-            return this._logs;
-        }
+        public ChatlogManager GetLogs() => _logs;
 
-        public WordFilterManager GetFilter()
-        {
-            return this._filter;
-        }
+        public WordFilterManager GetFilter() => _filter;
 
-        public CommandManager GetCommands()
-        {
-            return this._commands;
-        }
+        public CommandManager GetCommands() => _commands;
 
-        public PetCommandManager GetPetCommands()
-        {
-            return this._petCommands;
-        }
+        public PetCommandManager GetPetCommands() => _petCommands;
 
-        public PetLocale GetPetLocale()
-        {
-            return this._petLocale;
-        }
+        public PetLocale GetPetLocale() => _petLocale;
 
-        public ChatStyleManager GetChatStyles()
-        {
-            return this._chatStyles;
-        }
+        public ChatStyleManager GetChatStyles() => _chatStyles;
     }
 }

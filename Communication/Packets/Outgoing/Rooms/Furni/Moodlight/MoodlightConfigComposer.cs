@@ -1,27 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Items.Data.Moodlight;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.Moodlight
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.Moodlight
 {
-    class MoodlightConfigComposer : ServerPacket
-    {
-        public MoodlightConfigComposer(MoodlightData MoodlightData)
-            : base(ServerPacketHeader.MoodlightConfigMessageComposer)
-        {
-            base.WriteInteger(MoodlightData.Presets.Count);
-            base.WriteInteger(MoodlightData.CurrentPreset);
+    using HabboHotel.Items.Data.Moodlight;
 
-            int i = 1;
-            foreach (MoodlightPreset Preset in MoodlightData.Presets)
+    internal class MoodlightConfigComposer : ServerPacket
+    {
+        public MoodlightConfigComposer(MoodlightData MoodlightData) : base(ServerPacketHeader.MoodlightConfigMessageComposer)
+        {
+            WriteInteger(MoodlightData.Presets.Count);
+            WriteInteger(MoodlightData.CurrentPreset);
+            var i = 1;
+            foreach (var Preset in MoodlightData.Presets)
             {
-                base.WriteInteger(i);
-                base.WriteInteger(Preset.BackgroundOnly ? 2 : 1);
-               base.WriteString(Preset.ColorCode);
-                base.WriteInteger(Preset.ColorIntensity);
+                WriteInteger(i);
+                WriteInteger(Preset.BackgroundOnly ? 2 : 1);
+                WriteString(Preset.ColorCode);
+                WriteInteger(Preset.ColorIntensity);
                 i++;
             }
         }

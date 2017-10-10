@@ -1,12 +1,11 @@
-﻿using System;
-using System.Data;
-
-using MySql.Data.MySqlClient;
-using Plus.Database.Interfaces;
-using Plus.Database.Adapter;
-
-namespace Plus.Database
+﻿namespace Plus.Database
 {
+    using System;
+    using System.Data;
+    using Adapter;
+    using Interfaces;
+    using MySql.Data.MySqlClient;
+
     public class DatabaseConnection : IDatabaseClient, IDisposable
     {
         private readonly IQueryAdapter _adapter;
@@ -14,8 +13,8 @@ namespace Plus.Database
 
         public DatabaseConnection(string ConnectionStr)
         {
-            this._con = new MySqlConnection(ConnectionStr);
-            this._adapter = new NormalQueryReactor(this);
+            _con = new MySqlConnection(ConnectionStr);
+            _adapter = new NormalQueryReactor(this);
         }
 
         public void connect()
@@ -41,35 +40,28 @@ namespace Plus.Database
             }
         }
 
-        public IQueryAdapter GetQueryReactor()
-        {
-            return this._adapter;
-        }
-
-        public void prepare()
-        {
-            // nothing here
-        }
+        public IQueryAdapter GetQueryReactor() => _adapter;
 
         public void reportDone()
         {
             Dispose();
         }
 
-        public MySqlCommand createNewCommand()
-        {
-            return _con.CreateCommand();
-        }
+        public MySqlCommand createNewCommand() => _con.CreateCommand();
 
         public void Dispose()
         {
-            if (this._con.State == ConnectionState.Open)
+            if (_con.State == ConnectionState.Open)
             {
-                this._con.Close();
+                _con.Close();
             }
-
-            this._con.Dispose();
+            _con.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        public void prepare()
+        {
+            // nothing here
         }
     }
 }

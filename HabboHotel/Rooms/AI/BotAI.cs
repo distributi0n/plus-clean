@@ -1,43 +1,37 @@
-﻿using System;
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.AI
+﻿namespace Plus.HabboHotel.Rooms.AI
 {
+    using GameClients;
+
     public abstract class BotAI
     {
         public int BaseId;
-        private int RoomId;
-        private int RoomUserId;
         private Room room;
+        private int RoomId;
         private RoomUser roomUser;
+        private int RoomUserId;
 
         public void Init(int pBaseId, int pRoomUserId, int pRoomId, RoomUser user, Room room)
         {
-            this.BaseId = pBaseId;
-            this.RoomUserId = pRoomUserId;
-            this.RoomId = pRoomId;
-            this.roomUser = user;
+            BaseId = pBaseId;
+            RoomUserId = pRoomUserId;
+            RoomId = pRoomId;
+            roomUser = user;
             this.room = room;
         }
 
-        public Room GetRoom()
-        {
-            return room;
-        }
+        public Room GetRoom() => room;
 
-        public RoomUser GetRoomUser()
-        {
-            return roomUser;
-        }
+        public RoomUser GetRoomUser() => roomUser;
 
         public RoomBot GetBotData()
         {
-            RoomUser User = GetRoomUser();
+            var User = GetRoomUser();
             if (User == null)
+            {
                 return null;
-            else
-                return GetRoomUser().BotData;
+            }
+
+            return GetRoomUser().BotData;
         }
 
         public abstract void OnSelfEnterRoom();

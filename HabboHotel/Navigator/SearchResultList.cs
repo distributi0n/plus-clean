@@ -1,105 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.HabboHotel.Navigator
+﻿namespace Plus.HabboHotel.Navigator
 {
     public class SearchResultList
     {
-        private int _id;
-        private string _category;
-        private string _categoryName;
-        private string _customName;
-        private bool _canDoActions;
-        private int _colour;
-        private int _requiredRank;
-        private NavigatorViewMode _viewMode;
-        private NavigatorCategoryType _categoryType;
-        private NavigatorSearchAllowance _searchAllowance;
-        private int _orderId;
-
-        public SearchResultList(int Id, string Category, string CategoryIdentifier, string PublicName, bool CanDoActions, int Colour, int RequiredRank, NavigatorViewMode ViewMode, string CategoryType, string SearchAllowance, int OrderId)
+        public SearchResultList(int Id,
+            string Category,
+            string CategoryIdentifier,
+            string PublicName,
+            bool CanDoActions,
+            int Colour,
+            int RequiredRank,
+            NavigatorViewMode ViewMode,
+            string CategoryType,
+            string SearchAllowance,
+            int OrderId)
         {
-            this._id = Id;
-            this._category = Category;
-            this._categoryName = CategoryIdentifier;
-            this._customName = PublicName;
-            this._canDoActions = CanDoActions;
-            this._colour = Colour;
-            this._requiredRank = RequiredRank;
-            this._viewMode = ViewMode;
-            this._categoryType = NavigatorCategoryTypeUtility.GetCategoryTypeByString(CategoryType);
-            this._searchAllowance = NavigatorSearchAllowanceUtility.GetSearchAllowanceByString(SearchAllowance);
-            this._orderId = OrderId;
+            this.Id = Id;
+            this.Category = Category;
+            this.CategoryIdentifier = CategoryIdentifier;
+            this.PublicName = PublicName;
+            this.CanDoActions = CanDoActions;
+            this.Colour = Colour;
+            this.RequiredRank = RequiredRank;
+            this.ViewMode = ViewMode;
+            this.CategoryType = NavigatorCategoryTypeUtility.GetCategoryTypeByString(CategoryType);
+            this.SearchAllowance = NavigatorSearchAllowanceUtility.GetSearchAllowanceByString(SearchAllowance);
+            this.OrderId = OrderId;
         }
 
-        public int Id
-        {
-            get { return this._id; }
-            set { this._id = value; }
-        }
+        public int Id { get; set; }
 
         //TODO: Make an enum?
-        public string Category
-        {
-            get { return this._category; }
-            set { this._category = value; }
-        }
+        public string Category { get; set; }
 
-        public string CategoryIdentifier
-        {
-            get { return this._categoryName; }
-            set { this._categoryName = value; }
-        }
+        public string CategoryIdentifier { get; set; }
 
-        public string PublicName
-        {
-            get { return this._customName; }
-            set { this._customName = value; }
-        }
+        public string PublicName { get; set; }
 
-        public bool CanDoActions
-        {
-            get { return this._canDoActions; }
-            set { this._canDoActions = value; }
-        }
+        public bool CanDoActions { get; set; }
 
-        public int Colour
-        {
-            get { return this._colour; }
-            set { this._colour = value; }
-        }
+        public int Colour { get; set; }
 
-        public int RequiredRank
-        {
-            get { return this._requiredRank; }
-            set { this._requiredRank = value; }
-        }
+        public int RequiredRank { get; set; }
 
-        public NavigatorViewMode ViewMode
-        {
-            get { return this._viewMode; }
-            set { this._viewMode = value; }
-        }
+        public NavigatorViewMode ViewMode { get; set; }
 
-        public NavigatorCategoryType CategoryType
-        {
-            get { return this._categoryType; }
-            set { this._categoryType = value; }
-        }
+        public NavigatorCategoryType CategoryType { get; set; }
 
-        public NavigatorSearchAllowance SearchAllowance
-        {
-            get { return this._searchAllowance; }
-            set { this._searchAllowance = value; }
-        }
+        public NavigatorSearchAllowance SearchAllowance { get; set; }
 
-        public int OrderId
-        {
-            get { return this._orderId; }
-            set { this._orderId = value; }
-        }
+        public int OrderId { get; set; }
     }
 }

@@ -1,28 +1,25 @@
-﻿using System;
-
-using Plus.HabboHotel.Users;
-
-namespace Plus.Communication.Packets.Outgoing.Handshake
+﻿namespace Plus.Communication.Packets.Outgoing.Handshake
 {
+    using HabboHotel.Users;
+
     public class UserObjectComposer : ServerPacket
     {
-        public UserObjectComposer(Habbo Habbo)
-            : base(ServerPacketHeader.UserObjectMessageComposer)
+        public UserObjectComposer(Habbo Habbo) : base(ServerPacketHeader.UserObjectMessageComposer)
         {
-            base.WriteInteger(Habbo.Id);
-            base.WriteString(Habbo.Username);
-            base.WriteString(Habbo.Look);
-            base.WriteString(Habbo.Gender.ToUpper());
-            base.WriteString(Habbo.Motto);
-            base.WriteString("");
-            base.WriteBoolean(false);
-            base.WriteInteger(Habbo.GetStats().Respect);
-            base.WriteInteger(Habbo.GetStats().DailyRespectPoints);
-            base.WriteInteger(Habbo.GetStats().DailyPetRespectPoints);
-            base.WriteBoolean(false); // Friends stream active
-            base.WriteString(Habbo.LastOnline.ToString()); // last online?
-            base.WriteBoolean(Habbo.ChangingName); // Can change name
-            base.WriteBoolean(false);
+            WriteInteger(Habbo.Id);
+            WriteString(Habbo.Username);
+            WriteString(Habbo.Look);
+            WriteString(Habbo.Gender.ToUpper());
+            WriteString(Habbo.Motto);
+            WriteString("");
+            WriteBoolean(false);
+            WriteInteger(Habbo.GetStats().Respect);
+            WriteInteger(Habbo.GetStats().DailyRespectPoints);
+            WriteInteger(Habbo.GetStats().DailyPetRespectPoints);
+            WriteBoolean(false); // Friends stream active
+            WriteString(Habbo.LastOnline.ToString()); // last online?
+            WriteBoolean(Habbo.ChangingName); // Can change name
+            WriteBoolean(false);
         }
     }
 }

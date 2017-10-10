@@ -1,44 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.HabboHotel.Groups;
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Cache;
-using Plus.HabboHotel.Cache.Type;
-
-namespace Plus.Communication.Packets.Outgoing.Groups
+﻿namespace Plus.Communication.Packets.Outgoing.Groups
 {
-    class GroupMembersComposer : ServerPacket
+    using System.Collections.Generic;
+    using HabboHotel.Cache.Type;
+    using HabboHotel.Groups;
+
+    internal class GroupMembersComposer : ServerPacket
     {
-        public GroupMembersComposer(Group Group, ICollection<UserCache> Members, int MembersCount, int Page, bool Admin, int ReqType, string SearchVal)
+        public GroupMembersComposer(Group Group, ICollection<UserCache> Members, int MembersCount, int Page, bool Admin,
+            int ReqType, string SearchVal)
             : base(ServerPacketHeader.GroupMembersMessageComposer)
         {
-            base.WriteInteger(Group.Id);
-            base.WriteString(Group.Name);
-            base.WriteInteger(Group.RoomId);
-            base.WriteString(Group.Badge);
-            base.WriteInteger(MembersCount);
-
-            base.WriteInteger(Members.Count);
+            WriteInteger(Group.Id);
+            WriteString(Group.Name);
+            WriteInteger(Group.RoomId);
+            WriteString(Group.Badge);
+            WriteInteger(MembersCount);
+            WriteInteger(Members.Count);
             if (MembersCount > 0)
             {
-                foreach (UserCache Data in Members)
+                foreach (var Data in Members)
                 {
-                    base.WriteInteger(Group.CreatorId == Data.Id ? 0 : Group.IsAdmin(Data.Id) ? 1 : Group.IsMember(Data.Id) ? 2 : 3);
-                    base.WriteInteger(Data.Id);
-                    base.WriteString(Data.Username);
-                    base.WriteString(Data.Look);
-                    base.WriteString(string.Empty);
+                    WriteInteger(Group.CreatorId == Data.Id ? 0 : Group.IsAdmin(Data.Id) ? 1 : Group.IsMember(Data.Id) ? 2 : 3);
+                    WriteInteger(Data.Id);
+                    WriteString(Data.Username);
+                    WriteString(Data.Look);
+                    WriteString(string.Empty);
                 }
             }
-            base.WriteBoolean(Admin);
-            base.WriteInteger(14);
-            base.WriteInteger(Page);
-            base.WriteInteger(ReqType);
-            base.WriteString(SearchVal);
+
+            WriteBoolean(Admin);
+            WriteInteger(14);
+            WriteInteger(Page);
+            WriteInteger(ReqType);
+            WriteString(SearchVal);
         }
     }
 }

@@ -1,47 +1,40 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.Communication.Packets.Outgoing.Groups
+﻿namespace Plus.Communication.Packets.Outgoing.Groups
 {
-    class GroupCreationWindowComposer : ServerPacket
-    {
-        public GroupCreationWindowComposer(ICollection<RoomData> Rooms)
-            : base(ServerPacketHeader.GroupCreationWindowMessageComposer)
-        {
-            base.WriteInteger(Convert.ToInt32(PlusEnvironment.GetSettingsManager().TryGetValue("catalog.group.purchase.cost")));//Price
+    using System;
+    using System.Collections.Generic;
+    using HabboHotel.Rooms;
 
-            base.WriteInteger(Rooms.Count);//Room count that the user has.
-            foreach (RoomData Room in Rooms)
+    internal class GroupCreationWindowComposer : ServerPacket
+    {
+        public GroupCreationWindowComposer(ICollection<RoomData> Rooms) : base(ServerPacketHeader
+            .GroupCreationWindowMessageComposer)
+        {
+            WriteInteger(Convert.ToInt32(PlusEnvironment.GetSettingsManager()
+                .TryGetValue("catalog.group.purchase.cost"))); //Price
+            WriteInteger(Rooms.Count); //Room count that the user has.
+            foreach (var Room in Rooms)
             {
-                base.WriteInteger(Room.Id);//Room Id
-                base.WriteString(Room.Name);//Room Name
-                base.WriteBoolean(false);//What?
+                WriteInteger(Room.Id); //Room Id
+                WriteString(Room.Name); //Room Name
+                WriteBoolean(false); //What?
             }
 
-            base.WriteInteger(5);
-            base.WriteInteger(5);
-            base.WriteInteger(11);
-            base.WriteInteger(4);
-
-            base.WriteInteger(6);
-            base.WriteInteger(11);
-            base.WriteInteger(4);
-
-            base.WriteInteger(0);
-            base.WriteInteger(0);
-            base.WriteInteger(0);
-
-            base.WriteInteger(0);
-            base.WriteInteger(0);
-            base.WriteInteger(0);
-
-            base.WriteInteger(0);
-            base.WriteInteger(0);
-            base.WriteInteger(0);
+            WriteInteger(5);
+            WriteInteger(5);
+            WriteInteger(11);
+            WriteInteger(4);
+            WriteInteger(6);
+            WriteInteger(11);
+            WriteInteger(4);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
+            WriteInteger(0);
         }
     }
 }

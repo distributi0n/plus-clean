@@ -1,81 +1,52 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-
-using Plus.Communication.Packets.Incoming;
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Users;
-using Plus.Communication.Packets.Outgoing.Rooms.Chat;
-
-namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
+﻿namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
 {
-    class ToggleFurniBox : IWiredItem, IWiredCycle
+    using System.Collections.Concurrent;
+    using System.Linq;
+    using Communication.Packets.Incoming;
+    using Rooms;
+
+    internal class ToggleFurniBox : IWiredItem, IWiredCycle
     {
-        public Room Instance { get; set; }
-        public Item Item { get; set; }
-        public WiredBoxType Type { get { return WiredBoxType.EffectToggleFurniState; } }
-        public ConcurrentDictionary<int, Item> SetItems { get; set; }
-        public int TickCount { get; set; }
-        public string StringData { get; set; }
-        public bool BoolData { get; set; }
-        public int Delay { get { return this._delay; } set { this._delay = value; this.TickCount = value; } }
-        public string ItemsData { get; set; }
+        private int _delay;
 
         private long _next;
-        private int _delay = 0;
-        private bool Requested = false;
+        private bool Requested;
 
         public ToggleFurniBox(Room Instance, Item Item)
         {
             this.Instance = Instance;
             this.Item = Item;
-            this.SetItems = new ConcurrentDictionary<int, Item>();
+            SetItems = new ConcurrentDictionary<int, Item>();
         }
 
-        public void HandleSave(ClientPacket Packet)
-        {
-            this.SetItems.Clear();
-            int Unknown = Packet.PopInt();
-            string Unknown2 = Packet.PopString();
+        public int TickCount { get; set; }
 
-            int FurniCount = Packet.PopInt();
-            for (int i = 0; i < FurniCount; i++)
+        public int Delay
+        {
+            get => _delay;
+            set
             {
-                Item SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                _delay = value;
+                TickCount = value;
             }
-
-            int Delay = Packet.PopInt();
-            this.Delay = Delay;
-        }
-
-        public bool Execute(params object[] Params)
-        {
-            if (this._next == 0 || this._next < PlusEnvironment.Now())
-                this._next = PlusEnvironment.Now() + this.Delay;
-
-
-            this.Requested = true;
-            this.TickCount = Delay;
-            return true;
         }
 
         public bool OnCycle()
         {
-            if (this.SetItems.Count == 0 || !Requested)
+            if (SetItems.Count == 0 || !Requested)
+            {
                 return false;
+            }
 
-            long Now = PlusEnvironment.Now();
+            var Now = PlusEnvironment.Now();
             if (_next < Now)
             {
-                foreach (Item Item in this.SetItems.Values.ToList())
+                foreach (var Item in SetItems.Values.ToList())
                 {
                     if (Item == null)
+                    {
                         continue;
+                    }
 
                     if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
                     {
@@ -88,11 +59,48 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                 }
 
                 Requested = false;
-
-                this._next = 0;
-                this.TickCount = Delay;
-        
+                _next = 0;
+                TickCount = Delay;
             }
+
+            return true;
+        }
+
+        public Room Instance { get; set; }
+        public Item Item { get; set; }
+        public WiredBoxType Type => WiredBoxType.EffectToggleFurniState;
+        public ConcurrentDictionary<int, Item> SetItems { get; set; }
+        public string StringData { get; set; }
+        public bool BoolData { get; set; }
+        public string ItemsData { get; set; }
+
+        public void HandleSave(ClientPacket Packet)
+        {
+            SetItems.Clear();
+            var Unknown = Packet.PopInt();
+            var Unknown2 = Packet.PopString();
+            var FurniCount = Packet.PopInt();
+            for (var i = 0; i < FurniCount; i++)
+            {
+                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
+                if (SelectedItem != null)
+                {
+                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                }
+            }
+
+            var Delay = Packet.PopInt();
+            this.Delay = Delay;
+        }
+
+        public bool Execute(params object[] Params)
+        {
+            if (_next == 0 || _next < PlusEnvironment.Now())
+            {
+                _next = PlusEnvironment.Now() + Delay;
+            }
+            Requested = true;
+            TickCount = Delay;
             return true;
         }
     }

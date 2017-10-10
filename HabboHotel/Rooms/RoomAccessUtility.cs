@@ -9,13 +9,10 @@
                 default:
                 case RoomAccess.OPEN:
                     return 0;
-
                 case RoomAccess.DOORBELL:
                     return 1;
-
                 case RoomAccess.PASSWORD:
                     return 2;
-
                 case RoomAccess.INVISIBLE:
                     return 3;
             }
@@ -28,13 +25,10 @@
                 default:
                 case "open":
                     return RoomAccess.OPEN;
-
                 case "locked":
                     return RoomAccess.DOORBELL;
-
                 case "password":
                     return RoomAccess.PASSWORD;
-
                 case "invisible":
                     return RoomAccess.INVISIBLE;
             }
@@ -47,13 +41,10 @@
                 default:
                 case 0:
                     return RoomAccess.OPEN;
-
                 case 1:
                     return RoomAccess.DOORBELL;
-
                 case 2:
                     return RoomAccess.PASSWORD;
-
                 case 3:
                     return RoomAccess.INVISIBLE;
             }

@@ -1,31 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class KickCommand : IChatCommand
+    using GameClients;
+
+    internal class KickCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_kick"; }
-        }
+        public string PermissionRequired => "command_kick";
 
-        public string Parameters
-        {
-            get { return "%username% %reason%"; }
-        }
+        public string Parameters => "%username% %reason%";
 
-        public string Description
-        {
-            get { return "Kick a user from a room and send them a reason."; }
-        }
+        public string Description => "Kick a user from a room and send them a reason.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -33,7 +18,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
@@ -60,13 +45,19 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 
             Room TargetRoom;
             if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(TargetClient.GetHabbo().CurrentRoomId, out TargetRoom))
+            {
                 return;
+            }
 
             if (Params.Length > 2)
-                TargetClient.SendNotification("A moderator has kicked you from the room for the following reason: " + CommandManager.MergeParams(Params, 2));
+            {
+                TargetClient.SendNotification("A moderator has kicked you from the room for the following reason: " +
+                                              CommandManager.MergeParams(Params, 2));
+            }
             else
+            {
                 TargetClient.SendNotification("A moderator has kicked you from the room.");
-
+            }
             TargetRoom.GetRoomUserManager().RemoveUserFromRoom(TargetClient, true, false);
         }
     }

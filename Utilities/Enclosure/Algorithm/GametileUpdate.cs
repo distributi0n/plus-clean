@@ -9,8 +9,8 @@
             this.value = value;
         }
 
-        public byte value { get; private set; }
-        public int y { get; private set; }
-        public int x { get; private set; }
+        public byte value { get; }
+        public int y { get; }
+        public int x { get; }
     }
 }

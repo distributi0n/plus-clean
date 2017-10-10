@@ -1,34 +1,37 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.Communication.Packets.Incoming.Rooms.Settings
+﻿namespace Plus.Communication.Packets.Incoming.Rooms.Settings
 {
-    class ModifyRoomFilterListEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal class ModifyRoomFilterListEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (!Session.GetHabbo().InRoom)
+            {
                 return;
+            }
 
-            Room Instance = Session.GetHabbo().CurrentRoom;
+            var Instance = Session.GetHabbo().CurrentRoom;
             if (Instance == null)
+            {
                 return;
-
+            }
             if (!Instance.CheckRights(Session))
+            {
                 return;
+            }
 
-            int RoomId = Packet.PopInt();
-            bool Added = Packet.PopBoolean();
-            string Word = Packet.PopString();
-
+            var RoomId = Packet.PopInt();
+            var Added = Packet.PopBoolean();
+            var Word = Packet.PopString();
             if (Added)
+            {
                 Instance.GetFilter().AddFilter(Word);
+            }
             else
+            {
                 Instance.GetFilter().RemoveFilter(Word);
+            }
         }
     }
 }

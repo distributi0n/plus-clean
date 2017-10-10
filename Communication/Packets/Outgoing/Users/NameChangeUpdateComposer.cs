@@ -1,31 +1,26 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Users
+﻿namespace Plus.Communication.Packets.Outgoing.Users
 {
-    class NameChangeUpdateComposer : ServerPacket
-    {
-        public NameChangeUpdateComposer(string Name, int Error, ICollection<string> Tags)
-            : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
-        {
-            base.WriteInteger(Error);
-           base.WriteString(Name);
+    using System.Collections.Generic;
 
-            base.WriteInteger(Tags.Count);
-            foreach (string Tag in Tags)
+    internal class NameChangeUpdateComposer : ServerPacket
+    {
+        public NameChangeUpdateComposer(string Name, int Error, ICollection<string> Tags) : base(ServerPacketHeader
+            .NameChangeUpdateMessageComposer)
+        {
+            WriteInteger(Error);
+            WriteString(Name);
+            WriteInteger(Tags.Count);
+            foreach (var Tag in Tags)
             {
-               base.WriteString(Name + Tag);
+                WriteString(Name + Tag);
             }
         }
 
-        public NameChangeUpdateComposer(string Name, int Error)
-            : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
+        public NameChangeUpdateComposer(string Name, int Error) : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
         {
-            base.WriteInteger(Error);
-           base.WriteString(Name);
-            base.WriteInteger(0);
+            WriteInteger(Error);
+            WriteString(Name);
+            WriteInteger(0);
         }
     }
 }

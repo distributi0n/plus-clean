@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.Communication.Packets.Outgoing.Users;
-
-namespace Plus.Communication.Packets.Incoming.Users
+﻿namespace Plus.Communication.Packets.Incoming.Users
 {
-    class GetIgnoredUsersEvent : IPacketEvent
-    {
-        public void Parse(HabboHotel.GameClients.GameClient session, ClientPacket packet)
-        {
-            List<string> ignoredUsers = new List<string>();
+    using System.Collections.Generic;
+    using HabboHotel.GameClients;
+    using Outgoing.Users;
 
-            foreach (int userId in new List<int>(session.GetHabbo().GetIgnores().IgnoredUserIds()))
+    internal class GetIgnoredUsersEvent : IPacketEvent
+    {
+        public void Parse(GameClient session, ClientPacket packet)
+        {
+            var ignoredUsers = new List<string>();
+            foreach (var userId in new List<int>(session.GetHabbo().GetIgnores().IgnoredUserIds()))
             {
-                Habbo player = PlusEnvironment.GetHabboById(userId);
+                var player = PlusEnvironment.GetHabboById(userId);
                 if (player != null)
                 {
                     if (!ignoredUsers.Contains(player.Username))
+                    {
                         ignoredUsers.Add(player.Username);
+                    }
                 }
             }
 

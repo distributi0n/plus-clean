@@ -1,44 +1,40 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Items;
-using Plus.HabboHotel.Items.Wired;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.Wired
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.Wired
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Items.Wired;
+
     internal class WiredTriggerConfigComposer : ServerPacket
     {
-        public WiredTriggerConfigComposer(IWiredItem Box, List<int> BlockedItems)
-            : base(ServerPacketHeader.WiredTriggerConfigMessageComposer)
+        public WiredTriggerConfigComposer(IWiredItem Box, List<int> BlockedItems) : base(ServerPacketHeader
+            .WiredTriggerConfigMessageComposer)
         {
-            base.WriteBoolean(false);
-            base.WriteInteger(5);
-
-            base.WriteInteger(Box.SetItems.Count);
-            foreach (Item Item in Box.SetItems.Values.ToList())
+            WriteBoolean(false);
+            WriteInteger(5);
+            WriteInteger(Box.SetItems.Count);
+            foreach (var Item in Box.SetItems.Values.ToList())
             {
-                base.WriteInteger(Item.Id);
+                WriteInteger(Item.Id);
             }
 
-            base.WriteInteger(Box.Item.GetBaseItem().SpriteId);
-            base.WriteInteger(Box.Item.Id);
-           base.WriteString(Box.StringData);
-
-            base.WriteInteger(Box is IWiredCycle ? 1 : 0);
+            WriteInteger(Box.Item.GetBaseItem().SpriteId);
+            WriteInteger(Box.Item.Id);
+            WriteString(Box.StringData);
+            WriteInteger(Box is IWiredCycle ? 1 : 0);
             if (Box is IWiredCycle)
             {
-                IWiredCycle Cycle = (IWiredCycle)Box;
-                base.WriteInteger(Cycle.Delay);
+                var Cycle = (IWiredCycle) Box;
+                WriteInteger(Cycle.Delay);
             }
-            base.WriteInteger(0);
-            base.WriteInteger(WiredBoxTypeUtility.GetWiredId(Box.Type));
-            base.WriteInteger(BlockedItems.Count());
-            if(BlockedItems.Count() > 0)
+            WriteInteger(0);
+            WriteInteger(WiredBoxTypeUtility.GetWiredId(Box.Type));
+            WriteInteger(BlockedItems.Count());
+            if (BlockedItems.Count() > 0)
             {
-                foreach (int Id in BlockedItems.ToList())
-                    base.WriteInteger(Id);
+                foreach (var Id in BlockedItems.ToList())
+                {
+                    WriteInteger(Id);
+                }
             }
         }
     }

@@ -1,193 +1,163 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Collections.Generic;
-
-using log4net;
-
-using Plus.Communication.Packets.Outgoing.Inventory.Furni;
-using Plus.Communication.Packets.Outgoing.Catalog;
-using Plus.HabboHotel.Items;
-using Plus.Communication.Packets.Outgoing.Handshake;
-using Plus.Database.Interfaces;
-
-namespace Plus.HabboHotel.Users.Process
+﻿namespace Plus.HabboHotel.Users.Process
 {
-    sealed class ProcessComponent
+    using System;
+    using System.Threading;
+    using Communication.Packets.Outgoing.Handshake;
+    using log4net;
+
+    internal sealed class ProcessComponent
     {
         private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Users.Process.ProcessComponent");
 
-        /// <summary>
-        /// Player to update, handle, change etc.
-        /// </summary>
-        private Habbo _player = null;
+        private static readonly int _runtimeInSec = 60;
 
-        /// <summary>
-        /// ThreadPooled Timer.
-        /// </summary>
-        private Timer _timer = null;
+        private readonly AutoResetEvent _resetEvent = new AutoResetEvent(true);
 
-        /// <summary>
-        /// Prevents the timer from overlapping itself.
-        /// </summary>
-        private bool _timerRunning = false;
+        private bool _disabled;
 
-        /// <summary>
-        /// Checks if the timer is lagging behind (server can't keep up).
-        /// </summary>
-        private bool _timerLagging = false;
+        private Habbo _player;
 
-        /// <summary>
-        /// Enable/Disable the timer WITHOUT disabling the timer itself.
-        /// </summary>
-        private bool _disabled = false;
+        private Timer _timer;
 
-        /// <summary>
-        /// Used for disposing the ProcessComponent safely.
-        /// </summary>
-        private AutoResetEvent _resetEvent = new AutoResetEvent(true);
+        private bool _timerLagging;
 
-        /// <summary>
-        /// How often the timer should execute.
-        /// </summary>
-        private static int _runtimeInSec = 60;
+        private bool _timerRunning;
 
-        /// <summary>
-        /// Default.
-        /// </summary>
-        public ProcessComponent()
-        {
-        }
-
-        /// <summary>
-        /// Initializes the ProcessComponent.
-        /// </summary>
-        /// <param name="Player">Player.</param>
         public bool Init(Habbo Player)
         {
             if (Player == null)
+            {
                 return false;
-            else if (this._player != null)
+            }
+            if (_player != null)
+            {
                 return false;
+            }
 
-            this._player = Player;
-            this._timer = new Timer(new TimerCallback(Run), null, _runtimeInSec * 1000, _runtimeInSec * 1000);
+            _player = Player;
+            _timer = new Timer(Run, null, _runtimeInSec * 1000, _runtimeInSec * 1000);
             return true;
         }
 
-        /// <summary>
-        /// Called for each time the timer ticks.
-        /// </summary>
-        /// <param name="State"></param>
         public void Run(object State)
         {
             try
             {
-                if (this._disabled)
-                    return;
-
-                if (this._timerRunning)
+                if (_disabled)
                 {
-                    this._timerLagging = true;
-                    log.Warn("<Player " + this._player.Id + "> Server can't keep up, Player timer is lagging behind.");
                     return;
                 }
 
-                this._resetEvent.Reset();
+                if (_timerRunning)
+                {
+                    _timerLagging = true;
+                    log.Warn("<Player " + _player.Id + "> Server can't keep up, Player timer is lagging behind.");
+                    return;
+                }
+
+                _resetEvent.Reset();
 
                 // BEGIN CODE
-
-                #region Muted Checks
-                if (this._player.TimeMuted > 0)
-                    this._player.TimeMuted -= 60;
-                #endregion
-
-                #region Console Checks
-                if (this._player.MessengerSpamTime > 0)
-                    this._player.MessengerSpamTime -= 60;
-                if (this._player.MessengerSpamTime <= 0)
-                    this._player.MessengerSpamCount = 0;
-                #endregion
-
-                this._player.TimeAFK += 1;
-
-                #region Respect checking
-                if (this._player.GetStats().RespectsTimestamp != DateTime.Today.ToString("MM/dd"))
+                if (_player.TimeMuted > 0)
                 {
-                    this._player.GetStats().RespectsTimestamp = DateTime.Today.ToString("MM/dd");
-                    using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                    _player.TimeMuted -= 60;
+                }
+                if (_player.MessengerSpamTime > 0)
+                {
+                    _player.MessengerSpamTime -= 60;
+                }
+                if (_player.MessengerSpamTime <= 0)
+                {
+                    _player.MessengerSpamCount = 0;
+                }
+                _player.TimeAFK += 1;
+                if (_player.GetStats().RespectsTimestamp != DateTime.Today.ToString("MM/dd"))
+                {
+                    _player.GetStats().RespectsTimestamp = DateTime.Today.ToString("MM/dd");
+                    using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.RunQuery("UPDATE `user_stats` SET `dailyRespectPoints` = '" + (this._player.Rank == 1 && this._player.VIPRank == 0 ? 10 : this._player.VIPRank == 1 ? 15 : 20) + "', `dailyPetRespectPoints` = '" + (this._player.Rank == 1 && this._player.VIPRank == 0 ? 10 : this._player.VIPRank == 1 ? 15 : 20) + "', `respectsTimestamp` = '" + DateTime.Today.ToString("MM/dd") + "' WHERE `id` = '" + this._player.Id + "' LIMIT 1");
+                        dbClient.RunQuery("UPDATE `user_stats` SET `dailyRespectPoints` = '" +
+                                          (_player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20) +
+                                          "', `dailyPetRespectPoints` = '" +
+                                          (_player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20) +
+                                          "', `respectsTimestamp` = '" +
+                                          DateTime.Today.ToString("MM/dd") +
+                                          "' WHERE `id` = '" +
+                                          _player.Id +
+                                          "' LIMIT 1");
                     }
-
-                    this._player.GetStats().DailyRespectPoints = (this._player.Rank == 1 && this._player.VIPRank == 0 ? 10 : this._player.VIPRank == 1 ? 15 : 20);
-                    this._player.GetStats().DailyPetRespectPoints = (this._player.Rank == 1 && this._player.VIPRank == 0 ? 10 : this._player.VIPRank == 1 ? 15 : 20);
-
-                    if (this._player.GetClient() != null)
+                    _player.GetStats().DailyRespectPoints =
+                        _player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20;
+                    _player.GetStats().DailyPetRespectPoints =
+                        _player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20;
+                    if (_player.GetClient() != null)
                     {
-                        this._player.GetClient().SendPacket(new UserObjectComposer(this._player));
+                        _player.GetClient().SendPacket(new UserObjectComposer(_player));
                     }
                 }
-                #endregion
-
-                #region Reset Scripting Warnings
-                if (this._player.GiftPurchasingWarnings < 15)
-                    this._player.GiftPurchasingWarnings = 0;
-
-                if (this._player.MottoUpdateWarnings < 15)
-                    this._player.MottoUpdateWarnings = 0;
-
-                if (this._player.ClothingUpdateWarnings < 15)
-                    this._player.ClothingUpdateWarnings = 0;
-                #endregion
-
-
-                if (this._player.GetClient() != null)
-                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(this._player.GetClient(), "ACH_AllTimeHotelPresence", 1);
-
-                this._player.CheckCreditsTimer();
-                this._player.Effects().CheckEffectExpiry(this._player);
+                if (_player.GiftPurchasingWarnings < 15)
+                {
+                    _player.GiftPurchasingWarnings = 0;
+                }
+                if (_player.MottoUpdateWarnings < 15)
+                {
+                    _player.MottoUpdateWarnings = 0;
+                }
+                if (_player.ClothingUpdateWarnings < 15)
+                {
+                    _player.ClothingUpdateWarnings = 0;
+                }
+                if (_player.GetClient() != null)
+                {
+                    PlusEnvironment.GetGame().GetAchievementManager()
+                        .ProgressAchievement(_player.GetClient(), "ACH_AllTimeHotelPresence", 1);
+                }
+                _player.CheckCreditsTimer();
+                _player.Effects().CheckEffectExpiry(_player);
 
                 // END CODE
 
                 // Reset the values
-                this._timerRunning = false;
-                this._timerLagging = false;
-
-                this._resetEvent.Set();
+                _timerRunning = false;
+                _timerLagging = false;
+                _resetEvent.Set();
             }
-            catch { }
+            catch
+            {
+            }
         }
 
-        /// <summary>
-        /// Stops the timer and disposes everything.
-        /// </summary>
         public void Dispose()
         {
             // Wait until any processing is complete first.
             try
             {
-                this._resetEvent.WaitOne(TimeSpan.FromMinutes(5));
+                _resetEvent.WaitOne(TimeSpan.FromMinutes(5));
             }
-            catch { } // give up
+            catch
+            {
+            } // give up
 
             // Set the timer to disabled
-            this._disabled = true;
+            _disabled = true;
 
             // Dispose the timer to disable it.
             try
             {
-                if (this._timer != null)
-                    this._timer.Dispose();
+                if (_timer != null)
+                {
+                    _timer.Dispose();
+                }
             }
-            catch { }
+            catch
+            {
+            }
 
             // Remove reference to the timer.
-            this._timer = null;
+            _timer = null;
 
             // Null the player so we don't reference it here anymore
-            this._player = null;
+            _player = null;
         }
     }
 }

@@ -1,21 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Quests;
-
-namespace Plus.Communication.Packets.Incoming.Messenger
+﻿namespace Plus.Communication.Packets.Incoming.Messenger
 {
-    class RequestBuddyEvent : IPacketEvent
+    using HabboHotel.GameClients;
+    using HabboHotel.Quests;
+
+    internal sealed class RequestBuddyEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            {
                 return;
+            }
 
             if (Session.GetHabbo().GetMessenger().RequestBuddy(Packet.PopString()))
+            {
                 PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.SOCIAL_FRIEND);
+            }
         }
     }
 }

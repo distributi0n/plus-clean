@@ -1,33 +1,28 @@
-﻿using Plus.Database.Interfaces;
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms;
-using Plus.Communication.Packets.Outgoing.Rooms.Engine;
-
-namespace Plus.Communication.RCON.Commands.User
+﻿namespace Plus.Communication.RCON.Commands.User
 {
-    class ReloadUserMottoCommand : IRCONCommand
-    {
-        public string Description
-        {
-            get { return "This command is used to reload the users motto from the database."; }
-        }
+    using Packets.Outgoing.Rooms.Engine;
 
-        public string Parameters
-        {
-           get { return "%userId%"; }
-        }
+    internal class ReloadUserMottoCommand : IRCONCommand
+    {
+        public string Description => "This command is used to reload the users motto from the database.";
+
+        public string Parameters => "%userId%";
 
         public bool TryExecute(string[] parameters)
         {
-            int userId = 0;
-            if (!int.TryParse(parameters[0].ToString(), out userId))
+            var userId = 0;
+            if (!int.TryParse(parameters[0], out userId))
+            {
                 return false;
+            }
 
-            GameClient client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
             if (client == null || client.GetHabbo() == null)
+            {
                 return false;
+            }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT `motto` FROM `users` WHERE `id` = @userID LIMIT 1");
                 dbClient.AddParameter("userID", userId);
@@ -39,18 +34,16 @@ namespace Plus.Communication.RCON.Commands.User
             {
                 return true;
             }
-            else
+
+            //We are in a room, let's try to run the packets.
+            var Room = client.GetHabbo().CurrentRoom;
+            if (Room != null)
             {
-                //We are in a room, let's try to run the packets.
-                Room Room = client.GetHabbo().CurrentRoom;
-                if (Room != null)
+                var User = Room.GetRoomUserManager().GetRoomUserByHabbo(client.GetHabbo().Id);
+                if (User != null)
                 {
-                    RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(client.GetHabbo().Id);
-                    if (User != null)
-                    {
-                        Room.SendPacket(new UserChangeComposer(User, false));
-                        return true;
-                    }
+                    Room.SendPacket(new UserChangeComposer(User, false));
+                    return true;
                 }
             }
 

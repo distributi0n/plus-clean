@@ -1,34 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using Plus.Database.Interfaces;
-
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
 {
-    class DeleteGroupCommand : IChatCommand
+    using GameClients;
+
+    internal class DeleteGroupCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_delete_group"; }
-        }
+        public string PermissionRequired => "command_delete_group";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Delete a group from the database and cache."; }
-        }
+        public string Description => "Delete a group from the database and cache.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             Room = Session.GetHabbo().CurrentRoom;
             if (Room == null)
+            {
                 return;
+            }
 
             if (Room.Group == null)
             {
@@ -36,7 +24,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
                 return;
             }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery("DELETE FROM `groups` WHERE `id` = '" + Room.Group.Id + "'");
                 dbClient.RunQuery("DELETE FROM `group_memberships` WHERE `group_id` = '" + Room.Group.Id + "'");
@@ -45,16 +33,11 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
                 dbClient.RunQuery("UPDATE `user_stats` SET `groupid` = '0' WHERE `groupid` = '" + Room.Group.Id + "' LIMIT 1");
                 dbClient.RunQuery("DELETE FROM `items_groups` WHERE `group_id` = '" + Room.Group.Id + "'");
             }
-
             PlusEnvironment.GetGame().GetGroupManager().DeleteGroup(Room.RoomData.Group.Id);
-
             Room.Group = null;
             Room.RoomData.Group = null;
-
             PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(Room, true);
-
             Session.SendNotification("Success, group deleted.");
-            return;
         }
     }
 }

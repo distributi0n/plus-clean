@@ -1,28 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Data;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Inventory.Purse;
-using Plus.Database.Interfaces;
-
-
-namespace Plus.Communication.Packets.Incoming.Marketplace
+﻿namespace Plus.Communication.Packets.Incoming.Marketplace
 {
-    class RedeemOfferCreditsEvent : IPacketEvent
+    using System;
+    using System.Data;
+    using HabboHotel.GameClients;
+    using Outgoing.Inventory.Purse;
+
+    internal sealed class RedeemOfferCreditsEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
-            int CreditsOwed = 0;
-
+            var CreditsOwed = 0;
             DataTable Table = null;
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("SELECT `asking_price` FROM `catalog_marketplace_offers` WHERE `user_id` = '" + Session.GetHabbo().Id + "' AND `state` = '2'");
-               Table = dbClient.GetTable();
+                dbClient.SetQuery("SELECT `asking_price` FROM `catalog_marketplace_offers` WHERE `user_id` = '" +
+                                  Session.GetHabbo().Id +
+                                  "' AND `state` = '2'");
+                Table = dbClient.GetTable();
             }
-
             if (Table != null)
             {
                 foreach (DataRow row in Table.Rows)
@@ -35,10 +30,10 @@ namespace Plus.Communication.Packets.Incoming.Marketplace
                     Session.GetHabbo().Credits += CreditsOwed;
                     Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
                 }
-
-                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("DELETE FROM `catalog_marketplace_offers` WHERE `user_id` = '" + Session.GetHabbo().Id + "' AND `state` = '2'");
+                    dbClient.RunQuery("DELETE FROM `catalog_marketplace_offers` WHERE `user_id` = '" + Session.GetHabbo().Id +
+                                      "' AND `state` = '2'");
                 }
             }
         }

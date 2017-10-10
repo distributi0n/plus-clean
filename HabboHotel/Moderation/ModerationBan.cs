@@ -1,18 +1,13 @@
-﻿using System;
-
-using Plus.HabboHotel.Moderation;
-
-namespace Plus.HabboHotel.Moderation
+﻿namespace Plus.HabboHotel.Moderation
 {
-
     public class ModerationBan
     {
-        public string Value;
         public double Expire;
         public string Reason;
         public ModerationBanType Type;
+        public string Value;
 
-        public ModerationBan(ModerationBanType Type, string Value, string Reason, Double Expire)
+        public ModerationBan(ModerationBanType Type, string Value, string Reason, double Expire)
         {
             this.Type = Type;
             this.Value = Value;
@@ -25,7 +20,10 @@ namespace Plus.HabboHotel.Moderation
             get
             {
                 if (PlusEnvironment.GetUnixTimestamp() >= Expire)
+                {
                     return true;
+                }
+
                 return false;
             }
         }

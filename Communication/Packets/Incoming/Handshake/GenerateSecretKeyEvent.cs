@@ -1,31 +1,24 @@
-﻿using System;
-
-using Plus.Communication.Packets.Incoming;
-using Plus.Utilities;
-using Plus.HabboHotel.GameClients;
-
-using Plus.Communication.Encryption;
-using Plus.Communication.Encryption.Crypto.Prng;
-using Plus.Communication.Packets.Outgoing.Handshake;
-
-namespace Plus.Communication.Packets.Incoming.Handshake
+﻿namespace Plus.Communication.Packets.Incoming.Handshake
 {
-    public class GenerateSecretKeyEvent : IPacketEvent
+    using Encryption;
+    using Encryption.Crypto.Prng;
+    using HabboHotel.GameClients;
+    using Outgoing.Handshake;
+
+    public sealed class GenerateSecretKeyEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
-            string CipherPublickey = Packet.PopString();
-           
-            BigInteger SharedKey = HabboEncryptionV2.CalculateDiffieHellmanSharedKey(CipherPublickey);
+            var CipherPublickey = Packet.PopString();
+            var SharedKey = HabboEncryptionV2.CalculateDiffieHellmanSharedKey(CipherPublickey);
             if (SharedKey != 0)
             {
-                Session.RC4Client = new ARC4(SharedKey.getBytes());
+                Session.RC4Client = new Arc4(SharedKey.getBytes());
                 Session.SendPacket(new SecretKeyComposer(HabboEncryptionV2.GetRsaDiffieHellmanPublicKey()));
             }
-            else 
+            else
             {
                 Session.SendNotification("There was an error logging you in, please try again!");
-                return;
             }
         }
     }

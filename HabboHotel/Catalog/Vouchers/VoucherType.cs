@@ -3,6 +3,6 @@
     public enum VoucherType
     {
         CREDIT,
-        DUCKET,
+        DUCKET
     }
 }

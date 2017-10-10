@@ -1,32 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using Plus.Database.Interfaces;
-using Plus.Utilities;
-using Plus.HabboHotel.GameClients;
-
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class UnmuteCommand : IChatCommand
+    using GameClients;
+
+    internal class UnmuteCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_unmute"; }
-        }
+        public string PermissionRequired => "command_unmute";
 
-        public string Parameters
-        {
-            get { return "%username%"; }
-        }
+        public string Parameters => "%username%";
 
-        public string Description
-        {
-            get { return "Unmute a currently muted user."; }
-        }
+        public string Description => "Unmute a currently muted user.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -34,18 +18,18 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null || TargetClient.GetHabbo() == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `users` SET `time_muted` = '0' WHERE `id` = '" + TargetClient.GetHabbo().Id + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `users` SET `time_muted` = '0' WHERE `id` = '" + TargetClient.GetHabbo().Id +
+                                  "' LIMIT 1");
             }
-
             TargetClient.GetHabbo().TimeMuted = 0;
             TargetClient.SendNotification("You have been un-muted by " + Session.GetHabbo().Username + "!");
             Session.SendWhisper("You have successfully un-muted " + TargetClient.GetHabbo().Username + "!");

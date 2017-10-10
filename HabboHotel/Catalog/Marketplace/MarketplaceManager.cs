@@ -1,68 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Plus.Database.Interfaces;
-
-namespace Plus.HabboHotel.Catalog.Marketplace
+﻿namespace Plus.HabboHotel.Catalog.Marketplace
 {
+    using System;
+    using System.Collections.Generic;
+
     public class MarketplaceManager
     {
+        public Dictionary<int, int> MarketAverages = new Dictionary<int, int>();
+        public Dictionary<int, int> MarketCounts = new Dictionary<int, int>();
         public List<int> MarketItemKeys = new List<int>();
         public List<MarketOffer> MarketItems = new List<MarketOffer>();
-        public Dictionary<int, int> MarketCounts = new Dictionary<int, int>();
-        public Dictionary<int, int> MarketAverages = new Dictionary<int, int>();
-
-        public MarketplaceManager()
-        {
-
-        }
 
         public int AvgPriceForSprite(int SpriteID)
         {
-            int num = 0;
-            int num2 = 0;
-            if (this.MarketAverages.ContainsKey(SpriteID) && this.MarketCounts.ContainsKey(SpriteID))
+            var num = 0;
+            var num2 = 0;
+            if (MarketAverages.ContainsKey(SpriteID) && MarketCounts.ContainsKey(SpriteID))
             {
-                if (this.MarketCounts[SpriteID] > 0)
+                if (MarketCounts[SpriteID] > 0)
                 {
-                    return (this.MarketAverages[SpriteID] / this.MarketCounts[SpriteID]);
+                    return MarketAverages[SpriteID] / MarketCounts[SpriteID];
                 }
+
                 return 0;
             }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("SELECT `avgprice` FROM `catalog_marketplace_data` WHERE `sprite` = '" + SpriteID + "' LIMIT 1");
+                dbClient.SetQuery("SELECT `avgprice` FROM `catalog_marketplace_data` WHERE `sprite` = '" + SpriteID +
+                                  "' LIMIT 1");
                 num = dbClient.GetInteger();
-
                 dbClient.SetQuery("SELECT `sold` FROM `catalog_marketplace_data` WHERE `sprite` = '" + SpriteID + "' LIMIT 1");
                 num2 = dbClient.GetInteger();
             }
-
-            this.MarketAverages.Add(SpriteID, num);
-            this.MarketCounts.Add(SpriteID, num2);
-
+            MarketAverages.Add(SpriteID, num);
+            MarketCounts.Add(SpriteID, num2);
             if (num2 > 0)
-                return Convert.ToInt32(Math.Ceiling((double)(num / num2)));
-            
+            {
+                return Convert.ToInt32(Math.Ceiling((double) (num / num2)));
+            }
+
             return 0;
         }
 
-        public string FormatTimestampString()
-        {
-            return this.FormatTimestamp().ToString().Split(new char[] { ',' })[0];
-        }
+        public string FormatTimestampString() => FormatTimestamp().ToString().Split(',')[0];
 
-        public double FormatTimestamp()
-        {
-            return (PlusEnvironment.GetUnixTimestamp() - 172800.0);
-        }
+        public double FormatTimestamp() => PlusEnvironment.GetUnixTimestamp() - 172800.0;
 
         public int OfferCountForSprite(int SpriteID)
         {
-            Dictionary<int, MarketOffer> dictionary = new Dictionary<int, MarketOffer>();
-            Dictionary<int, int> dictionary2 = new Dictionary<int, int>();
-            foreach (MarketOffer item in this.MarketItems)
+            var dictionary = new Dictionary<int, MarketOffer>();
+            var dictionary2 = new Dictionary<int, int>();
+            foreach (var item in MarketItems)
             {
                 if (dictionary.ContainsKey(item.SpriteId))
                 {
@@ -71,8 +59,7 @@ namespace Plus.HabboHotel.Catalog.Marketplace
                         dictionary.Remove(item.SpriteId);
                         dictionary.Add(item.SpriteId, item);
                     }
-
-                    int num = dictionary2[item.SpriteId];
+                    var num = dictionary2[item.SpriteId];
                     dictionary2.Remove(item.SpriteId);
                     dictionary2.Add(item.SpriteId, num + 1);
                 }
@@ -82,16 +69,15 @@ namespace Plus.HabboHotel.Catalog.Marketplace
                     dictionary2.Add(item.SpriteId, 1);
                 }
             }
+
             if (dictionary2.ContainsKey(SpriteID))
             {
                 return dictionary2[SpriteID];
             }
+
             return 0;
         }
 
-        public int CalculateComissionPrice(float SellingPrice)
-        {
-            return Convert.ToInt32(Math.Ceiling(SellingPrice / 100 * 1));
-        }
+        public int CalculateComissionPrice(float SellingPrice) => Convert.ToInt32(Math.Ceiling(SellingPrice / 100 * 1));
     }
 }

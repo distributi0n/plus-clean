@@ -1,17 +1,17 @@
-﻿using System;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms.Games;
-using Plus.HabboHotel.Rooms.Games.Teams;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using System;
+    using GameClients;
+    using Rooms.Games.Teams;
+
     public class InteractorBanzaiScoreCounter : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
         {
             if (Item.team == TEAM.NONE)
+            {
                 return;
+            }
 
             Item.ExtraData = Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)].ToString();
             Item.UpdateState(false, true);
@@ -26,7 +26,6 @@ namespace Plus.HabboHotel.Items.Interactor
             if (HasRights)
             {
                 Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)] = 0;
-
                 Item.ExtraData = "0";
                 Item.UpdateState();
             }

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Misc;
-
-namespace Plus.Communication.Packets.Incoming.Misc
+﻿namespace Plus.Communication.Packets.Incoming.Misc
 {
-    class LatencyTestEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal sealed class LatencyTestEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             //Session.SendMessage(new LatencyTestComposer(Packet.PopInt()));
         }

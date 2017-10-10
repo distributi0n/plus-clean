@@ -1,139 +1,87 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-
-using Plus.Communication.Packets.Incoming;
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Users;
-using System.Drawing;
-using System.Security.Cryptography;
-using Plus.Communication.Packets.Outgoing.Rooms.Engine;
-using Plus.Utilities;
-
-
-namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
+﻿namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Drawing;
+    using System.Linq;
+    using Communication.Packets.Incoming;
+    using Communication.Packets.Outgoing.Rooms.Engine;
+    using Rooms;
+    using Utilities;
+
     internal class MoveAndRotateBox : IWiredItem, IWiredCycle
     {
-        public Room Instance { get; set; }
-        public Item Item { get; set; }
-
-        public WiredBoxType Type
-        {
-            get { return WiredBoxType.EffectMoveAndRotate; }
-        }
-
-        public ConcurrentDictionary<int, Item> SetItems { get; set; }
-        public string StringData { get; set; }
-        public bool BoolData { get; set; }
-
-        public int Delay
-        {
-            get { return this._delay; }
-            set
-            {
-                this._delay = value;
-                this.TickCount = value + 1;
-            }
-        }
-
-        public int TickCount { get; set; }
-        public string ItemsData { get; set; }
+        private int _delay;
+        private long _next;
         private bool Requested;
-        private int _delay = 0;
-        private long _next = 0;
 
         public MoveAndRotateBox(Room Instance, Item Item)
         {
             this.Instance = Instance;
             this.Item = Item;
-            this.SetItems = new ConcurrentDictionary<int, Item>();
-            this.TickCount = Delay;
-            this.Requested = false;
+            SetItems = new ConcurrentDictionary<int, Item>();
+            TickCount = Delay;
+            Requested = false;
         }
 
-        public void HandleSave(ClientPacket Packet)
+        public int Delay
         {
-            if (this.SetItems.Count > 0)
-                this.SetItems.Clear();
-
-            int Unknown = Packet.PopInt();
-            int Movement = Packet.PopInt();
-            int Rotation = Packet.PopInt();
-
-            string Unknown1 = Packet.PopString();
-
-            int FurniCount = Packet.PopInt();
-            for (int i = 0; i < FurniCount; i++)
+            get => _delay;
+            set
             {
-                Item SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-
-                if (SelectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, SelectedItem.Id))
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                _delay = value;
+                TickCount = value + 1;
             }
-
-            this.StringData = Movement + ";" + Rotation;
-            this.Delay = Packet.PopInt();
         }
 
-        public bool Execute(params object[] Params)
-        {
-            if (this.SetItems.Count == 0)
-                return false;
-
-            if (this._next == 0 || this._next < PlusEnvironment.Now())
-                this._next = PlusEnvironment.Now() + this.Delay;
-
-            if (!Requested)
-            {
-                this.TickCount = this.Delay;
-                this.Requested = true;
-            }
-            return true;
-        }
+        public int TickCount { get; set; }
 
         public bool OnCycle()
         {
             if (Instance == null || !Requested || _next == 0)
+            {
                 return false;
+            }
 
-            long Now = PlusEnvironment.Now();
+            var Now = PlusEnvironment.Now();
             if (_next < Now)
             {
-                foreach (Item Item in this.SetItems.Values.ToList())
+                foreach (var Item in SetItems.Values.ToList())
                 {
                     if (Item == null)
+                    {
                         continue;
-
+                    }
                     if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                    {
                         continue;
+                    }
 
                     Item toRemove = null;
-
                     if (Instance.GetWired().OtherBoxHasItem(this, Item.Id))
-                        this.SetItems.TryRemove(Item.Id, out toRemove);
-   
-
-                    Point Point = HandleMovement(Convert.ToInt32(this.StringData.Split(';')[0]),new Point(Item.GetX, Item.GetY));
-                    int newRot = HandleRotation(Convert.ToInt32(this.StringData.Split(';')[1]), Item.Rotation);
-
-                    Instance.GetWired().onUserFurniCollision(Instance, Item);
-
-                    if (!Instance.GetGameMap().ItemCanMove(Item, Point))
-                        continue;
-
-                    if (Instance.GetGameMap().CanRollItemHere(Point.X, Point.Y) && !Instance.GetGameMap().SquareHasUsers(Point.X, Point.Y))
                     {
-                        Double NewZ = Instance.GetGameMap().GetHeightForSquareFromData(Point);
-                        Boolean CanBePlaced = true;
+                        SetItems.TryRemove(Item.Id, out toRemove);
+                    }
+                    var Point = HandleMovement(Convert.ToInt32(StringData.Split(';')[0]), new Point(Item.GetX, Item.GetY));
+                    var newRot = HandleRotation(Convert.ToInt32(StringData.Split(';')[1]), Item.Rotation);
+                    Instance.GetWired().onUserFurniCollision(Instance, Item);
+                    if (!Instance.GetGameMap().ItemCanMove(Item, Point))
+                    {
+                        continue;
+                    }
 
-                        List<Item> Items = Instance.GetGameMap().GetCoordinatedItems(Point);
-                        foreach (Item IItem in Items.ToList())
+                    if (Instance.GetGameMap().CanRollItemHere(Point.X, Point.Y) &&
+                        !Instance.GetGameMap().SquareHasUsers(Point.X, Point.Y))
+                    {
+                        var NewZ = Instance.GetGameMap().GetHeightForSquareFromData(Point);
+                        var CanBePlaced = true;
+                        var Items = Instance.GetGameMap().GetCoordinatedItems(Point);
+                        foreach (var IItem in Items.ToList())
                         {
                             if (IItem == null || IItem.Id == Item.Id)
+                            {
                                 continue;
+                            }
 
                             if (!IItem.GetBaseItem().Walkable)
                             {
@@ -143,10 +91,13 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                             }
 
                             if (IItem.TotalHeight > NewZ)
+                            {
                                 NewZ = IItem.TotalHeight;
-
-                            if (CanBePlaced == true && !IItem.GetBaseItem().Stackable)
+                            }
+                            if (CanBePlaced && !IItem.GetBaseItem().Stackable)
+                            {
                                 CanBePlaced = false;
+                            }
                         }
 
                         if (newRot != Item.Rotation)
@@ -154,11 +105,10 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                             Item.Rotation = newRot;
                             Item.UpdateState(false, true);
                         }
-
                         if (CanBePlaced && Point != Item.Coordinate)
                         {
-                            Instance.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, Point.X,
-                                Point.Y, NewZ, 0, 0, Item.Id));
+                            Instance.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, Point.X, Point.Y,
+                                NewZ, 0, 0, Item.Id));
                             Instance.GetRoomItemHandler().SetFloorItem(Item, Point.X, Point.Y, NewZ);
                         }
                     }
@@ -167,7 +117,61 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                 _next = 0;
                 return true;
             }
+
             return false;
+        }
+
+        public Room Instance { get; set; }
+        public Item Item { get; set; }
+
+        public WiredBoxType Type => WiredBoxType.EffectMoveAndRotate;
+
+        public ConcurrentDictionary<int, Item> SetItems { get; set; }
+        public string StringData { get; set; }
+        public bool BoolData { get; set; }
+        public string ItemsData { get; set; }
+
+        public void HandleSave(ClientPacket Packet)
+        {
+            if (SetItems.Count > 0)
+            {
+                SetItems.Clear();
+            }
+            var Unknown = Packet.PopInt();
+            var Movement = Packet.PopInt();
+            var Rotation = Packet.PopInt();
+            var Unknown1 = Packet.PopString();
+            var FurniCount = Packet.PopInt();
+            for (var i = 0; i < FurniCount; i++)
+            {
+                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
+                if (SelectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, SelectedItem.Id))
+                {
+                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                }
+            }
+
+            StringData = Movement + ";" + Rotation;
+            Delay = Packet.PopInt();
+        }
+
+        public bool Execute(params object[] Params)
+        {
+            if (SetItems.Count == 0)
+            {
+                return false;
+            }
+
+            if (_next == 0 || _next < PlusEnvironment.Now())
+            {
+                _next = PlusEnvironment.Now() + Delay;
+            }
+            if (!Requested)
+            {
+                TickCount = Delay;
+                Requested = true;
+            }
+            return true;
         }
 
         private int HandleRotation(int mode, int rotation)
@@ -183,7 +187,6 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                     }
                     break;
                 }
-
                 case 2:
                 {
                     rotation -= 2;
@@ -193,7 +196,6 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                     }
                     break;
                 }
-
                 case 3:
                 {
                     if (RandomNumber.GenerateRandom(0, 2) == 0)
@@ -215,12 +217,13 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                     break;
                 }
             }
+
             return rotation;
         }
 
         private Point HandleMovement(int Mode, Point Position)
         {
-            Point NewPos = new Point();
+            var NewPos = new Point();
             switch (Mode)
             {
                 case 0:
@@ -245,6 +248,7 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Effects
                             NewPos = new Point(Position.X, Position.Y - 1);
                             break;
                     }
+
                     break;
                 }
                 case 2:

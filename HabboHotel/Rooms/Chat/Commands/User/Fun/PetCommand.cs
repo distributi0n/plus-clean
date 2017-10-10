@@ -1,34 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Rooms.Engine;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun 
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 {
-    class PetCommand : IChatCommand
+    using Communication.Packets.Outgoing.Rooms.Engine;
+    using GameClients;
+
+    internal class PetCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_pet"; }
-        }
+        public string PermissionRequired => "command_pet";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Allows you to transform into a pet.."; }
-        }
+        public string Description => "Allows you to transform into a pet..";
 
-        public void Execute(GameClients.GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser RoomUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var RoomUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (RoomUser == null)
+            {
                 return;
+            }
 
             if (!Room.PetMorphsAllowed)
             {
@@ -36,6 +25,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 if (Session.GetHabbo().PetId > 0)
                 {
                     Session.SendWhisper("Oops, you still have a morph, un-morphing you.");
+
                     //Change the users Pet Id.
                     Session.GetHabbo().PetId = 0;
 
@@ -50,17 +40,19 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Oops, you forgot to choose the type of pet you'd like to turn into! Use :pet list to see the availiable morphs!");
+                Session.SendWhisper(
+                    "Oops, you forgot to choose the type of pet you'd like to turn into! Use :pet list to see the availiable morphs!");
                 return;
             }
 
-            if (Params[1].ToString().ToLower() == "list")
+            if (Params[1].ToLower() == "list")
             {
-                Session.SendWhisper("Habbo, Dog, Cat, Terrier, Croc, Bear, Pig, Lion, Rhino, Spider, Turtle, Chick, Frog, Drag, Monkey, Horse, Bunny, Pigeon, Demon and Gnome.");
+                Session.SendWhisper(
+                    "Habbo, Dog, Cat, Terrier, Croc, Bear, Pig, Lion, Rhino, Spider, Turtle, Chick, Frog, Drag, Monkey, Horse, Bunny, Pigeon, Demon and Gnome.");
                 return;
             }
 
-            int TargetPetId = GetPetIdByString(Params[1].ToString());
+            var TargetPetId = GetPetIdByString(Params[1]);
             if (TargetPetId == 0)
             {
                 Session.SendWhisper("Oops, couldn't find a pet by that name!");
@@ -68,7 +60,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
             }
 
             //Change the users Pet Id.
-            Session.GetHabbo().PetId = (TargetPetId == -1 ? 0 : TargetPetId);
+            Session.GetHabbo().PetId = TargetPetId == -1 ? 0 : TargetPetId;
 
             //Quickly remove the old user instance.
             Room.SendPacket(new UserRemoveComposer(RoomUser.VirtualId));
@@ -78,7 +70,9 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 
             //Tell them a quick message.
             if (Session.GetHabbo().PetId > 0)
+            {
                 Session.SendWhisper("Use ':pet habbo' to turn back into a Habbo!");
+            }
         }
 
         private int GetPetIdByString(string Pet)
@@ -90,7 +84,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 case "habbo":
                     return -1;
                 case "dog":
-                    return 60;//This should be 0.
+                    return 60; //This should be 0.
                 case "cat":
                     return 1;
                 case "terrier":

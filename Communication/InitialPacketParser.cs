@@ -1,8 +1,8 @@
-﻿using System;
-using Plus.Communication.ConnectionManager;
-
-namespace Plus.Communication
+﻿namespace Plus.Communication
 {
+    using System;
+    using ConnectionManager;
+
     public class InitialPacketParser : IDataParser
     {
         public delegate void NoParamDelegate();
@@ -29,10 +29,7 @@ namespace Plus.Communication
             GC.SuppressFinalize(this);
         }
 
-        public object Clone()
-        {
-            return new InitialPacketParser();
-        }
+        public object Clone() => new InitialPacketParser();
 
         public event NoParamDelegate PolicyRequest;
         public event NoParamDelegate SwitchParserRequest;

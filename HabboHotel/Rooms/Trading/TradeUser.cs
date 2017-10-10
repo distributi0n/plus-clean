@@ -1,37 +1,21 @@
-﻿using System.Collections.Generic;
-
-using Plus.HabboHotel.Items;
-
-namespace Plus.HabboHotel.Rooms.Trading
+﻿namespace Plus.HabboHotel.Rooms.Trading
 {
+    using System.Collections.Generic;
+    using Items;
+
     public sealed class TradeUser
     {
-        private RoomUser _user;
-        private bool _accepted;
-        private Dictionary<int, Item> _offeredItems;
-
         public TradeUser(RoomUser User)
         {
-            this._user = User;
-            this._accepted = false;
-            this._offeredItems = new Dictionary<int, Item>();
+            RoomUser = User;
+            HasAccepted = false;
+            OfferedItems = new Dictionary<int, Item>();
         }
 
-        public RoomUser RoomUser
-        {
-            get { return this._user; }
-        }
+        public RoomUser RoomUser { get; }
 
-        public bool HasAccepted
-        {
-            get { return this._accepted; }
-            set { this._accepted = value; }
-        }
+        public bool HasAccepted { get; set; }
 
-        public Dictionary<int, Item> OfferedItems
-        {
-            get { return this._offeredItems; }
-            set { this._offeredItems = value; }
-        }
+        public Dictionary<int, Item> OfferedItems { get; set; }
     }
 }

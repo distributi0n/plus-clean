@@ -1,9 +1,8 @@
-﻿using System;
-using Plus.Communication.ConnectionManager;
-using Plus.Communication;
-
-namespace Plus.Communication.ConnectionManager
+﻿namespace Plus.Communication.ConnectionManager
 {
+    using System;
+    using Core;
+
     public class ConnectionHandling
     {
         private readonly SocketManager manager;
@@ -23,7 +22,8 @@ namespace Plus.Communication.ConnectionManager
         private void manager_connectionEvent(ConnectionInformation connection)
         {
             connection.connectionChanged += connectionChanged;
-            PlusEnvironment.GetGame().GetClientManager().CreateAndStartClient(Convert.ToInt32(connection.getConnectionID()), connection);
+            PlusEnvironment.GetGame().GetClientManager()
+                .CreateAndStartClient(Convert.ToInt32(connection.getConnectionID()), connection);
         }
 
         private void connectionChanged(ConnectionInformation information, ConnectionState state)
@@ -39,11 +39,11 @@ namespace Plus.Communication.ConnectionManager
             try
             {
                 Connection.Dispose();
-                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32( Connection.getConnectionID()));
+                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32(Connection.getConnectionID()));
             }
             catch (Exception e)
             {
-                Core.ExceptionLogger.LogException(e);
+                ExceptionLogger.LogException(e);
             }
         }
 

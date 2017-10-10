@@ -1,65 +1,57 @@
-﻿using System;
-
-using Plus.Utilities;
-
-namespace Plus.Communication.Encryption.KeyExchange
+﻿namespace Plus.Communication.Encryption.KeyExchange
 {
-    public class DiffieHellman
+    using System;
+    using Utilities;
+
+    public sealed class DiffieHellman
     {
         public readonly int BITLENGTH = 32;
 
-        public BigInteger Prime { get; private set; }
-        public BigInteger Generator { get; private set; }
-
         private BigInteger PrivateKey;
-        public BigInteger PublicKey { get; private set; }
 
         public DiffieHellman()
         {
-            this.Initialize();
+            Initialize();
         }
 
         public DiffieHellman(int b)
         {
-            this.BITLENGTH = b;
-
-            this.Initialize();
+            BITLENGTH = b;
+            Initialize();
         }
 
         public DiffieHellman(BigInteger prime, BigInteger generator)
         {
-            this.Prime = prime;
-            this.Generator = generator;
-
-            this.Initialize(true);
+            Prime = prime;
+            Generator = generator;
+            Initialize(true);
         }
+
+        public BigInteger Prime { get; private set; }
+        public BigInteger Generator { get; private set; }
+        public BigInteger PublicKey { get; private set; }
 
         private void Initialize(bool ignoreBaseKeys = false)
         {
-            this.PublicKey = 0;
-
-            Random rand = new Random();
-            while (this.PublicKey == 0)
+            PublicKey = 0;
+            var rand = new Random();
+            while (PublicKey == 0)
             {
                 if (!ignoreBaseKeys)
                 {
-                    this.Prime = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
-                    this.Generator = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
+                    Prime = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
+                    Generator = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
                 }
-
-                byte[] bytes = new byte[this.BITLENGTH / 8];
+                var bytes = new byte[BITLENGTH / 8];
                 Randomizer.NextBytes(bytes);
-                this.PrivateKey = new BigInteger(bytes);
-
-                if (this.Generator > this.Prime)
+                PrivateKey = new BigInteger(bytes);
+                if (Generator > Prime)
                 {
-                    BigInteger temp = this.Prime;
-                    this.Prime = this.Generator;
-                    this.Generator = temp;
+                    var temp = Prime;
+                    Prime = Generator;
+                    Generator = temp;
                 }
-
-                this.PublicKey = this.Generator.modPow(this.PrivateKey, this.Prime);
-
+                PublicKey = Generator.modPow(PrivateKey, Prime);
                 if (!ignoreBaseKeys)
                 {
                     break;
@@ -67,10 +59,6 @@ namespace Plus.Communication.Encryption.KeyExchange
             }
         }
 
-        public BigInteger CalculateSharedKey(BigInteger m)
-        {
-            return m.modPow(this.PrivateKey, this.Prime);
-        }
+        public BigInteger CalculateSharedKey(BigInteger m) => m.modPow(PrivateKey, Prime);
     }
 }
-

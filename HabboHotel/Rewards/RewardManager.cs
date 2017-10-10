@@ -1,40 +1,40 @@
-﻿using Plus.Database.Interfaces;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
-using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Outgoing.Inventory.Purse;
-
-namespace Plus.HabboHotel.Rewards
+﻿namespace Plus.HabboHotel.Rewards
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Data;
+    using Communication.Packets.Outgoing.Inventory.Purse;
+    using GameClients;
+
     public class RewardManager
     {
-        private ConcurrentDictionary<int, Reward> _rewards;
-        private ConcurrentDictionary<int, List<int>> _rewardLogs;
+        private readonly ConcurrentDictionary<int, List<int>> _rewardLogs;
+        private readonly ConcurrentDictionary<int, Reward> _rewards;
 
         public RewardManager()
         {
-            this._rewards = new ConcurrentDictionary<int, Reward>();
-            this._rewardLogs = new ConcurrentDictionary<int, List<int>>();
-
-            this.Reload();   
+            _rewards = new ConcurrentDictionary<int, Reward>();
+            _rewardLogs = new ConcurrentDictionary<int, List<int>>();
+            Reload();
         }
 
         public void Reload()
         {
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `server_rewards` WHERE enabled = '1'");
-                DataTable dTable = dbClient.GetTable();
+                var dTable = dbClient.GetTable();
                 if (dTable != null)
                 {
                     foreach (DataRow dRow in dTable.Rows)
                     {
-                        _rewards.TryAdd((int)dRow["id"], new Reward(Convert.ToDouble(dRow["reward_start"]), Convert.ToDouble(dRow["reward_end"]), Convert.ToString(dRow["reward_type"]), Convert.ToString(dRow["reward_data"]), Convert.ToString(dRow["message"])));
+                        _rewards.TryAdd((int) dRow["id"],
+                            new Reward(Convert.ToDouble(dRow["reward_start"]),
+                                Convert.ToDouble(dRow["reward_end"]),
+                                Convert.ToString(dRow["reward_type"]),
+                                Convert.ToString(dRow["reward_data"]),
+                                Convert.ToString(dRow["message"])));
                     }
                 }
 
@@ -44,14 +44,16 @@ namespace Plus.HabboHotel.Rewards
                 {
                     foreach (DataRow dRow in dTable.Rows)
                     {
-                        int Id = (int)dRow["user_id"];
-                        int RewardId = (int)dRow["reward_id"];
-
+                        var Id = (int) dRow["user_id"];
+                        var RewardId = (int) dRow["reward_id"];
                         if (!_rewardLogs.ContainsKey(Id))
+                        {
                             _rewardLogs.TryAdd(Id, new List<int>());
-
+                        }
                         if (!_rewardLogs[Id].Contains(RewardId))
+                        {
                             _rewardLogs[Id].Add(RewardId);
+                        }
                     }
                 }
             }
@@ -60,10 +62,13 @@ namespace Plus.HabboHotel.Rewards
         public bool HasReward(int Id, int RewardId)
         {
             if (!_rewardLogs.ContainsKey(Id))
+            {
                 return false;
-
+            }
             if (_rewardLogs[Id].Contains(RewardId))
+            {
                 return true;
+            }
 
             return false;
         }
@@ -71,12 +76,14 @@ namespace Plus.HabboHotel.Rewards
         public void LogReward(int Id, int RewardId)
         {
             if (!_rewardLogs.ContainsKey(Id))
+            {
                 _rewardLogs.TryAdd(Id, new List<int>());
-
+            }
             if (!_rewardLogs[Id].Contains(RewardId))
+            {
                 _rewardLogs[Id].Add(RewardId);
-
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            }
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("INSERT INTO `server_reward_logs` VALUES ('', @userId, @rewardId)");
                 dbClient.AddParameter("userId", Id);
@@ -88,56 +95,61 @@ namespace Plus.HabboHotel.Rewards
         public void CheckRewards(GameClient Session)
         {
             if (Session == null || Session.GetHabbo() == null)
-                return;
-
-            foreach (KeyValuePair<int, Reward> Entry in _rewards)
             {
-                int Id = Entry.Key;
-                Reward Reward = Entry.Value;
+                return;
+            }
 
-                if (this.HasReward(Session.GetHabbo().Id, Id))
+            foreach (var Entry in _rewards)
+            {
+                var Id = Entry.Key;
+                var Reward = Entry.Value;
+                if (HasReward(Session.GetHabbo().Id, Id))
+                {
                     continue;
+                }
 
                 if (Reward.isActive())
                 {
                     switch (Reward.Type)
                     {
                         case RewardType.BADGE:
+                        {
+                            if (!Session.GetHabbo().GetBadgeComponent().HasBadge(Reward.RewardData))
                             {
-                                if (!Session.GetHabbo().GetBadgeComponent().HasBadge(Reward.RewardData))
-                                    Session.GetHabbo().GetBadgeComponent().GiveBadge(Reward.RewardData, true, Session);
-                                break;
+                                Session.GetHabbo().GetBadgeComponent().GiveBadge(Reward.RewardData, true, Session);
                             }
-
+                            break;
+                        }
                         case RewardType.CREDITS:
-                            {
-                                Session.GetHabbo().Credits += Convert.ToInt32(Reward.RewardData);
-                                Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
-                                break;
-                            }
-
+                        {
+                            Session.GetHabbo().Credits += Convert.ToInt32(Reward.RewardData);
+                            Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
+                            break;
+                        }
                         case RewardType.DUCKETS:
-                            {
-                                Session.GetHabbo().Duckets += Convert.ToInt32(Reward.RewardData);
-                                Session.SendPacket(new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets, Convert.ToInt32(Reward.RewardData)));
-                                break;
-                            }
-
+                        {
+                            Session.GetHabbo().Duckets += Convert.ToInt32(Reward.RewardData);
+                            Session.SendPacket(
+                                new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets,
+                                    Convert.ToInt32(Reward.RewardData)));
+                            break;
+                        }
                         case RewardType.DIAMONDS:
-                            {
-                                Session.GetHabbo().Diamonds += Convert.ToInt32(Reward.RewardData);
-                                Session.SendPacket(new HabboActivityPointNotificationComposer(Session.GetHabbo().Diamonds, Convert.ToInt32(Reward.RewardData), 5));
-                                break;
-                            }
+                        {
+                            Session.GetHabbo().Diamonds += Convert.ToInt32(Reward.RewardData);
+                            Session.SendPacket(new HabboActivityPointNotificationComposer(Session.GetHabbo().Diamonds,
+                                Convert.ToInt32(Reward.RewardData),
+                                5));
+                            break;
+                        }
                     }
 
-                    if (!String.IsNullOrEmpty(Reward.Message))
+                    if (!string.IsNullOrEmpty(Reward.Message))
+                    {
                         Session.SendNotification(Reward.Message);
-
-                    this.LogReward(Session.GetHabbo().Id, Id);
+                    }
+                    LogReward(Session.GetHabbo().Id, Id);
                 }
-                else
-                    continue;
             }
         }
     }

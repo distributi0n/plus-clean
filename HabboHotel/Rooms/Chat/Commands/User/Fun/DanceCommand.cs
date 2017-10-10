@@ -1,35 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.Communication.Packets.Outgoing.Rooms.Avatar;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 {
-    class DanceCommand :IChatCommand
+    using Communication.Packets.Outgoing.Rooms.Avatar;
+    using GameClients;
+
+    internal class DanceCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_dance"; }
-        }
+        public string PermissionRequired => "command_dance";
 
-        public string Parameters
-        {
-            get { return "%DanceId%"; }
-        }
+        public string Parameters => "%DanceId%";
 
-        public string Description
-        {
-            get { return "Too lazy to dance the proper way? Do it like this!"; }
-        }
+        public string Description => "Too lazy to dance the proper way? Do it like this!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser ThisUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var ThisUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (ThisUser == null)
+            {
                 return;
+            }
 
             if (Params.Length == 1)
             {
@@ -49,7 +37,9 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 Session.GetHabbo().CurrentRoom.SendPacket(new DanceComposer(ThisUser, DanceId));
             }
             else
+            {
                 Session.SendWhisper("Please enter a valid dance ID.");
+            }
         }
     }
 }

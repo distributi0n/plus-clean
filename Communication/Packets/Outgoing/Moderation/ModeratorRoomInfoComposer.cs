@@ -1,33 +1,27 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.Communication.Packets.Outgoing.Moderation
+﻿namespace Plus.Communication.Packets.Outgoing.Moderation
 {
-    class ModeratorRoomInfoComposer : ServerPacket
+    using HabboHotel.Rooms;
+
+    internal class ModeratorRoomInfoComposer : ServerPacket
     {
-        public ModeratorRoomInfoComposer(RoomData Data, bool OwnerInRoom)
-            : base(ServerPacketHeader.ModeratorRoomInfoMessageComposer)
+        public ModeratorRoomInfoComposer(RoomData Data, bool OwnerInRoom) : base(ServerPacketHeader
+            .ModeratorRoomInfoMessageComposer)
         {
-            base.WriteInteger(Data.Id);
-            base.WriteInteger(Data.UsersNow);
-            base.WriteBoolean(OwnerInRoom); // owner in room
-            base.WriteInteger(Data.OwnerId);
-           base.WriteString(Data.OwnerName);
-            base.WriteBoolean(Data != null);
-           base.WriteString(Data.Name);
-           base.WriteString(Data.Description);
-           
-            base.WriteInteger(Data.Tags.Count);
-            foreach (string Tag in Data.Tags)
+            WriteInteger(Data.Id);
+            WriteInteger(Data.UsersNow);
+            WriteBoolean(OwnerInRoom); // owner in room
+            WriteInteger(Data.OwnerId);
+            WriteString(Data.OwnerName);
+            WriteBoolean(Data != null);
+            WriteString(Data.Name);
+            WriteString(Data.Description);
+            WriteInteger(Data.Tags.Count);
+            foreach (var Tag in Data.Tags)
             {
-               base.WriteString(Tag);
+                WriteString(Tag);
             }
 
-            base.WriteBoolean(false);
+            WriteBoolean(false);
         }
     }
 }

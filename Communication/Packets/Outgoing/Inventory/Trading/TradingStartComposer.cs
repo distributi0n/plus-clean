@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.Trading
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.Trading
 {
-    class TradingStartComposer : ServerPacket
+    internal class TradingStartComposer : ServerPacket
     {
-        public TradingStartComposer(int User1Id, int User2Id)
-            : base(ServerPacketHeader.TradingStartMessageComposer)
+        public TradingStartComposer(int User1Id, int User2Id) : base(ServerPacketHeader.TradingStartMessageComposer)
         {
-            base.WriteInteger(User1Id);
-            base.WriteInteger(1);
-            base.WriteInteger(User2Id);
-            base.WriteInteger(1);
+            WriteInteger(User1Id);
+            WriteInteger(1);
+            WriteInteger(User2Id);
+            WriteInteger(1);
         }
     }
 }

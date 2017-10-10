@@ -1,36 +1,24 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class UnloadCommand : IChatCommand
+    using GameClients;
+
+    internal class UnloadCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_unload"; }
-        }
+        public string PermissionRequired => "command_unload";
 
-        public string Parameters
-        {
-            get { return "%id%"; }
-        }
+        public string Parameters => "%id%";
 
-        public string Description
-        {
-            get { return "Unload the current room."; }
-        }
+        public string Description => "Unload the current room.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Session.GetHabbo().GetPermissions().HasRight("room_unload_any"))
             {
                 Room R = null;
                 if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Room.Id, out R))
+                {
                     return;
+                }
 
                 PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(R, true);
             }

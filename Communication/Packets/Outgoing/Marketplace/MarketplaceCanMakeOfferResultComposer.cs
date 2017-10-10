@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Marketplace
+﻿namespace Plus.Communication.Packets.Outgoing.Marketplace
 {
-    class MarketplaceCanMakeOfferResultComposer : ServerPacket
+    internal class MarketplaceCanMakeOfferResultComposer : ServerPacket
     {
-        public MarketplaceCanMakeOfferResultComposer(int Result)
-            : base(ServerPacketHeader.MarketplaceCanMakeOfferResultMessageComposer)
+        public MarketplaceCanMakeOfferResultComposer(int Result) : base(ServerPacketHeader
+            .MarketplaceCanMakeOfferResultMessageComposer)
         {
-            base.WriteInteger(Result);
-            base.WriteInteger(0);
+            WriteInteger(Result);
+            WriteInteger(0);
         }
     }
 }

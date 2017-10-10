@@ -1,12 +1,101 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Items.Wired;
-
-namespace Plus.HabboHotel.Items
+﻿namespace Plus.HabboHotel.Items
 {
+    using System;
+    using System.Collections.Generic;
+    using Wired;
+
     public class ItemData
     {
+        public ItemData(int Id,
+            int Sprite,
+            string Name,
+            string PublicName,
+            string Type,
+            int Width,
+            int Length,
+            double Height,
+            bool Stackable,
+            bool Walkable,
+            bool IsSeat,
+            bool AllowRecycle,
+            bool AllowTrade,
+            bool AllowMarketplaceSell,
+            bool AllowGift,
+            bool AllowInventoryStack,
+            InteractionType InteractionType,
+            int behaviourData,
+            int Modes,
+            string VendingIds,
+            string AdjustableHeights,
+            int EffectId,
+            bool IsRare,
+            bool ExtraRot)
+        {
+            this.Id = Id;
+            SpriteId = Sprite;
+            ItemName = Name;
+            this.PublicName = PublicName;
+            this.Type = char.Parse(Type);
+            this.Width = Width;
+            this.Length = Length;
+            this.Height = Height;
+            this.Stackable = Stackable;
+            this.Walkable = Walkable;
+            this.IsSeat = IsSeat;
+            AllowEcotronRecycle = AllowRecycle;
+            this.AllowTrade = AllowTrade;
+            this.AllowMarketplaceSell = AllowMarketplaceSell;
+            this.AllowGift = AllowGift;
+            this.AllowInventoryStack = AllowInventoryStack;
+            this.InteractionType = InteractionType;
+            BehaviourData = behaviourData;
+            this.Modes = Modes;
+            this.VendingIds = new List<int>();
+            if (VendingIds.Contains(","))
+            {
+                foreach (var VendingId in VendingIds.Split(','))
+                {
+                    try
+                    {
+                        this.VendingIds.Add(int.Parse(VendingId));
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Error with Item " + ItemName + " - Vending Ids");
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(VendingIds) && int.Parse(VendingIds) > 0)
+            {
+                this.VendingIds.Add(int.Parse(VendingIds));
+            }
+
+            this.AdjustableHeights = new List<double>();
+            if (AdjustableHeights.Contains(","))
+            {
+                foreach (var H in AdjustableHeights.Split(','))
+                {
+                    this.AdjustableHeights.Add(double.Parse(H));
+                }
+            }
+            else if (!string.IsNullOrEmpty(AdjustableHeights) && double.Parse(AdjustableHeights) > 0)
+            {
+                this.AdjustableHeights.Add(double.Parse(AdjustableHeights));
+            }
+
+            this.EffectId = EffectId;
+            var wiredId = 0;
+            if (this.InteractionType == InteractionType.WIRED_CONDITION ||
+                this.InteractionType == InteractionType.WIRED_TRIGGER ||
+                this.InteractionType == InteractionType.WIRED_EFFECT)
+            {
+                wiredId = BehaviourData;
+            }
+            WiredType = WiredBoxTypeUtility.FromWiredId(wiredId);
+            this.IsRare = IsRare;
+            this.ExtraRot = ExtraRot;
+        }
+
         public int Id { get; set; }
         public int SpriteId { get; set; }
         public string ItemName { get; set; }
@@ -32,70 +121,5 @@ namespace Plus.HabboHotel.Items
         public WiredBoxType WiredType { get; set; }
         public bool IsRare { get; set; }
         public bool ExtraRot { get; set; }
-
-        public ItemData(int Id, int Sprite, string Name, string PublicName, string Type, int Width, int Length, double Height, bool Stackable, bool Walkable, bool IsSeat,
-            bool AllowRecycle, bool AllowTrade, bool AllowMarketplaceSell, bool AllowGift, bool AllowInventoryStack, InteractionType InteractionType, int behaviourData, int Modes,
-            string VendingIds, string AdjustableHeights, int EffectId, bool IsRare, bool ExtraRot)
-        {
-            this.Id = Id;
-            this.SpriteId = Sprite;
-            this.ItemName = Name;
-            this.PublicName = PublicName;
-            this.Type = char.Parse(Type);
-            this.Width = Width;
-            this.Length = Length;
-            this.Height = Height;
-            this.Stackable = Stackable;
-            this.Walkable = Walkable;
-            this.IsSeat = IsSeat;
-            this.AllowEcotronRecycle = AllowRecycle;
-            this.AllowTrade = AllowTrade;
-            this.AllowMarketplaceSell = AllowMarketplaceSell;
-            this.AllowGift = AllowGift;
-            this.AllowInventoryStack = AllowInventoryStack;
-            this.InteractionType = InteractionType;
-            this.BehaviourData = behaviourData;
-            this.Modes = Modes;
-            this.VendingIds = new List<int>();
-            if (VendingIds.Contains(","))
-            {
-                foreach (string VendingId in VendingIds.Split(','))
-                {
-                    try
-                    {
-                        this.VendingIds.Add(int.Parse(VendingId));
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Error with Item " + ItemName + " - Vending Ids");
-                        continue;
-                    }
-                }
-            }
-            else if (!String.IsNullOrEmpty(VendingIds) && (int.Parse(VendingIds)) > 0)
-                this.VendingIds.Add(int.Parse(VendingIds));
-
-            this.AdjustableHeights = new List<double>();
-            if (AdjustableHeights.Contains(","))
-            {
-                foreach (string H in AdjustableHeights.Split(','))
-                {
-                    this.AdjustableHeights.Add(double.Parse(H));
-                }
-            }
-            else if (!String.IsNullOrEmpty(AdjustableHeights) && (double.Parse(AdjustableHeights)) > 0)
-                this.AdjustableHeights.Add(double.Parse(AdjustableHeights));
-
-            this.EffectId = EffectId;
-
-            int wiredId = 0;
-            if (this.InteractionType == InteractionType.WIRED_CONDITION || this.InteractionType == InteractionType.WIRED_TRIGGER || this.InteractionType == InteractionType.WIRED_EFFECT)
-                wiredId = this.BehaviourData;
-
-            this.WiredType = WiredBoxTypeUtility.FromWiredId(wiredId);
-
-            this.IsRare = IsRare;
-            this.ExtraRot = ExtraRot;
-        }
     }
 }

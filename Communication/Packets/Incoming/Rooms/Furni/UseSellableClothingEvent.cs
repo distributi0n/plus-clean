@@ -1,42 +1,40 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Items;
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Catalog.Clothing;
-
-
-
-using Plus.Communication.Packets.Outgoing.Rooms.Notifications;
-using Plus.Communication.Packets.Outgoing.Inventory.AvatarEffects;
-using Plus.Database.Interfaces;
-
-namespace Plus.Communication.Packets.Incoming.Rooms.Furni
+﻿namespace Plus.Communication.Packets.Incoming.Rooms.Furni
 {
-    class UseSellableClothingEvent : IPacketEvent
+    using HabboHotel.Catalog.Clothing;
+    using HabboHotel.GameClients;
+    using HabboHotel.Items;
+    using Outgoing.Inventory.AvatarEffects;
+    using Outgoing.Rooms.Notifications;
+
+    internal class UseSellableClothingEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            {
                 return;
+            }
 
-            Room Room = Session.GetHabbo().CurrentRoom;
+            var Room = Session.GetHabbo().CurrentRoom;
             if (Room == null)
+            {
                 return;
+            }
 
-            int ItemId = Packet.PopInt();
-
-            Item Item = Room.GetRoomItemHandler().GetItem(ItemId);
+            var ItemId = Packet.PopInt();
+            var Item = Room.GetRoomItemHandler().GetItem(ItemId);
             if (Item == null)
+            {
                 return;
-
+            }
             if (Item.Data == null)
+            {
                 return;
-
+            }
             if (Item.UserID != Session.GetHabbo().Id)
+            {
                 return;
+            }
 
             if (Item.Data.InteractionType != InteractionType.PURCHASABLE_CLOTHING)
             {
@@ -51,14 +49,15 @@ namespace Plus.Communication.Packets.Incoming.Rooms.Furni
             }
 
             ClothingItem Clothing = null;
-            if (!PlusEnvironment.GetGame().GetCatalog().GetClothingManager().TryGetClothing(Item.Data.BehaviourData, out Clothing))
+            if (!PlusEnvironment.GetGame().GetCatalog().GetClothingManager()
+                .TryGetClothing(Item.Data.BehaviourData, out Clothing))
             {
                 Session.SendNotification("Oops, we couldn't find this clothing part!");
                 return;
             }
 
             //Quickly delete it from the database.
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("DELETE FROM `items` WHERE `id` = @ItemId LIMIT 1");
                 dbClient.AddParameter("ItemId", Item.Id);
@@ -67,7 +66,6 @@ namespace Plus.Communication.Packets.Incoming.Rooms.Furni
 
             //Remove the item.
             Room.GetRoomItemHandler().RemoveFurniture(Session, Item.Id);
-
             Session.GetHabbo().GetClothing().AddClothing(Clothing.ClothingName, Clothing.PartIds);
             Session.SendPacket(new FigureSetIdsComposer(Session.GetHabbo().GetClothing().GetClothingParts));
             Session.SendPacket(new RoomNotificationComposer("figureset.redeemed.success"));

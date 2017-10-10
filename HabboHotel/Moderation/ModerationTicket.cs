@@ -1,16 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.HabboHotel.Rooms;
-
-
-namespace Plus.HabboHotel.Moderation
+﻿namespace Plus.HabboHotel.Moderation
 {
+    using System.Collections.Generic;
+    using Rooms;
+    using Users;
+
     public class ModerationTicket
     {
+        public List<string> ReportedChats;
+
+        public ModerationTicket(int id,
+            int type,
+            int category,
+            double timestamp,
+            int priority,
+            Habbo sender,
+            Habbo reported,
+            string issue,
+            RoomData room,
+            List<string> reportedChats)
+        {
+            Id = id;
+            Type = type;
+            Category = category;
+            Timestamp = timestamp;
+            Priority = priority;
+            Sender = sender;
+            Reported = reported;
+            Moderator = null;
+            Issue = issue;
+            Room = room;
+            Answered = false;
+            ReportedChats = reportedChats;
+        }
+
         public int Id { get; set; }
         public int Type { get; set; }
         public int Category { get; set; }
@@ -23,34 +45,22 @@ namespace Plus.HabboHotel.Moderation
         public string Issue { get; set; }
         public RoomData Room { get; set; }
 
-        public List<string> ReportedChats;
-
-        public ModerationTicket(int id, int type, int category, double timestamp, int priority, Habbo sender, Habbo reported, string issue, RoomData room, List<string> reportedChats)
-        {
-            this.Id = id;
-            this.Type = type;
-            this.Category = category;
-            this.Timestamp = timestamp;
-            this.Priority = priority;
-            this.Sender = sender;
-            this.Reported = reported;
-            this.Moderator = null;
-            this.Issue = issue;
-            this.Room = room;
-            this.Answered = false;
-            this.ReportedChats = reportedChats;
-        }
-
         public int GetStatus(int Id)
         {
             if (Moderator == null)
-                return 1;         
-            else if (Moderator.Id == Id && !Answered)
+            {
+                return 1;
+            }
+            if (Moderator.Id == Id && !Answered)
+            {
                 return 2;
-            else if (Answered)
+            }
+            if (Answered)
+            {
                 return 3;
-            else
-                return 3;           
+            }
+
+            return 3;
         }
     }
 }

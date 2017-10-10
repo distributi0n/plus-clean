@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.Furni
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.Furni
 {
-    class FurniListUpdateComposer : ServerPacket
+    internal class FurniListUpdateComposer : ServerPacket
     {
-        public FurniListUpdateComposer()
-            : base(ServerPacketHeader.FurniListUpdateMessageComposer)
+        public FurniListUpdateComposer() : base(ServerPacketHeader.FurniListUpdateMessageComposer)
         {
-
         }
     }
 }

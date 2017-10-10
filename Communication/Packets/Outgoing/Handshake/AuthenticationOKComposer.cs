@@ -2,8 +2,7 @@
 {
     public class AuthenticationOKComposer : ServerPacket
     {
-        public AuthenticationOKComposer()
-            : base(ServerPacketHeader.AuthenticationOKMessageComposer)
+        public AuthenticationOKComposer() : base(ServerPacketHeader.AuthenticationOKMessageComposer)
         {
         }
     }

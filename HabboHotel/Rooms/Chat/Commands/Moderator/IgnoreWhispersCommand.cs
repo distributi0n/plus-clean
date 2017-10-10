@@ -1,31 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class IgnoreWhispersCommand : IChatCommand
+    using GameClients;
+
+    internal class IgnoreWhispersCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_ignore_whispers"; }
-        }
+        public string PermissionRequired => "command_ignore_whispers";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Allows you to ignore all of the whispers in the room, except from your own."; }
-        }
+        public string Description => "Allows you to ignore all of the whispers in the room, except from your own.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             Session.GetHabbo().IgnorePublicWhispers = !Session.GetHabbo().IgnorePublicWhispers;
-            Session.SendWhisper("You're " + (Session.GetHabbo().IgnorePublicWhispers ? "now" : "no longer") + " ignoring public whispers!");
+            Session.SendWhisper("You're " + (Session.GetHabbo().IgnorePublicWhispers ? "now" : "no longer") +
+                                " ignoring public whispers!");
         }
     }
 }

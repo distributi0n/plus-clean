@@ -1,17 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.GameCenter
+﻿namespace Plus.Communication.Packets.Outgoing.GameCenter
 {
-    class PlayableGamesComposer : ServerPacket
+    internal class PlayableGamesComposer : ServerPacket
     {
-        public PlayableGamesComposer(int GameID)
-            : base(ServerPacketHeader.PlayableGamesMessageComposer)
+        public PlayableGamesComposer(int GameID) : base(ServerPacketHeader.PlayableGamesMessageComposer)
         {
-            base.WriteInteger(GameID);
-            base.WriteInteger(0);
+            WriteInteger(GameID);
+            WriteInteger(0);
         }
     }
 }

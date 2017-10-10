@@ -1,20 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Navigator
+﻿namespace Plus.Communication.Packets.Outgoing.Navigator
 {
-    class PopularRoomTagsResultComposer : ServerPacket
+    using System.Collections.Generic;
+
+    internal class PopularRoomTagsResultComposer : ServerPacket
     {
-        public PopularRoomTagsResultComposer(ICollection<KeyValuePair<string, int>> Tags)
-            : base(ServerPacketHeader.PopularRoomTagsResultMessageComposer)
+        public PopularRoomTagsResultComposer(ICollection<KeyValuePair<string, int>> Tags) : base(
+            ServerPacketHeader.PopularRoomTagsResultMessageComposer)
         {
-            base.WriteInteger(Tags.Count);
-            foreach (KeyValuePair<string, int> tag in Tags)
+            WriteInteger(Tags.Count);
+            foreach (var tag in Tags)
             {
-               base.WriteString(tag.Key);
-                base.WriteInteger(tag.Value);
+                WriteString(tag.Key);
+                WriteInteger(tag.Value);
             }
         }
     }

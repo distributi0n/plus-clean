@@ -1,25 +1,17 @@
-﻿using Plus.Communication.Packets.Outgoing.Rooms.Notifications;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
 {
-    class HALCommand : IChatCommand
+    using Communication.Packets.Outgoing.Rooms.Notifications;
+    using GameClients;
+
+    internal class HALCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_hal"; }
-        }
+        public string PermissionRequired => "command_hal";
 
-        public string Parameters
-        {
-            get { return "%message%"; }
-        }
+        public string Parameters => "%message%";
 
-        public string Description
-        {
-            get { return "Send a message to the entire hotel, with a link."; }
-        }
+        public string Description => "Send a message to the entire hotel, with a link.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 2)
             {
@@ -27,11 +19,12 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Administrator
                 return;
             }
 
-            string URL = Params[1];
-
-            string Message = CommandManager.MergeParams(Params, 2);
-            PlusEnvironment.GetGame().GetClientManager().SendPacket(new RoomNotificationComposer("Habboon Hotel Alert!", Message + "\r\n" + "- " + Session.GetHabbo().Username, "", URL, URL));
-            return;
+            var URL = Params[1];
+            var Message = CommandManager.MergeParams(Params, 2);
+            PlusEnvironment.GetGame()
+                .GetClientManager()
+                .SendPacket(new RoomNotificationComposer("Habboon Hotel Alert!",
+                    Message + "\r\n" + "- " + Session.GetHabbo().Username, "", URL, URL));
         }
     }
 }

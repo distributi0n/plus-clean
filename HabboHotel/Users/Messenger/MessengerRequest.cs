@@ -1,34 +1,18 @@
-﻿using System;
-using Plus.Communication.Packets.Incoming;
-
-namespace Plus.HabboHotel.Users.Messenger
+﻿namespace Plus.HabboHotel.Users.Messenger
 {
     public class MessengerRequest
     {
-        private int _toUser;
-        private int _fromUser;
-        private string _username;
-
         public MessengerRequest(int ToUser, int FromUser, string Username)
         {
-            this._toUser = ToUser;
-            this._fromUser = FromUser;
-            this._username = Username;
+            To = ToUser;
+            From = FromUser;
+            this.Username = Username;
         }
 
-        public string Username
-        {
-            get { return this._username; }
-        }
+        public string Username { get; }
 
-        public int To
-        {
-            get { return _toUser; }
-        }
+        public int To { get; }
 
-        public int From
-        {
-            get { return _fromUser; }
-        }
+        public int From { get; }
     }
 }

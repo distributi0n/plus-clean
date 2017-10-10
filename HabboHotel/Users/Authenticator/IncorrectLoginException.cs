@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace Plus.HabboHotel.Users.Authenticator
+﻿namespace Plus.HabboHotel.Users.Authenticator
 {
+    using System;
+
     [Serializable]
     public class IncorrectLoginException : Exception
     {

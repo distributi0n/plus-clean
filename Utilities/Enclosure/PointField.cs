@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-
-namespace Plus.Utilities.Enclosure
+﻿namespace Plus.Utilities.Enclosure
 {
+    using System.Collections.Generic;
+    using System.Drawing;
+
     public class PointField
     {
         private static readonly Point badPoint = new Point(-1, -1);
@@ -18,34 +18,44 @@ namespace Plus.Utilities.Enclosure
             this.forValue = forValue;
         }
 
-        public byte forValue { get; private set; }
+        public byte forValue { get; }
 
-        public List<Point> getPoints()
-        {
-            return PointList;
-        }
+        public List<Point> getPoints() => PointList;
 
         public void add(Point p)
         {
             if (mostLeft == badPoint)
+            {
                 mostLeft = p;
+            }
             if (mostRight == badPoint)
+            {
                 mostRight = p;
+            }
             if (mostTop == badPoint)
+            {
                 mostTop = p;
+            }
             if (mostDown == badPoint)
+            {
                 mostDown = p;
-
+            }
             if (p.X < mostLeft.X)
+            {
                 mostLeft = p;
+            }
             if (p.X > mostRight.X)
+            {
                 mostRight = p;
+            }
             if (p.Y > mostTop.Y)
+            {
                 mostTop = p;
+            }
             if (p.Y < mostDown.Y)
+            {
                 mostDown = p;
-
-
+            }
             PointList.Add(p);
         }
     }

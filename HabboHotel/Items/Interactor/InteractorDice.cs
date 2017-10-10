@@ -1,10 +1,8 @@
-﻿using System;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using GameClients;
+    using Rooms;
+
     public class InteractorDice : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
@@ -28,9 +26,13 @@ namespace Plus.HabboHotel.Items.Interactor
         {
             RoomUser User = null;
             if (Session != null)
+            {
                 User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            }
             if (User == null)
+            {
                 return;
+            }
 
             if (Gamemap.TilesTouching(Item.GetX, Item.GetY, User.X, User.Y))
             {

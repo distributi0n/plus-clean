@@ -1,10 +1,8 @@
-﻿using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Quests;
-using Plus.HabboHotel.Rooms;
-
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using GameClients;
+    using Quests;
+
     public class InteractorGenericSwitch : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
@@ -17,22 +15,18 @@ namespace Plus.HabboHotel.Items.Interactor
 
         public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
         {
-            int Modes = Item.GetBaseItem().Modes - 1;
-
+            var Modes = Item.GetBaseItem().Modes - 1;
             if (Session == null || !HasRights || Modes <= 0)
             {
                 return;
             }
 
             PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_SWITCH);
-
-            int CurrentMode = 0;
-            int NewMode = 0;
-
+            var CurrentMode = 0;
+            var NewMode = 0;
             if (!int.TryParse(Item.ExtraData, out CurrentMode))
             {
             }
-
             if (CurrentMode <= 0)
             {
                 NewMode = 1;
@@ -45,26 +39,24 @@ namespace Plus.HabboHotel.Items.Interactor
             {
                 NewMode = CurrentMode + 1;
             }
-
             Item.ExtraData = NewMode.ToString();
             Item.UpdateState();
         }
 
         public void OnWiredTrigger(Item Item)
         {
-            int Modes = Item.GetBaseItem().Modes - 1;
-
+            var Modes = Item.GetBaseItem().Modes - 1;
             if (Modes == 0)
             {
                 return;
             }
 
-            int CurrentMode = 0;
-            int NewMode = 0;
-
+            var CurrentMode = 0;
+            var NewMode = 0;
             if (string.IsNullOrEmpty(Item.ExtraData))
+            {
                 Item.ExtraData = "0";
-
+            }
             if (!int.TryParse(Item.ExtraData, out CurrentMode))
             {
                 return;
@@ -82,7 +74,6 @@ namespace Plus.HabboHotel.Items.Interactor
             {
                 NewMode = CurrentMode + 1;
             }
-
             Item.ExtraData = NewMode.ToString();
             Item.UpdateState();
         }

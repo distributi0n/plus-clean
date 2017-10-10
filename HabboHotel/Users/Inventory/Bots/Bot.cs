@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.HabboHotel.Users.Inventory.Bots
+﻿namespace Plus.HabboHotel.Users.Inventory.Bots
 {
     public class Bot
     {
-        private int _id;
-        private int _ownerId;
-        private string _name;
-        private string _motto;
-        private string _figure;
-        private string _gender;
-
         public Bot(int Id, int OwnerId, string Name, string Motto, string Figure, string Gender)
         {
             this.Id = Id;
@@ -25,40 +12,16 @@ namespace Plus.HabboHotel.Users.Inventory.Bots
             this.Gender = Gender;
         }
 
-        public int Id
-        {
-            get { return this._id; }
-            set { this._id = value; }
-        }
+        public int Id { get; set; }
 
-        public int OwnerId
-        {
-            get { return this._ownerId; }
-            set { this._ownerId = value; }
-        }
+        public int OwnerId { get; set; }
 
-        public string Name
-        {
-            get { return this._name; }
-            set { this._name = value; }
-        }
+        public string Name { get; set; }
 
-        public string Motto
-        {
-            get { return this._motto; }
-            set { this._motto = value; }
-        }
+        public string Motto { get; set; }
 
-        public string Figure
-        {
-            get { return this._figure; }
-            set { this._figure = value; }
-        }
+        public string Figure { get; set; }
 
-        public string Gender
-        {
-            get { return this._gender; }
-            set { this._gender = value; }
-        }
+        public string Gender { get; set; }
     }
 }

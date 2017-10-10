@@ -1,87 +1,101 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.HabboHotel.Groups;
-using Plus.Communication.Packets.Outgoing.Groups;
-using Plus.HabboHotel.Users.Authenticator;
-using Plus.HabboHotel.Cache;
-using Plus.HabboHotel.Cache.Type;
-
-namespace Plus.Communication.Packets.Incoming.Groups
+﻿namespace Plus.Communication.Packets.Incoming.Groups
 {
-    class GetGroupMembersEvent : IPacketEvent
-    {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
-        {
-            int GroupId = Packet.PopInt();
-            int Page = Packet.PopInt();
-            string SearchVal = Packet.PopString();
-            int RequestType = Packet.PopInt();
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Cache.Type;
+    using HabboHotel.GameClients;
+    using HabboHotel.Groups;
+    using Outgoing.Groups;
 
+    internal class GetGroupMembersEvent : IPacketEvent
+    {
+        public void Parse(GameClient Session, ClientPacket Packet)
+        {
+            var GroupId = Packet.PopInt();
+            var Page = Packet.PopInt();
+            var SearchVal = Packet.PopString();
+            var RequestType = Packet.PopInt();
             Group Group = null;
             if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
+            {
                 return;
+            }
 
-            List<UserCache> Members = new List<UserCache>();
-
+            var Members = new List<UserCache>();
             switch (RequestType)
             {
                 case 0:
+                {
+                    var MemberIds = Group.GetAllMembers;
+                    foreach (var Id in MemberIds.ToList())
                     {
-                        List<int> MemberIds = Group.GetAllMembers;
-                        foreach (int Id in MemberIds.ToList())
+                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
+                        if (GroupMember == null)
                         {
-                            UserCache GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                            if (GroupMember == null)
-                                continue;
-
-                            if (!Members.Contains(GroupMember))
-                                Members.Add(GroupMember);
+                            continue;
                         }
-                        break;
+
+                        if (!Members.Contains(GroupMember))
+                        {
+                            Members.Add(GroupMember);
+                        }
                     }
 
+                    break;
+                }
                 case 1:
+                {
+                    var AdminIds = Group.GetAdministrators;
+                    foreach (var Id in AdminIds.ToList())
                     {
-                        List<int> AdminIds = Group.GetAdministrators;
-                        foreach (int Id in AdminIds.ToList())
+                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
+                        if (GroupMember == null)
                         {
-                            UserCache GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                            if (GroupMember == null)
-                                continue;
-
-                            if (!Members.Contains(GroupMember))
-                                Members.Add(GroupMember);
+                            continue;
                         }
-                        break;
+
+                        if (!Members.Contains(GroupMember))
+                        {
+                            Members.Add(GroupMember);
+                        }
                     }
 
+                    break;
+                }
                 case 2:
+                {
+                    var RequestIds = Group.GetRequests;
+                    foreach (var Id in RequestIds.ToList())
                     {
-                        List<int> RequestIds = Group.GetRequests;
-                        foreach (int Id in RequestIds.ToList())
+                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
+                        if (GroupMember == null)
                         {
-                            UserCache GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                            if (GroupMember == null)
-                                continue;
-
-                            if (!Members.Contains(GroupMember))
-                                Members.Add(GroupMember);
+                            continue;
                         }
-                        break;
+
+                        if (!Members.Contains(GroupMember))
+                        {
+                            Members.Add(GroupMember);
+                        }
                     }
+
+                    break;
+                }
             }
 
             if (!string.IsNullOrEmpty(SearchVal))
+            {
                 Members = Members.Where(x => x.Username.StartsWith(SearchVal)).ToList();
-
-            int StartIndex = ((Page - 1) * 14 + 14);
-            int FinishIndex = Members.Count;
-
-            Session.SendPacket(new GroupMembersComposer(Group, Members.Skip(StartIndex).Take(FinishIndex - StartIndex).ToList(), Members.Count, Page, (Group.CreatorId == Session.GetHabbo().Id || Group.IsAdmin(Session.GetHabbo().Id)), RequestType, SearchVal));
+            }
+            var StartIndex = (Page - 1) * 14 + 14;
+            var FinishIndex = Members.Count;
+            Session.SendPacket(new GroupMembersComposer(Group,
+                Members.Skip(StartIndex).Take(FinishIndex - StartIndex).ToList(),
+                Members.Count,
+                Page,
+                Group.CreatorId == Session.GetHabbo().Id || Group.IsAdmin(Session.GetHabbo().Id),
+                RequestType,
+                SearchVal));
         }
     }
 }

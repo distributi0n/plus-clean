@@ -1,18 +1,12 @@
-﻿using Plus.Communication.Packets.Outgoing.Catalog;
-
-namespace Plus.Communication.RCON.Commands.Hotel
+﻿namespace Plus.Communication.RCON.Commands.Hotel
 {
-    class ReloadCatalogCommand : IRCONCommand
-    {
-        public string Description
-        {
-            get { return "This command is used to reload the catalog."; }
-        }
+    using Packets.Outgoing.Catalog;
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+    internal class ReloadCatalogCommand : IRCONCommand
+    {
+        public string Description => "This command is used to reload the catalog.";
+
+        public string Parameters => "";
 
         public bool TryExecute(string[] parameters)
         {

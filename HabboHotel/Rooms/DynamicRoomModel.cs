@@ -1,8 +1,8 @@
-﻿using System;
-using System.Text;
-
-namespace Plus.HabboHotel.Rooms
+﻿namespace Plus.HabboHotel.Rooms
 {
+    using System;
+    using System.Text;
+
     public class DynamicRoomModel
     {
         public bool ClubOnly;
@@ -15,12 +15,12 @@ namespace Plus.HabboHotel.Rooms
 
         public int MapSizeX;
         public int MapSizeY;
+
+        private string RelativeHeightmap;
         public short[,] SqFloorHeight;
         public byte[,] SqSeatRot;
         public SquareState[,] SqState;
         private RoomModel staticModel;
-
-        private string RelativeHeightmap = null;
 
         public DynamicRoomModel(RoomModel pModel)
         {
@@ -28,16 +28,12 @@ namespace Plus.HabboHotel.Rooms
             DoorX = staticModel.DoorX;
             DoorY = staticModel.DoorY;
             DoorZ = staticModel.DoorZ;
-
             DoorOrientation = staticModel.DoorOrientation;
             Heightmap = staticModel.Heightmap;
-
             MapSizeX = staticModel.MapSizeX;
             MapSizeY = staticModel.MapSizeY;
             ClubOnly = staticModel.ClubOnly;
-
-            this.RelativeHeightmap = string.Empty;
-
+            RelativeHeightmap = string.Empty;
             Generate();
         }
 
@@ -46,12 +42,11 @@ namespace Plus.HabboHotel.Rooms
             SqState = new SquareState[MapSizeX, MapSizeY];
             SqFloorHeight = new short[MapSizeX, MapSizeY];
             SqSeatRot = new byte[MapSizeX, MapSizeY];
-
-            for (int y = 0; y < MapSizeY; y++)
+            for (var y = 0; y < MapSizeY; y++)
             {
-                for (int x = 0; x < MapSizeX; x++)
+                for (var x = 0; x < MapSizeX; x++)
                 {
-                    if (x > (staticModel.MapSizeX - 1) || y > (staticModel.MapSizeY - 1))
+                    if (x > staticModel.MapSizeX - 1 || y > staticModel.MapSizeY - 1)
                     {
                         SqState[x, y] = SquareState.BLOCKED;
                     }
@@ -64,20 +59,19 @@ namespace Plus.HabboHotel.Rooms
                 }
             }
 
-            this.Make();
+            Make();
         }
 
         private void Make()
         {
             var FloorMap = new StringBuilder();
-
-            for (int y = 0; y < MapSizeY; y++)
+            for (var y = 0; y < MapSizeY; y++)
             {
-                for (int x = 0; x < MapSizeX; x++)
+                for (var x = 0; x < MapSizeX; x++)
                 {
                     if (x == DoorX && y == DoorY)
                     {
-                        FloorMap.Append(DoorZ > 9 ? ((char)(87 + DoorZ)).ToString() : DoorZ.ToString());
+                        FloorMap.Append(DoorZ > 9 ? ((char) (87 + DoorZ)).ToString() : DoorZ.ToString());
                         continue;
                     }
 
@@ -88,14 +82,14 @@ namespace Plus.HabboHotel.Rooms
                     }
 
                     double Height = SqFloorHeight[x, y];
-                    string Val = Height > 9 ? ((char)(87 + Height)).ToString() : Height.ToString();
+                    var Val = Height > 9 ? ((char) (87 + Height)).ToString() : Height.ToString();
                     FloorMap.Append(Val);
-
                 }
+
                 FloorMap.Append(Convert.ToChar(13));
             }
 
-            this.RelativeHeightmap = FloorMap.ToString();
+            RelativeHeightmap = FloorMap.ToString();
         }
 
         public void refreshArrays()
@@ -103,12 +97,11 @@ namespace Plus.HabboHotel.Rooms
             var newSqState = new SquareState[MapSizeX + 1, MapSizeY + 1];
             var newSqFloorHeight = new short[MapSizeX + 1, MapSizeY + 1];
             var newSqSeatRot = new byte[MapSizeX + 1, MapSizeY + 1];
-
-            for (int y = 0; y < MapSizeY; y++)
+            for (var y = 0; y < MapSizeY; y++)
             {
-                for (int x = 0; x < MapSizeX; x++)
+                for (var x = 0; x < MapSizeX; x++)
                 {
-                    if (x > (staticModel.MapSizeX - 1) || y > (staticModel.MapSizeY - 1))
+                    if (x > staticModel.MapSizeX - 1 || y > staticModel.MapSizeY - 1)
                     {
                         newSqState[x, y] = SquareState.BLOCKED;
                     }
@@ -124,15 +117,9 @@ namespace Plus.HabboHotel.Rooms
             SqState = newSqState;
             SqFloorHeight = newSqFloorHeight;
             SqSeatRot = newSqSeatRot;
-
         }
 
-        public string GetRelativeHeightmap()
-        {
-            return this.RelativeHeightmap;
-        }
-
-
+        public string GetRelativeHeightmap() => RelativeHeightmap;
 
         public void AddX()
         {
@@ -143,10 +130,14 @@ namespace Plus.HabboHotel.Rooms
         public void OpenSquare(int x, int y, double z)
         {
             if (z > 9)
+            {
                 z = 9;
+            }
             if (z < 0)
+            {
                 z = 0;
-            SqFloorHeight[x, y] = (short)z;
+            }
+            SqFloorHeight[x, y] = (short) z;
             SqState[x, y] = SquareState.OPEN;
         }
 
@@ -159,9 +150,11 @@ namespace Plus.HabboHotel.Rooms
         public bool DoorIsValid()
         {
             if (DoorX > SqFloorHeight.GetUpperBound(0) || DoorY > SqFloorHeight.GetUpperBound(1))
+            {
                 return false;
-            else
-                return true;
+            }
+
+            return true;
         }
 
         public void SetMapsize(int x, int y)
@@ -176,7 +169,6 @@ namespace Plus.HabboHotel.Rooms
             Array.Clear(SqState, 0, SqState.Length);
             Array.Clear(SqFloorHeight, 0, SqFloorHeight.Length);
             Array.Clear(SqSeatRot, 0, SqSeatRot.Length);
-
             staticModel = null;
             Heightmap = null;
             SqState = null;

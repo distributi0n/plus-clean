@@ -1,41 +1,36 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Data;
-using System.Collections.Generic;
-
-using System.Text.RegularExpressions;
-
-using Plus.Database.Interfaces;
-
-
-namespace Plus.HabboHotel.Rooms.Chat.Filter
+﻿namespace Plus.HabboHotel.Rooms.Chat.Filter
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+
     public sealed class WordFilterManager
     {
-        private List<WordFilter> _filteredWords;
+        private readonly List<WordFilter> _filteredWords;
 
-        public WordFilterManager()
-        {
-            this._filteredWords = new List<WordFilter>();
-        }
+        public WordFilterManager() => _filteredWords = new List<WordFilter>();
 
         public void Init()
         {
-            if (this._filteredWords.Count > 0)
-            this._filteredWords.Clear();
-
+            if (_filteredWords.Count > 0)
+            {
+                _filteredWords.Clear();
+            }
             DataTable Data = null;
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `wordfilter`");
                 Data = dbClient.GetTable();
-
                 if (Data != null)
                 {
                     foreach (DataRow Row in Data.Rows)
                     {
-                        this._filteredWords.Add(new WordFilter(Convert.ToString(Row["word"]), Convert.ToString(Row["replacement"]), PlusEnvironment.EnumToBool(Row["strict"].ToString()), PlusEnvironment.EnumToBool(Row["bannable"].ToString())));
+                        _filteredWords.Add(new WordFilter(Convert.ToString(Row["word"]),
+                            Convert.ToString(Row["replacement"]),
+                            PlusEnvironment.EnumToBool(Row["strict"].ToString()),
+                            PlusEnvironment.EnumToBool(Row["bannable"].ToString())));
                     }
                 }
             }
@@ -43,7 +38,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Filter
 
         public string CheckMessage(string Message)
         {
-            foreach (WordFilter Filter in this._filteredWords.ToList())
+            foreach (var Filter in _filteredWords.ToList())
             {
                 if (Message.ToLower().Contains(Filter.Word) && Filter.IsStrict || Message == Filter.Word)
                 {
@@ -51,15 +46,18 @@ namespace Plus.HabboHotel.Rooms.Chat.Filter
                 }
                 else if (Message.ToLower().Contains(Filter.Word) && !Filter.IsStrict || Message == Filter.Word)
                 {
-                    string[] Words = Message.Split(' ');
-
+                    var Words = Message.Split(' ');
                     Message = "";
-                    foreach (string Word in Words.ToList())
+                    foreach (var Word in Words.ToList())
                     {
                         if (Word.ToLower() == Filter.Word)
+                        {
                             Message += Filter.Replacement + " ";
+                        }
                         else
+                        {
                             Message += Word + " ";
+                        }
                     }
                 }
             }
@@ -70,25 +68,32 @@ namespace Plus.HabboHotel.Rooms.Chat.Filter
         public bool CheckBannedWords(string Message)
         {
             Message = Message.Replace(" ", "").Replace(".", "").Replace("_", "").ToLower();
-
-            foreach (WordFilter Filter in this._filteredWords.ToList())
+            foreach (var Filter in _filteredWords.ToList())
             {
                 if (!Filter.IsBannable)
+                {
                     continue;
+                }
 
                 if (Message.Contains(Filter.Word))
+                {
                     return true;
+                }
             }
+
             return false;
         }
 
         public bool IsFiltered(string Message)
         {
-            foreach (WordFilter Filter in this._filteredWords.ToList())
+            foreach (var Filter in _filteredWords.ToList())
             {
                 if (Message.Contains(Filter.Word))
+                {
                     return true;
+                }
             }
+
             return false;
         }
     }

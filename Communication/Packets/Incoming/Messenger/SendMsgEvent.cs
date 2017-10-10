@@ -1,25 +1,27 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Incoming.Messenger
+﻿namespace Plus.Communication.Packets.Incoming.Messenger
 {
-    class SendMsgEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal sealed class SendMsgEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            {
                 return;
+            }
 
-            int userId = Packet.PopInt();
+            var userId = Packet.PopInt();
             if (userId == 0 || userId == Session.GetHabbo().Id)
+            {
                 return;
+            }
 
-            string message = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
+            var message = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
             if (string.IsNullOrWhiteSpace(message))
+            {
                 return;
-
+            }
 
             if (Session.GetHabbo().TimeMuted > 0)
             {
@@ -28,7 +30,6 @@ namespace Plus.Communication.Packets.Incoming.Messenger
             }
 
             Session.GetHabbo().GetMessenger().SendInstantMessage(userId, message);
-
         }
     }
 }

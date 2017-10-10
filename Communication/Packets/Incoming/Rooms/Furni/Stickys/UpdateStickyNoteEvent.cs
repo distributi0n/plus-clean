@@ -1,36 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Items;
-
-namespace Plus.Communication.Packets.Incoming.Rooms.Furni.Stickys
+﻿namespace Plus.Communication.Packets.Incoming.Rooms.Furni.Stickys
 {
-    class UpdateStickyNoteEvent : IPacketEvent
+    using HabboHotel.GameClients;
+    using HabboHotel.Items;
+    using HabboHotel.Rooms;
+
+    internal class UpdateStickyNoteEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (!Session.GetHabbo().InRoom)
+            {
                 return;
+            }
 
             Room Room;
-
             if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            {
                 return;
+            }
 
-            Item Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
+            var Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
             if (Item == null || Item.GetBaseItem().InteractionType != InteractionType.POSTIT)
+            {
                 return;
+            }
 
-            String Color = Packet.PopString();
-            String Text = Packet.PopString();
-
+            var Color = Packet.PopString();
+            var Text = Packet.PopString();
             if (!Room.CheckRights(Session))
             {
                 if (!Text.StartsWith(Item.ExtraData))
+                {
                     return; // we can only ADD stuff! older stuff changed, this is not allowed
+                }
             }
 
             switch (Color)
@@ -39,11 +41,8 @@ namespace Plus.Communication.Packets.Incoming.Rooms.Furni.Stickys
                 case "FF9CFF":
                 case "9CCEFF":
                 case "9CFF9C":
-
                     break;
-
                 default:
-
                     return; // invalid color
             }
 

@@ -1,21 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users;
-using Plus.Communication.Packets.Outgoing.Users;
-
-namespace Plus.Communication.Packets.Incoming.Users
+﻿namespace Plus.Communication.Packets.Incoming.Users
 {
-    class GetSelectedBadgesEvent : IPacketEvent
+    using HabboHotel.GameClients;
+    using Outgoing.Users;
+
+    internal class GetSelectedBadgesEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
-            int UserId = Packet.PopInt();
-            Habbo Habbo = PlusEnvironment.GetHabboById(UserId);
+            var UserId = Packet.PopInt();
+            var Habbo = PlusEnvironment.GetHabboById(UserId);
             if (Habbo == null)
+            {
                 return;
+            }
 
             Session.SendPacket(new HabboUserBadgesComposer(Habbo));
         }

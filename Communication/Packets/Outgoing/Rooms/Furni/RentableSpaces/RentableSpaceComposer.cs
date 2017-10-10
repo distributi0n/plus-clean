@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.RentableSpaces
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.RentableSpaces
 {
     public class RentableSpaceComposer : ServerPacket
     {
-        public RentableSpaceComposer()
-            : base(ServerPacketHeader.RentableSpaceMessageComposer)
+        public RentableSpaceComposer() : base(ServerPacketHeader.RentableSpaceMessageComposer)
         {
-            base.WriteBoolean(true); //Is rented y/n
-            base.WriteInteger(-1); //No fucking clue
-            base.WriteInteger(-1); //No fucking clue
-           base.WriteString("Tyler-Retros"); //Username of who owns.
-            base.WriteInteger(360); //Time to expire.
-            base.WriteInteger(-1); //No fucking clue
+            WriteBoolean(true); //Is rented y/n
+            WriteInteger(-1); //No fucking clue
+            WriteInteger(-1); //No fucking clue
+            WriteString("Tyler-Retros"); //Username of who owns.
+            WriteInteger(360); //Time to expire.
+            WriteInteger(-1); //No fucking clue
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿namespace Plus.Communication.Packets.Outgoing.Availability
 {
-    class MaintenanceStatusComposer : ServerPacket
+    internal class MaintenanceStatusComposer : ServerPacket
     {
-        public MaintenanceStatusComposer(int Minutes, int Duration)
-            : base(ServerPacketHeader.MaintenanceStatusMessageComposer)
+        public MaintenanceStatusComposer(int minutes, int duration) : base(ServerPacketHeader.MaintenanceStatusMessageComposer)
         {
-            base.WriteBoolean(false);
-            base.WriteInteger(Minutes);//Time till shutdown.
-            base.WriteInteger(Duration);//Duration
+            WriteBoolean(false);
+            WriteInteger(minutes); //Time till shutdown.
+            WriteInteger(duration); //Duration
         }
     }
 }

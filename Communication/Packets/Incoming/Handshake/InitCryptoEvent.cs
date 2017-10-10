@@ -1,15 +1,15 @@
-﻿using System;
-
-using Plus.Communication.Encryption;
-using Plus.Communication.Packets.Outgoing.Handshake;
-
-namespace Plus.Communication.Packets.Incoming.Handshake
+﻿namespace Plus.Communication.Packets.Incoming.Handshake
 {
-    public class InitCryptoEvent : IPacketEvent
+    using Encryption;
+    using HabboHotel.GameClients;
+    using Outgoing.Handshake;
+
+    public sealed class InitCryptoEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
-            Session.SendPacket(new InitCryptoComposer(HabboEncryptionV2.GetRsaDiffieHellmanPrimeKey(), HabboEncryptionV2.GetRsaDiffieHellmanGeneratorKey()));
+            Session.SendPacket(new InitCryptoComposer(HabboEncryptionV2.GetRsaDiffieHellmanPrimeKey(),
+                HabboEncryptionV2.GetRsaDiffieHellmanGeneratorKey()));
         }
     }
 }

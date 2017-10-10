@@ -1,27 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Users.Effects;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.AvatarEffects
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.AvatarEffects
 {
-    class AvatarEffectsComposer : ServerPacket
-    {
-        public AvatarEffectsComposer(ICollection<AvatarEffect> Effects)
-            : base(ServerPacketHeader.AvatarEffectsMessageComposer)
-        {
-            base.WriteInteger(Effects.Count);
+    using System.Collections.Generic;
+    using HabboHotel.Users.Effects;
 
-            foreach (AvatarEffect Effect in Effects)
+    internal class AvatarEffectsComposer : ServerPacket
+    {
+        public AvatarEffectsComposer(ICollection<AvatarEffect> Effects) : base(ServerPacketHeader.AvatarEffectsMessageComposer)
+        {
+            WriteInteger(Effects.Count);
+            foreach (var Effect in Effects)
             {
-                base.WriteInteger(Effect.SpriteId);//Effect Id
-                base.WriteInteger(0);//Type, 0 = Hand, 1 = Full
-                base.WriteInteger((int)Effect.Duration);
-                base.WriteInteger(Effect.Activated ? Effect.Quantity - 1 : Effect.Quantity);
-                base.WriteInteger(Effect.Activated ? (int)Effect.TimeLeft : -1);
-                base.WriteBoolean(false);//Permanent
+                WriteInteger(Effect.SpriteId); //Effect Id
+                WriteInteger(0); //Type, 0 = Hand, 1 = Full
+                WriteInteger((int) Effect.Duration);
+                WriteInteger(Effect.Activated ? Effect.Quantity - 1 : Effect.Quantity);
+                WriteInteger(Effect.Activated ? (int) Effect.TimeLeft : -1);
+                WriteBoolean(false); //Permanent
             }
         }
     }

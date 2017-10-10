@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Handshake
+﻿namespace Plus.Communication.Packets.Outgoing.Handshake
 {
-    class AvailabilityStatusComposer : ServerPacket
+    internal class AvailabilityStatusComposer : ServerPacket
     {
-        public AvailabilityStatusComposer()
-            : base(ServerPacketHeader.AvailabilityStatusMessageComposer)
+        public AvailabilityStatusComposer() : base(ServerPacketHeader.AvailabilityStatusMessageComposer)
         {
-            base.WriteBoolean(true);
-            base.WriteBoolean(false);
-            base.WriteBoolean(true);
+            WriteBoolean(true);
+            WriteBoolean(false);
+            WriteBoolean(true);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using Plus;
-using Plus.Core;
-namespace Plus.HabboHotel.Items
+﻿namespace Plus.HabboHotel.Items
 {
     public enum InteractionType
     {
@@ -68,7 +65,6 @@ namespace Plus.HabboHotel.Items
         PUZZLE_BOX,
         TONER,
 
-
         PRESSURE_PAD,
 
         WF_FLOOR_SWITCH_1,
@@ -121,7 +117,6 @@ namespace Plus.HabboHotel.Items
         FX_PROVIDER,
         EXCHANGE
     }
-
 
     public class InteractionTypes
     {
@@ -178,7 +173,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.haloweenpool;
                 case "ball":
                     return InteractionType.FOOTBALL;
-
                 case "green_goal":
                     return InteractionType.FOOTBALL_GOAL_GREEN;
                 case "yellow_goal":
@@ -187,7 +181,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.FOOTBALL_GOAL_RED;
                 case "blue_goal":
                     return InteractionType.FOOTBALL_GOAL_BLUE;
-
                 case "green_score":
                     return InteractionType.footballcountergreen;
                 case "yellow_score":
@@ -196,7 +189,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.footballcounterblue;
                 case "red_score":
                     return InteractionType.footballcounterred;
-
                 case "bb_blue_gate":
                     return InteractionType.banzaigateblue;
                 case "bb_red_gate":
@@ -207,7 +199,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.banzaigategreen;
                 case "bb_patch":
                     return InteractionType.banzaifloor;
-
                 case "bb_blue_score":
                     return InteractionType.banzaiscoreblue;
                 case "bb_red_score":
@@ -216,7 +207,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.banzaiscoreyellow;
                 case "bb_green_score":
                     return InteractionType.banzaiscoregreen;
-
                 case "banzaicounter":
                     return InteractionType.banzaicounter;
                 case "bb_teleport":
@@ -225,7 +215,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.banzaipuck;
                 case "bb_pyramid":
                     return InteractionType.banzaipyramid;
-
                 case "freezetimer":
                     return InteractionType.freezetimer;
                 case "freezeexit":
@@ -250,12 +239,10 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.FREEZE_TILE_BLOCK;
                 case "freezetile":
                     return InteractionType.FREEZE_TILE;
-
                 case "jukebox":
                     return InteractionType.JUKEBOX;
                 case "musicdisc":
                     return InteractionType.MUSIC_DISC;
-
                 case "pressure_pad":
                     return InteractionType.PRESSURE_PAD;
                 case "wf_floor_switch1":
@@ -286,32 +273,26 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.TENT;
                 case "tent_small":
                     return InteractionType.TENT_SMALL;
-
                 case "badge_display":
                     return InteractionType.BADGE_DISPLAY;
                 case "stacktool":
                     return InteractionType.STACKTOOL;
                 case "television":
                     return InteractionType.TELEVISION;
-
-
                 case "wired_effect":
                     return InteractionType.WIRED_EFFECT;
                 case "wired_trigger":
                     return InteractionType.WIRED_TRIGGER;
                 case "wired_condition":
                     return InteractionType.WIRED_CONDITION;
-
                 case "floor":
                     return InteractionType.FLOOR;
                 case "wallpaper":
                     return InteractionType.WALLPAPER;
                 case "landscape":
                     return InteractionType.LANDSCAPE;
-
                 case "badge":
                     return InteractionType.BADGE;
-
                 case "crackable_egg":
                     return InteractionType.CRACKABLE_EGG;
                 case "effect":
@@ -320,7 +301,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.DEAL;
                 case "roomdeal":
                     return InteractionType.ROOMDEAL;
-
                 case "horse_saddle_1":
                     return InteractionType.HORSE_SADDLE_1;
                 case "horse_saddle_2":
@@ -331,7 +311,6 @@ namespace Plus.HabboHotel.Items
                     return InteractionType.HORSE_BODY_DYE;
                 case "horse_hair_dye":
                     return InteractionType.HORSE_HAIR_DYE;
-
                 case "gnome_box":
                     return InteractionType.GNOME_BOX;
                 case "bot":
@@ -357,10 +336,10 @@ namespace Plus.HabboHotel.Items
                 case "pet":
                     return InteractionType.PET;
                 default:
-                    {
-                        //Logging.WriteLine("Unknown interaction type in parse code: " + pType, ConsoleColor.Yellow);
-                        return InteractionType.NONE;
-                    }
+                {
+                    //Logging.WriteLine("Unknown interaction type in parse code: " + pType, ConsoleColor.Yellow);
+                    return InteractionType.NONE;
+                }
             }
         }
     }

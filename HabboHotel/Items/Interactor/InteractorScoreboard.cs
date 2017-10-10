@@ -1,7 +1,7 @@
-﻿using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
+    using GameClients;
+
     public class InteractorScoreboard : IFurniInteractor
     {
         public void OnPlace(GameClient Session, Item Item)
@@ -19,13 +19,10 @@ namespace Plus.HabboHotel.Items.Interactor
                 return;
             }
 
-            int OldValue = 0;
-
+            var OldValue = 0;
             if (!int.TryParse(Item.ExtraData, out OldValue))
             {
             }
-
-
             if (Request == 1)
             {
                 if (Item.pendingReset && OldValue > 0)
@@ -44,23 +41,18 @@ namespace Plus.HabboHotel.Items.Interactor
                 Item.UpdateNeeded = !Item.UpdateNeeded;
                 Item.pendingReset = true;
             }
-
-
             Item.ExtraData = OldValue.ToString();
             Item.UpdateState();
         }
 
         public void OnWiredTrigger(Item Item)
         {
-            int OldValue = 0;
-
+            var OldValue = 0;
             if (!int.TryParse(Item.ExtraData, out OldValue))
             {
             }
-
             OldValue = OldValue + 60;
             Item.UpdateNeeded = false;
-
             Item.ExtraData = OldValue.ToString();
             Item.UpdateState();
         }

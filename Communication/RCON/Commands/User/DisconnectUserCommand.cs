@@ -1,28 +1,24 @@
-﻿using Plus.HabboHotel.GameClients;
-
-namespace Plus.Communication.RCON.Commands.User
+﻿namespace Plus.Communication.RCON.Commands.User
 {
-    class DisconnectUserCommand : IRCONCommand
+    internal class DisconnectUserCommand : IRCONCommand
     {
-        public string Description
-        {
-            get { return "This command is used to disconnect a user."; }
-        }
+        public string Description => "This command is used to disconnect a user.";
 
-        public string Parameters
-        {
-            get { return "%userId%"; }
-        }
+        public string Parameters => "%userId%";
 
         public bool TryExecute(string[] parameters)
         {
-            int userId = 0;
-            if (!int.TryParse(parameters[0].ToString(), out userId))
+            var userId = 0;
+            if (!int.TryParse(parameters[0], out userId))
+            {
                 return false;
+            }
 
-            GameClient client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
             if (client == null || client.GetHabbo() == null)
+            {
                 return false;
+            }
 
             client.Disconnect();
             return true;

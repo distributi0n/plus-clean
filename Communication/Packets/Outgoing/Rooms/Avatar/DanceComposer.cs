@@ -1,19 +1,13 @@
-﻿using Plus.HabboHotel.Rooms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Avatar
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Avatar
 {
-    class DanceComposer : ServerPacket
+    using HabboHotel.Rooms;
+
+    internal class DanceComposer : ServerPacket
     {
-        public DanceComposer(RoomUser Avatar, int Dance)
-            : base(ServerPacketHeader.DanceMessageComposer)
+        public DanceComposer(RoomUser Avatar, int Dance) : base(ServerPacketHeader.DanceMessageComposer)
         {
-            base.WriteInteger(Avatar.VirtualId);
-            base.WriteInteger(Dance);
+            WriteInteger(Avatar.VirtualId);
+            WriteInteger(Dance);
         }
     }
 }

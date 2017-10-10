@@ -1,14 +1,7 @@
-﻿using System;
-
-namespace Plus.HabboHotel.Navigator
+﻿namespace Plus.HabboHotel.Navigator
 {
     public class FeaturedRoom
     {
-        public int RoomId { get; set; }
-        public string Caption { get; set; }
-        public string Description { get; set; }
-        public string Image { get; set; }
-
         public FeaturedRoom(int RoomId, string Caption, string Description, string Image)
         {
             this.RoomId = RoomId;
@@ -16,5 +9,10 @@ namespace Plus.HabboHotel.Navigator
             this.Description = Description;
             this.Image = Image;
         }
+
+        public int RoomId { get; set; }
+        public string Caption { get; set; }
+        public string Description { get; set; }
+        public string Image { get; set; }
     }
 }

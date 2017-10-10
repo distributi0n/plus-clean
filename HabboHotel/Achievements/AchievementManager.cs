@@ -1,17 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-
-using Plus.Communication.Packets.Outgoing.Inventory.Purse;
-using Plus.Communication.Packets.Outgoing.Inventory.Achievements;
-
-using Plus.Database.Interfaces;
-using log4net;
-
-namespace Plus.HabboHotel.Achievements
+﻿namespace Plus.HabboHotel.Achievements
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Communication.Packets.Outgoing.Inventory.Achievements;
+    using Communication.Packets.Outgoing.Inventory.Purse;
+    using GameClients;
+    using log4net;
+    using Users.Messenger;
+
     public class AchievementManager
     {
         private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Achievements.AchievementManager");
@@ -20,9 +17,8 @@ namespace Plus.HabboHotel.Achievements
 
         public AchievementManager()
         {
-            this._achievements = new Dictionary<string, Achievement>();
-            this.LoadAchievements();
-
+            _achievements = new Dictionary<string, Achievement>();
+            LoadAchievements();
             log.Info("Achievement Manager -> LOADED");
         }
 
@@ -34,111 +30,133 @@ namespace Plus.HabboHotel.Achievements
         public bool ProgressAchievement(GameClient Session, string AchievementGroup, int ProgressAmount, bool FromZero = false)
         {
             if (!_achievements.ContainsKey(AchievementGroup) || Session == null)
+            {
                 return false;
+            }
 
             Achievement AchievementData = null;
             AchievementData = _achievements[AchievementGroup];
-
-            UserAchievement UserData = Session.GetHabbo().GetAchievementData(AchievementGroup);
+            var UserData = Session.GetHabbo().GetAchievementData(AchievementGroup);
             if (UserData == null)
             {
                 UserData = new UserAchievement(AchievementGroup, 0, 0);
                 Session.GetHabbo().Achievements.TryAdd(AchievementGroup, UserData);
             }
-
-            int TotalLevels = AchievementData.Levels.Count;
-
+            var TotalLevels = AchievementData.Levels.Count;
             if (UserData != null && UserData.Level == TotalLevels)
+            {
                 return false; // done, no more.
+            }
 
-            int TargetLevel = (UserData != null ? UserData.Level + 1 : 1);
-
+            var TargetLevel = UserData != null ? UserData.Level + 1 : 1;
             if (TargetLevel > TotalLevels)
+            {
                 TargetLevel = TotalLevels;
-
-            AchievementLevel TargetLevelData = AchievementData.Levels[TargetLevel];
-            int NewProgress = 0;
+            }
+            var TargetLevelData = AchievementData.Levels[TargetLevel];
+            var NewProgress = 0;
             if (FromZero)
+            {
                 NewProgress = ProgressAmount;
+            }
             else
-                NewProgress = (UserData != null ? UserData.Progress + ProgressAmount : ProgressAmount);
-
-            int NewLevel = (UserData != null ? UserData.Level : 0);
-            int NewTarget = NewLevel + 1;
-
+            {
+                NewProgress = UserData != null ? UserData.Progress + ProgressAmount : ProgressAmount;
+            }
+            var NewLevel = UserData != null ? UserData.Level : 0;
+            var NewTarget = NewLevel + 1;
             if (NewTarget > TotalLevels)
+            {
                 NewTarget = TotalLevels;
-
+            }
             if (NewProgress >= TargetLevelData.Requirement)
             {
                 NewLevel++;
                 NewTarget++;
-
-                int ProgressRemainder = NewProgress - TargetLevelData.Requirement;
-
+                var ProgressRemainder = NewProgress - TargetLevelData.Requirement;
                 NewProgress = 0;
-
                 if (TargetLevel == 1)
+                {
                     Session.GetHabbo().GetBadgeComponent().GiveBadge(AchievementGroup + TargetLevel, true, Session);
+                }
                 else
                 {
                     Session.GetHabbo().GetBadgeComponent().RemoveBadge(Convert.ToString(AchievementGroup + (TargetLevel - 1)));
                     Session.GetHabbo().GetBadgeComponent().GiveBadge(AchievementGroup + TargetLevel, true, Session);
                 }
-
                 if (NewTarget > TotalLevels)
                 {
                     NewTarget = TotalLevels;
                 }
-
-
-                Session.SendPacket(new AchievementUnlockedComposer(AchievementData, TargetLevel, TargetLevelData.RewardPoints, TargetLevelData.RewardPixels));
-                Session.GetHabbo().GetMessenger().BroadcastAchievement(Session.GetHabbo().Id, Users.Messenger.MessengerEventTypes.ACHIEVEMENT_UNLOCKED, AchievementGroup + TargetLevel);
-
-                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                Session.SendPacket(new AchievementUnlockedComposer(AchievementData,
+                    TargetLevel,
+                    TargetLevelData.RewardPoints,
+                    TargetLevelData.RewardPixels));
+                Session.GetHabbo()
+                    .GetMessenger()
+                    .BroadcastAchievement(Session.GetHabbo().Id, MessengerEventTypes.ACHIEVEMENT_UNLOCKED,
+                        AchievementGroup + TargetLevel);
+                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.SetQuery("REPLACE INTO `user_achievements` VALUES ('" + Session.GetHabbo().Id + "', @group, '" + NewLevel + "', '" + NewProgress + "')");
+                    dbClient.SetQuery("REPLACE INTO `user_achievements` VALUES ('" +
+                                      Session.GetHabbo().Id +
+                                      "', @group, '" +
+                                      NewLevel +
+                                      "', '" +
+                                      NewProgress +
+                                      "')");
                     dbClient.AddParameter("group", AchievementGroup);
                     dbClient.RunQuery();
                 }
-
                 UserData.Level = NewLevel;
                 UserData.Progress = NewProgress;
-
                 Session.GetHabbo().Duckets += TargetLevelData.RewardPixels;
                 Session.GetHabbo().GetStats().AchievementPoints += TargetLevelData.RewardPoints;
-                Session.SendPacket(new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets, TargetLevelData.RewardPixels));
+                Session.SendPacket(
+                    new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets, TargetLevelData.RewardPixels));
                 Session.SendPacket(new AchievementScoreComposer(Session.GetHabbo().GetStats().AchievementPoints));
-
-                AchievementLevel NewLevelData = AchievementData.Levels[NewTarget];
-                Session.SendPacket(new AchievementProgressedComposer(AchievementData, NewTarget, NewLevelData, TotalLevels, Session.GetHabbo().GetAchievementData(AchievementGroup)));
-
+                var NewLevelData = AchievementData.Levels[NewTarget];
+                Session.SendPacket(new AchievementProgressedComposer(AchievementData,
+                    NewTarget,
+                    NewLevelData,
+                    TotalLevels,
+                    Session.GetHabbo().GetAchievementData(AchievementGroup)));
                 return true;
             }
-            else
-            {
-                UserData.Level = NewLevel;
-                UserData.Progress = NewProgress;
-                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-                {
-                    dbClient.SetQuery("REPLACE INTO `user_achievements` VALUES ('" + Session.GetHabbo().Id + "', @group, '" + NewLevel + "', '" + NewProgress + "')");
-                    dbClient.AddParameter("group", AchievementGroup);
-                    dbClient.RunQuery();
-                }
 
-                Session.SendPacket(new AchievementProgressedComposer(AchievementData, TargetLevel, TargetLevelData, TotalLevels, Session.GetHabbo().GetAchievementData(AchievementGroup)));
+            UserData.Level = NewLevel;
+            UserData.Progress = NewProgress;
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.SetQuery("REPLACE INTO `user_achievements` VALUES ('" +
+                                  Session.GetHabbo().Id +
+                                  "', @group, '" +
+                                  NewLevel +
+                                  "', '" +
+                                  NewProgress +
+                                  "')");
+                dbClient.AddParameter("group", AchievementGroup);
+                dbClient.RunQuery();
             }
+            Session.SendPacket(new AchievementProgressedComposer(AchievementData,
+                TargetLevel,
+                TargetLevelData,
+                TotalLevels,
+                Session.GetHabbo().GetAchievementData(AchievementGroup)));
             return false;
         }
 
         public ICollection<Achievement> GetGameAchievements(int GameId)
         {
-            List<Achievement> GameAchievements = new List<Achievement>();
-            foreach (Achievement Achievement in _achievements.Values.ToList())
+            var GameAchievements = new List<Achievement>();
+            foreach (var Achievement in _achievements.Values.ToList())
             {
                 if (Achievement.Category == "games" && Achievement.GameId == GameId)
+                {
                     GameAchievements.Add(Achievement);
+                }
             }
+
             return GameAchievements;
         }
     }

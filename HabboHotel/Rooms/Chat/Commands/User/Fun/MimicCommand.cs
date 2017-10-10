@@ -1,34 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Outgoing.Rooms.Engine;
-using Plus.Database.Interfaces;
-using Plus.Communication.Packets.Outgoing.Rooms.Avatar;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 {
-    class MimicCommand : IChatCommand
+    using Communication.Packets.Outgoing.Rooms.Avatar;
+    using Communication.Packets.Outgoing.Rooms.Engine;
+    using GameClients;
+
+    internal class MimicCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_mimic"; }
-        }
+        public string PermissionRequired => "command_mimic";
 
-        public string Parameters
-        {
-            get { return "%username%"; }
-        }
+        public string Parameters => "%username%";
 
-        public string Description
-        {
-            get { return "Liking someone elses swag? Copy it!"; }
-        }
+        public string Description => "Liking someone elses swag? Copy it!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -36,7 +20,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
@@ -49,7 +33,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 return;
             }
 
-            RoomUser TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+            var TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
             if (TargetUser == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online or in this room.");
@@ -58,8 +42,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 
             Session.GetHabbo().Gender = TargetUser.GetClient().GetHabbo().Gender;
             Session.GetHabbo().Look = TargetUser.GetClient().GetHabbo().Look;
-
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `users` SET `gender` = @gender, `look` = @look WHERE `id` = @id LIMIT 1");
                 dbClient.AddParameter("gender", Session.GetHabbo().Gender);
@@ -67,8 +50,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 dbClient.AddParameter("id", Session.GetHabbo().Id);
                 dbClient.RunQuery();
             }
-
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (User != null)
             {
                 Session.SendPacket(new AvatarAspectUpdateComposer(Session.GetHabbo().Look, Session.GetHabbo().Gender));

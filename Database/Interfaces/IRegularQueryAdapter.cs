@@ -1,7 +1,7 @@
-﻿using System.Data;
-
-namespace Plus.Database.Interfaces
+﻿namespace Plus.Database.Interfaces
 {
+    using System.Data;
+
     public interface IRegularQueryAdapter
     {
         void AddParameter(string name, object query);

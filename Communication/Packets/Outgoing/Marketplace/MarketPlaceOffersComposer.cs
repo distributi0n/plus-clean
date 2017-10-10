@@ -1,39 +1,35 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Catalog.Marketplace;
-
-namespace Plus.Communication.Packets.Outgoing.Marketplace
+﻿namespace Plus.Communication.Packets.Outgoing.Marketplace
 {
-    class MarketPlaceOffersComposer : ServerPacket
+    using System.Collections.Generic;
+    using HabboHotel.Catalog.Marketplace;
+
+    internal class MarketPlaceOffersComposer : ServerPacket
     {
-        public MarketPlaceOffersComposer(int MinCost, int MaxCost, Dictionary<int, MarketOffer> dictionary, Dictionary<int, int> dictionary2)
-            : base(ServerPacketHeader.MarketPlaceOffersMessageComposer)
+        public MarketPlaceOffersComposer(int MinCost, int MaxCost, Dictionary<int, MarketOffer> dictionary,
+            Dictionary<int, int> dictionary2) : base(
+            ServerPacketHeader.MarketPlaceOffersMessageComposer)
         {
-            base.WriteInteger(dictionary.Count);
+            WriteInteger(dictionary.Count);
             if (dictionary.Count > 0)
             {
-                foreach (KeyValuePair<int, MarketOffer> pair in dictionary)
+                foreach (var pair in dictionary)
                 {
-                    base.WriteInteger(pair.Value.OfferID);
-                    base.WriteInteger(1);//State
-                    base.WriteInteger(1);
-                    base.WriteInteger(pair.Value.SpriteId);
-
-                    base.WriteInteger(256);
-                   base.WriteString("");
-                    base.WriteInteger(pair.Value.LimitedNumber);
-                    base.WriteInteger(pair.Value.LimitedStack);
-
-                    base.WriteInteger(pair.Value.TotalPrice);
-                    base.WriteInteger(0);
-                    base.WriteInteger(PlusEnvironment.GetGame().GetCatalog().GetMarketplace().AvgPriceForSprite(pair.Value.SpriteId));
-                    base.WriteInteger(dictionary2[pair.Value.SpriteId]);
+                    WriteInteger(pair.Value.OfferID);
+                    WriteInteger(1); //State
+                    WriteInteger(1);
+                    WriteInteger(pair.Value.SpriteId);
+                    WriteInteger(256);
+                    WriteString("");
+                    WriteInteger(pair.Value.LimitedNumber);
+                    WriteInteger(pair.Value.LimitedStack);
+                    WriteInteger(pair.Value.TotalPrice);
+                    WriteInteger(0);
+                    WriteInteger(PlusEnvironment.GetGame().GetCatalog().GetMarketplace().AvgPriceForSprite(pair.Value.SpriteId));
+                    WriteInteger(dictionary2[pair.Value.SpriteId]);
                 }
             }
-            base.WriteInteger(dictionary.Count);//Item count to show how many were found.
+
+            WriteInteger(dictionary.Count); //Item count to show how many were found.
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.HabboHotel.Rewards
+﻿namespace Plus.HabboHotel.Rewards
 {
     public class RewardTypeUtility
     {
@@ -14,16 +8,12 @@ namespace Plus.HabboHotel.Rewards
             {
                 case "badge":
                     return RewardType.BADGE;
-
                 case "credits":
                     return RewardType.CREDITS;
-
                 case "duckets":
                     return RewardType.DUCKETS;
-
                 case "diamonds":
                     return RewardType.DIAMONDS;
-
                 default:
                 case "none":
                     return RewardType.NONE;

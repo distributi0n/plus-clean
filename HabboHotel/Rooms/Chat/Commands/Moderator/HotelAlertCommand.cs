@@ -1,30 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.Moderation;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class HotelAlertCommand : IChatCommand
+    using Communication.Packets.Outgoing.Moderation;
+    using GameClients;
+
+    internal class HotelAlertCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_hotel_alert"; }
-        }
+        public string PermissionRequired => "command_hotel_alert";
 
-        public string Parameters
-        {
-            get { return "%message%"; }
-        }
+        public string Parameters => "%message%";
 
-        public string Description
-        {
-            get { return "Send a message to the entire hotel."; }
-        }
+        public string Description => "Send a message to the entire hotel.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -32,10 +19,10 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            string Message = CommandManager.MergeParams(Params, 1);
-            PlusEnvironment.GetGame().GetClientManager().SendPacket(new BroadcastMessageAlertComposer(Message + "\r\n" + "- " + Session.GetHabbo().Username));
-                            
-            return;
+            var Message = CommandManager.MergeParams(Params, 1);
+            PlusEnvironment.GetGame()
+                .GetClientManager()
+                .SendPacket(new BroadcastMessageAlertComposer(Message + "\r\n" + "- " + Session.GetHabbo().Username));
         }
     }
 }

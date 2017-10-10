@@ -2,6 +2,37 @@
 {
     public class HabboStats
     {
+        public HabboStats(int roomVisits,
+            double onlineTime,
+            int Respect,
+            int respectGiven,
+            int giftsGiven,
+            int giftsReceived,
+            int dailyRespectPoints,
+            int dailyPetRespectPoints,
+            int achievementPoints,
+            int questID,
+            int questProgress,
+            int groupID,
+            string RespectsTimestamp,
+            int ForumPosts)
+        {
+            RoomVisits = roomVisits;
+            OnlineTime = onlineTime;
+            this.Respect = Respect;
+            RespectGiven = respectGiven;
+            GiftsGiven = giftsGiven;
+            GiftsReceived = giftsReceived;
+            DailyRespectPoints = dailyRespectPoints;
+            DailyPetRespectPoints = dailyPetRespectPoints;
+            AchievementPoints = achievementPoints;
+            QuestID = questID;
+            QuestProgress = questProgress;
+            FavouriteGroupId = groupID;
+            this.RespectsTimestamp = RespectsTimestamp;
+            this.ForumPosts = ForumPosts;
+        }
+
         public int RoomVisits { get; set; }
         public double OnlineTime { get; set; }
         public int Respect { get; set; }
@@ -16,23 +47,5 @@
         public int FavouriteGroupId { get; set; }
         public string RespectsTimestamp { get; set; }
         public int ForumPosts { get; set; }
-
-        public HabboStats(int roomVisits, double onlineTime, int Respect, int respectGiven, int giftsGiven, int giftsReceived, int dailyRespectPoints, int dailyPetRespectPoints, int achievementPoints, int questID, int questProgress, int groupID, string RespectsTimestamp, int ForumPosts)
-        {
-            this.RoomVisits = roomVisits;
-            this.OnlineTime = onlineTime;
-            this.Respect = Respect;
-            this.RespectGiven = respectGiven;
-            this.GiftsGiven = giftsGiven;
-            this.GiftsReceived = giftsReceived;
-            this.DailyRespectPoints = dailyRespectPoints;
-            this.DailyPetRespectPoints = dailyPetRespectPoints;
-            this.AchievementPoints = achievementPoints;
-            this.QuestID = questID;
-            this.QuestProgress = questProgress;
-            this.FavouriteGroupId = groupID;
-            this.RespectsTimestamp = RespectsTimestamp;
-            this.ForumPosts = ForumPosts;
-        }
     }
 }

@@ -1,26 +1,25 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using Plus.HabboHotel.Moderation;
-
-namespace Plus.Communication.Packets.Outgoing.Moderation
+﻿namespace Plus.Communication.Packets.Outgoing.Moderation
 {
-    class CfhTopicsInitComposer : ServerPacket
-    {
-        public CfhTopicsInitComposer(Dictionary<string, List<ModerationPresetActions>> UserActionPresets)
-            : base(ServerPacketHeader.CfhTopicsInitMessageComposer)
-        {
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Moderation;
 
-            base.WriteInteger(UserActionPresets.Count);
-            foreach (KeyValuePair<string, List<ModerationPresetActions>> Cat in UserActionPresets.ToList())
+    internal class CfhTopicsInitComposer : ServerPacket
+    {
+        public CfhTopicsInitComposer(Dictionary<string, List<ModerationPresetActions>> UserActionPresets) : base(
+            ServerPacketHeader
+                .CfhTopicsInitMessageComposer)
+        {
+            WriteInteger(UserActionPresets.Count);
+            foreach (var Cat in UserActionPresets.ToList())
             {
-                base.WriteString(Cat.Key);
-                base.WriteInteger(Cat.Value.Count);
-                foreach (ModerationPresetActions Preset in Cat.Value.ToList())
+                WriteString(Cat.Key);
+                WriteInteger(Cat.Value.Count);
+                foreach (var Preset in Cat.Value.ToList())
                 {
-                    base.WriteString(Preset.Caption);
-                    base.WriteInteger(Preset.Id);
-                    base.WriteString(Preset.Type);
+                    WriteString(Preset.Caption);
+                    WriteInteger(Preset.Id);
+                    WriteString(Preset.Type);
                 }
             }
         }

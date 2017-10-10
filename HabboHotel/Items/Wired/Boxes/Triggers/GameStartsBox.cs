@@ -1,60 +1,57 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-
-using Plus.Communication.Packets.Incoming;
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.Users;
-
-namespace Plus.HabboHotel.Items.Wired.Boxes.Triggers
+﻿namespace Plus.HabboHotel.Items.Wired.Boxes.Triggers
 {
-    class GameStartsBox : IWiredItem
+    using System.Collections.Concurrent;
+    using System.Linq;
+    using Communication.Packets.Incoming;
+    using Rooms;
+
+    internal class GameStartsBox : IWiredItem
     {
+        public GameStartsBox(Room Instance, Item Item)
+        {
+            this.Item = Item;
+            this.Instance = Instance;
+            SetItems = new ConcurrentDictionary<int, Item>();
+        }
+
         public Room Instance { get; set; }
         public Item Item { get; set; }
-        public WiredBoxType Type { get { return WiredBoxType.TriggerGameStarts; } }
+        public WiredBoxType Type => WiredBoxType.TriggerGameStarts;
         public ConcurrentDictionary<int, Item> SetItems { get; set; }
         public string StringData { get; set; }
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public GameStartsBox(Room Instance, Item Item)
-        {
-            this.Item = Item;
-            this.Instance = Instance;
-            this.SetItems = new ConcurrentDictionary<int, Item>();
-        }
-
         public void HandleSave(ClientPacket Packet)
         {
-
         }
 
         public bool Execute(params object[] Params)
         {
-            ICollection<IWiredItem> Effects = Instance.GetWired().GetEffects(this);
-            ICollection<IWiredItem> Conditions = Instance.GetWired().GetConditions(this);
-
-            foreach (IWiredItem Condition in Conditions)
+            var Effects = Instance.GetWired().GetEffects(this);
+            var Conditions = Instance.GetWired().GetConditions(this);
+            foreach (var Condition in Conditions)
             {
                 Instance.GetWired().OnEvent(Condition.Item);
             }
 
             //Check the ICollection to find the random addon effect.
-            bool HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+            var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
             if (HasRandomEffectAddon)
             {
                 //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                IWiredItem RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
                 if (!RandomBox.Execute())
+                {
                     return false;
+                }
 
                 //Success! Let's get our selected box and continue.
-                IWiredItem SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
+                var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
                 if (!SelectedBox.Execute())
+                {
                     return false;
+                }
 
                 //Woo! Almost there captain, now lets broadcast the update to the room instance.
                 if (Instance != null)
@@ -65,12 +62,14 @@ namespace Plus.HabboHotel.Items.Wired.Boxes.Triggers
             }
             else
             {
-                foreach (IWiredItem Effect in Effects)
+                foreach (var Effect in Effects)
                 {
-                    foreach (RoomUser User in Instance.GetRoomUserManager().GetRoomUsers().ToList())
+                    foreach (var User in Instance.GetRoomUserManager().GetRoomUsers().ToList())
                     {
                         if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null)
+                        {
                             continue;
+                        }
 
                         Effect.Execute(User.GetClient().GetHabbo());
                     }

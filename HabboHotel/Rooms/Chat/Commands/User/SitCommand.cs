@@ -1,44 +1,35 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User
 {
-    class SitCommand :IChatCommand
+    using GameClients;
+
+    internal class SitCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_sit"; }
-        }
+        public string PermissionRequired => "command_sit";
 
-        public string Parameters
-        {
-            get { return ""; }
-        }
+        public string Parameters => "";
 
-        public string Description
-        {
-            get { return "Allows you to sit down in your current spot."; }
-        }
+        public string Description => "Allows you to sit down in your current spot.";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
-            RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
             if (User == null)
+            {
                 return;
-
+            }
             if (User.Statusses.ContainsKey("lie") || User.isLying || User.RidingHorse || User.IsWalking)
+            {
                 return;
-            
+            }
+
             if (!User.Statusses.ContainsKey("sit"))
             {
-                if ((User.RotBody % 2) == 0)
+                if (User.RotBody % 2 == 0)
                 {
                     if (User == null)
+                    {
                         return;
+                    }
 
                     try
                     {
@@ -47,7 +38,9 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
                         User.isSitting = true;
                         User.UpdateNeeded = true;
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
                 else
                 {
@@ -58,7 +51,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User
                     User.UpdateNeeded = true;
                 }
             }
-            else if (User.isSitting == true)
+            else if (User.isSitting)
             {
                 User.Z += 0.35;
                 User.Statusses.Remove("sit");

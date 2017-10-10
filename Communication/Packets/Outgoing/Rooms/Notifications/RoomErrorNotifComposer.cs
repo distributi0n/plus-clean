@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Notifications
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Notifications
 {
-    class RoomErrorNotifComposer : ServerPacket
+    internal class RoomErrorNotifComposer : ServerPacket
     {
-        public RoomErrorNotifComposer(int Error)
-            : base(ServerPacketHeader.RoomErrorNotifMessageComposer)
+        public RoomErrorNotifComposer(int Error) : base(ServerPacketHeader.RoomErrorNotifMessageComposer)
         {
-            base.WriteInteger(Error);
+            WriteInteger(Error);
         }
     }
 }

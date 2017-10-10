@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Users
+﻿namespace Plus.Communication.Packets.Outgoing.Users
 {
+    using System.Collections.Generic;
+
     public class IgnoredUsersComposer : ServerPacket
     {
-        public IgnoredUsersComposer(List<string> ignoredUsers)
-            : base(ServerPacketHeader.IgnoredUsersMessageComposer)
+        public IgnoredUsersComposer(List<string> ignoredUsers) : base(ServerPacketHeader.IgnoredUsersMessageComposer)
         {
-            base.WriteInteger(ignoredUsers.Count);
-            foreach (string Username in ignoredUsers)
+            WriteInteger(ignoredUsers.Count);
+            foreach (var Username in ignoredUsers)
             {
-                base.WriteString(Username);
+                WriteString(Username);
             }
         }
     }

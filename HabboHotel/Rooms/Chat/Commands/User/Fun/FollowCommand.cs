@@ -1,31 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
 {
-    class FollowCommand : IChatCommand
+    using GameClients;
+
+    internal class FollowCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_follow"; }
-        }
+        public string PermissionRequired => "command_follow";
 
-        public string Parameters
-        {
-            get { return "%username%"; }
-        }
+        public string Parameters => "%username%";
 
-        public string Description
-        {
-            get { return "Want to visit a specific user? Use this command!"; }
-        }
+        public string Description => "Want to visit a specific user? Use this command!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -33,7 +18,7 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 return;
             }
 
-            GameClient TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
             if (TargetClient == null)
             {
                 Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
@@ -58,7 +43,8 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.User.Fun
                 return;
             }
 
-            if (TargetClient.GetHabbo().CurrentRoom.Access != RoomAccess.OPEN && !Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (TargetClient.GetHabbo().CurrentRoom.Access != RoomAccess.OPEN &&
+                !Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 Session.SendWhisper("Oops, the room that user is either locked, passworded or invisible. You cannot follow!");
                 return;

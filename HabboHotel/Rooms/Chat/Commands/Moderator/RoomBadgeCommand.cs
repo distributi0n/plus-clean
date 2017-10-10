@@ -1,30 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class RoomBadgeCommand : IChatCommand
+    using System.Linq;
+    using GameClients;
+
+    internal class RoomBadgeCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_room_badge"; }
-        }
+        public string PermissionRequired => "command_room_badge";
 
-        public string Parameters
-        {
-            get { return "%badge%"; }
-        }
+        public string Parameters => "%badge%";
 
-        public string Description
-        {
-            get { return "Give a badge to the entire room!"; }
-        }
+        public string Description => "Give a badge to the entire room!";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -32,10 +19,12 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                 return;
             }
 
-            foreach (RoomUser User in Room.GetRoomUserManager().GetUserList().ToList())
+            foreach (var User in Room.GetRoomUserManager().GetUserList().ToList())
             {
                 if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null)
+                {
                     continue;
+                }
 
                 if (!User.GetClient().GetHabbo().GetBadgeComponent().HasBadge(Params[1]))
                 {
@@ -43,7 +32,10 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
                     User.GetClient().SendNotification("You have just been given a badge!");
                 }
                 else
-                    User.GetClient().SendWhisper(Session.GetHabbo().Username + " tried to give you a badge, but you already have it!");
+                {
+                    User.GetClient()
+                        .SendWhisper(Session.GetHabbo().Username + " tried to give you a badge, but you already have it!");
+                }
             }
 
             Session.SendWhisper("You have successfully given every user in this room the " + Params[2] + " badge!");

@@ -8,9 +8,9 @@
 
         public UserAchievement(string achievementGroup, int level, int progress)
         {
-            this.AchievementGroup = achievementGroup;
-            this.Level = level;
-            this.Progress = progress;
+            AchievementGroup = achievementGroup;
+            Level = level;
+            Progress = progress;
         }
     }
 }

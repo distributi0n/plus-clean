@@ -1,11 +1,10 @@
 ﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Furni.LoveLocks
 {
-    class LoveLockDialogueCloseMessageComposer : ServerPacket
+    internal class LoveLockDialogueCloseMessageComposer : ServerPacket
     {
-        public LoveLockDialogueCloseMessageComposer(int ItemId)
-            : base(ServerPacketHeader.LoveLockDialogueCloseMessageComposer)
+        public LoveLockDialogueCloseMessageComposer(int ItemId) : base(ServerPacketHeader.LoveLockDialogueCloseMessageComposer)
         {
-            base.WriteInteger(ItemId);
+            WriteInteger(ItemId);
         }
     }
 }

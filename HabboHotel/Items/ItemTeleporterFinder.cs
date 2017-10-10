@@ -1,22 +1,17 @@
-﻿using System;
-using System.Data;
-
-using Plus.HabboHotel.Rooms;
-
-using Plus.Database.Interfaces;
-
-
-namespace Plus.HabboHotel.Items
+﻿namespace Plus.HabboHotel.Items
 {
+    using System;
+    using Rooms;
+
     public static class ItemTeleporterFinder
     {
         public static int GetLinkedTele(int TeleId)
         {
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("SELECT `tele_two_id` FROM `room_items_tele_links` WHERE `tele_one_id` = '" + TeleId + "' LIMIT 1");
-                DataRow Row = dbClient.GetRow();
-
+                dbClient.SetQuery("SELECT `tele_two_id` FROM `room_items_tele_links` WHERE `tele_one_id` = '" + TeleId +
+                                  "' LIMIT 1");
+                var Row = dbClient.GetRow();
                 if (Row == null)
                 {
                     return 0;
@@ -29,13 +24,14 @@ namespace Plus.HabboHotel.Items
         public static int GetTeleRoomId(int TeleId, Room pRoom)
         {
             if (pRoom.GetRoomItemHandler().GetItem(TeleId) != null)
+            {
                 return pRoom.RoomId;
+            }
 
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT `room_id` FROM `items` WHERE `id` = " + TeleId + " LIMIT 1");
-                DataRow Row = dbClient.GetRow();
-
+                var Row = dbClient.GetRow();
                 if (Row == null)
                 {
                     return 0;
@@ -47,20 +43,19 @@ namespace Plus.HabboHotel.Items
 
         public static bool IsTeleLinked(int TeleId, Room pRoom)
         {
-            int LinkId = GetLinkedTele(TeleId);
-
+            var LinkId = GetLinkedTele(TeleId);
             if (LinkId == 0)
             {
                 return false;
             }
 
-
-            Item item = pRoom.GetRoomItemHandler().GetItem(LinkId);
+            var item = pRoom.GetRoomItemHandler().GetItem(LinkId);
             if (item != null && item.GetBaseItem().InteractionType == InteractionType.TELEPORT)
+            {
                 return true;
+            }
 
-            int RoomId = GetTeleRoomId(LinkId, pRoom);
-
+            var RoomId = GetTeleRoomId(LinkId, pRoom);
             if (RoomId == 0)
             {
                 return false;

@@ -1,21 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.Communication.Packets.Outgoing.GameCenter;
-
-namespace Plus.Communication.Packets.Incoming.GameCenter
+﻿namespace Plus.Communication.Packets.Incoming.GameCenter
 {
-    class GetPlayableGamesEvent : IPacketEvent
-    {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
-        {
-            int GameId = Packet.PopInt();
+    using HabboHotel.GameClients;
+    using Outgoing.GameCenter;
 
+    internal class GetPlayableGamesEvent : IPacketEvent
+    {
+        public void Parse(GameClient Session, ClientPacket Packet)
+        {
+            var GameId = Packet.PopInt();
             Session.SendPacket(new GameAccountStatusComposer(GameId));
             Session.SendPacket(new PlayableGamesComposer(GameId));
-            Session.SendPacket(new GameAchievementListComposer(Session, PlusEnvironment.GetGame().GetAchievementManager().GetGameAchievements(GameId), GameId));
+            Session.SendPacket(new GameAchievementListComposer(Session,
+                PlusEnvironment.GetGame().GetAchievementManager().GetGameAchievements(GameId),
+                GameId));
         }
     }
 }

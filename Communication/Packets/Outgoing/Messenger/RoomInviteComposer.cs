@@ -1,17 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Messenger
+﻿namespace Plus.Communication.Packets.Outgoing.Messenger
 {
-    class RoomInviteComposer : ServerPacket
+    internal class RoomInviteComposer : ServerPacket
     {
-        public RoomInviteComposer(int SenderId, string Text)
-            : base(ServerPacketHeader.RoomInviteMessageComposer)
+        public RoomInviteComposer(int SenderId, string Text) : base(ServerPacketHeader.RoomInviteMessageComposer)
         {
-            base.WriteInteger(SenderId);
-           base.WriteString(Text);
+            WriteInteger(SenderId);
+            WriteString(Text);
         }
     }
 }

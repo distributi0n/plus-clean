@@ -1,13 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-using Plus.HabboHotel.GameClients;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands
 {
+    using GameClients;
+
     public interface IChatCommand
     {
         string PermissionRequired { get; }

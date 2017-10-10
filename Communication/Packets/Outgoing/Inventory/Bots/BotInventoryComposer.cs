@@ -1,26 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Users.Inventory.Bots;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.Bots
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.Bots
 {
-    class BotInventoryComposer : ServerPacket
+    using System.Collections.Generic;
+    using System.Linq;
+    using HabboHotel.Users.Inventory.Bots;
+
+    internal class BotInventoryComposer : ServerPacket
     {
-        public BotInventoryComposer(ICollection<Bot> Bots)
-            : base(ServerPacketHeader.BotInventoryMessageComposer)
+        public BotInventoryComposer(ICollection<Bot> Bots) : base(ServerPacketHeader.BotInventoryMessageComposer)
         {
-            base.WriteInteger(Bots.Count);
-            foreach (Bot Bot in Bots.ToList())
+            WriteInteger(Bots.Count);
+            foreach (var Bot in Bots.ToList())
             {
-                base.WriteInteger(Bot.Id);
-               base.WriteString(Bot.Name);
-               base.WriteString(Bot.Motto);
-               base.WriteString(Bot.Gender);
-               base.WriteString(Bot.Figure);
+                WriteInteger(Bot.Id);
+                WriteString(Bot.Name);
+                WriteString(Bot.Motto);
+                WriteString(Bot.Gender);
+                WriteString(Bot.Figure);
             }
         }
     }

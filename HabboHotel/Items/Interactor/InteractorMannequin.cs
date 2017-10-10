@@ -1,37 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Rooms;
-using Plus.Communication.Packets.Incoming;
-
-using Plus.Communication.Packets.Outgoing.Rooms.Engine;
-
-using Plus.Database.Interfaces;
-
-namespace Plus.HabboHotel.Items.Interactor
+﻿namespace Plus.HabboHotel.Items.Interactor
 {
-    class InteractorMannequin : IFurniInteractor
+    using System;
+    using System.Collections.Generic;
+    using Communication.Packets.Outgoing.Rooms.Engine;
+    using GameClients;
+
+    internal class InteractorMannequin : IFurniInteractor
     {
-        public void OnPlace(GameClients.GameClient Session, Item Item)
+        public void OnPlace(GameClient Session, Item Item)
         {
         }
 
-        public void OnRemove(GameClients.GameClient Session, Item Item)
+        public void OnRemove(GameClient Session, Item Item)
         {
         }
 
-        public void OnTrigger(GameClients.GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
         {
             if (Item.ExtraData.Contains(Convert.ToChar(5).ToString()))
             {
-                String[] Stuff = Item.ExtraData.Split(Convert.ToChar(5));
+                var Stuff = Item.ExtraData.Split(Convert.ToChar(5));
                 Session.GetHabbo().Gender = Stuff[0].ToUpper();
-                Dictionary<String, String> NewFig = new Dictionary<String, String>();
+                var NewFig = new Dictionary<string, string>();
                 NewFig.Clear();
-                foreach (String Man in Stuff[1].Split('.'))
+                foreach (var Man in Stuff[1].Split('.'))
                 {
-                    foreach (String Fig in Session.GetHabbo().Look.Split('.'))
+                    foreach (var Fig in Session.GetHabbo().Look.Split('.'))
                     {
                         if (Fig.Split('-')[0] == Man.Split('-')[0])
                         {
@@ -55,27 +49,25 @@ namespace Plus.HabboHotel.Items.Interactor
                     }
                 }
 
-                string Final = "";
-                foreach (String Str in NewFig.Values)
+                var Final = "";
+                foreach (var Str in NewFig.Values)
                 {
                     Final += Str + ".";
                 }
 
-
                 Session.GetHabbo().Look = Final.TrimEnd('.');
-
-                using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.SetQuery("UPDATE users SET look = @look, gender = @gender WHERE id = '" + Session.GetHabbo().Id + "' LIMIT 1");
+                    dbClient.SetQuery("UPDATE users SET look = @look, gender = @gender WHERE id = '" + Session.GetHabbo().Id +
+                                      "' LIMIT 1");
                     dbClient.AddParameter("look", Session.GetHabbo().Look);
                     dbClient.AddParameter("gender", Session.GetHabbo().Gender);
                     dbClient.RunQuery();
                 }
-
-                Room Room = Session.GetHabbo().CurrentRoom;
+                var Room = Session.GetHabbo().CurrentRoom;
                 if (Room != null)
                 {
-                    RoomUser User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
+                    var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
                     if (User != null)
                     {
                         Session.SendPacket(new UserChangeComposer(User, true));

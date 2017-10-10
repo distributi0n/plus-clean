@@ -1,35 +1,30 @@
-﻿using System;
-using System.Data;
-using System.Collections.Generic;
-using Plus.Database.Interfaces;
-
-
-namespace Plus.HabboHotel.Rooms.Chat.Pets.Locale
+﻿namespace Plus.HabboHotel.Rooms.Chat.Pets.Locale
 {
+    using System.Collections.Generic;
+    using System.Data;
+
     public class PetLocale
     {
         private Dictionary<string, string[]> _values;
 
         public PetLocale()
         {
-            this._values = new Dictionary<string, string[]>();
-
-            this.Init();
+            _values = new Dictionary<string, string[]>();
+            Init();
         }
 
         public void Init()
         {
-            this._values = new Dictionary<string, string[]>();
-            using (IQueryAdapter dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            _values = new Dictionary<string, string[]>();
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `bots_pet_responses`");
-                DataTable Pets = dbClient.GetTable();
-
+                var Pets = dbClient.GetTable();
                 if (Pets != null)
                 {
                     foreach (DataRow Row in Pets.Rows)
                     {
-                        this._values.Add(Row[0].ToString(), Row[1].ToString().Split(';'));
+                        _values.Add(Row[0].ToString(), Row[1].ToString().Split(';'));
                     }
                 }
             }
@@ -38,9 +33,12 @@ namespace Plus.HabboHotel.Rooms.Chat.Pets.Locale
         public string[] GetValue(string key)
         {
             string[] value;
-            if (this._values.TryGetValue(key, out value))
+            if (_values.TryGetValue(key, out value))
+            {
                 return value;
-            return new[] { "Unknown pet speach:" + key };
+            }
+
+            return new[] {"Unknown pet speach:" + key};
         }
     }
 }

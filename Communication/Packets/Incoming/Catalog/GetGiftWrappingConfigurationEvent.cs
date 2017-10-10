@@ -1,10 +1,9 @@
-﻿using Plus.Communication.Packets.Outgoing.Catalog;
-using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Incoming;
-
-namespace Plus.Communication.Packets.Incoming.Catalog
+﻿namespace Plus.Communication.Packets.Incoming.Catalog
 {
-    public class GetGiftWrappingConfigurationEvent : IPacketEvent
+    using HabboHotel.GameClients;
+    using Outgoing.Catalog;
+
+    public sealed class GetGiftWrappingConfigurationEvent : IPacketEvent
     {
         public void Parse(GameClient Session, ClientPacket Packet)
         {

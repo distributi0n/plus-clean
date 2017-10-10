@@ -1,26 +1,19 @@
-﻿using System.Collections.Generic;
-
-namespace Plus.Core.FigureData.Types
+﻿namespace Plus.Core.FigureData.Types
 {
-    class FigureSet
+    using System.Collections.Generic;
+
+    internal class FigureSet
     {
+        public FigureSet(SetType type, int palletId)
+        {
+            Type = type;
+            PalletId = palletId;
+            Sets = new Dictionary<int, Set>();
+        }
+
         public SetType Type { get; set; }
         public int PalletId { get; set; }
 
-        private Dictionary<int, Set> _sets;
-
-        public FigureSet(SetType type, int palletId)
-        {
-            this.Type = type;
-            this.PalletId = palletId;
-
-            this._sets = new Dictionary<int, Set>();
-        }
-
-        public Dictionary<int, Set> Sets
-        {
-            get { return this._sets; }
-            set { this._sets = value; }
-        }
+        public Dictionary<int, Set> Sets { get; set; }
     }
 }

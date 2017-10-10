@@ -1,19 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Polls
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Polls
 {
-    class PollOfferComposer : ServerPacket
+    internal class PollOfferComposer : ServerPacket
     {
-        public PollOfferComposer()
-            : base(1074)
+        public PollOfferComposer() : base(1074)
         {
-            base.WriteInteger(111141);//Room Id
-           base.WriteString("CLIENT_NPS");
-           base.WriteString("Customer Satisfaction Poll");
-           base.WriteString("Give us your opinion!");
+            WriteInteger(111141); //Room Id
+            WriteString("CLIENT_NPS");
+            WriteString("Customer Satisfaction Poll");
+            WriteString("Give us your opinion!");
         }
     }
 }

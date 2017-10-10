@@ -1,31 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.GameClients;
-using Plus.Communication.Packets.Outgoing.Inventory.Purse;
-
-namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
+﻿namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
 {
-    class GOTOCommand : IChatCommand
+    using GameClients;
+
+    internal class GOTOCommand : IChatCommand
     {
-        public string PermissionRequired
-        {
-            get { return "command_goto"; }
-        }
+        public string PermissionRequired => "command_goto";
 
-        public string Parameters
-        {
-            get { return "%room_id%"; }
-        }
+        public string Parameters => "%room_id%";
 
-        public string Description
-        {
-            get { return ""; }
-        }
+        public string Description => "";
 
-        public void Execute(GameClients.GameClient Session, Rooms.Room Room, string[] Params)
+        public void Execute(GameClient Session, Room Room, string[] Params)
         {
             if (Params.Length == 1)
             {
@@ -34,14 +19,17 @@ namespace Plus.HabboHotel.Rooms.Chat.Commands.Moderator
             }
 
             int RoomID;
-
             if (!int.TryParse(Params[1], out RoomID))
+            {
                 Session.SendWhisper("You must enter a valid room ID");
+            }
             else
             {
-                Room _room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(RoomID);
+                var _room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(RoomID);
                 if (_room == null)
+                {
                     Session.SendWhisper("This room does not exist!");
+                }
                 else
                 {
                     Session.GetHabbo().PrepareRoom(_room.Id, "");

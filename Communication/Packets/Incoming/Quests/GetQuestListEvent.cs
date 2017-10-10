@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using Plus.HabboHotel.GameClients;
-using Plus.HabboHotel.Quests;
-using Plus.Communication.Packets.Incoming;
-
-namespace Plus.Communication.Packets.Incoming.Quests
+﻿namespace Plus.Communication.Packets.Incoming.Quests
 {
+    using HabboHotel.GameClients;
+
     public class GetQuestListEvent : IPacketEvent
     {
         public void Parse(GameClient Session, ClientPacket Packet)

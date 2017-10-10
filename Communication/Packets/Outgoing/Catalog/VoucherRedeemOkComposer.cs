@@ -2,11 +2,10 @@
 {
     public class VoucherRedeemOkComposer : ServerPacket
     {
-        public VoucherRedeemOkComposer()
-            : base(ServerPacketHeader.VoucherRedeemOkMessageComposer)
+        public VoucherRedeemOkComposer() : base(ServerPacketHeader.VoucherRedeemOkMessageComposer)
         {
-           base.WriteString("");//productName
-           base.WriteString("");//productDescription
+            WriteString(""); //productName
+            WriteString(""); //productDescription
         }
     }
 }

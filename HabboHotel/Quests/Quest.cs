@@ -14,7 +14,17 @@
         public readonly int RewardType;
         public readonly int TimeUnlock;
 
-        public Quest(int Id, string Category, int Number, QuestType GoalType, int GoalData, string Name, int Reward, string DataBit, int RewardType, int TimeUnlock, int TimeLock)
+        public Quest(int Id,
+            string Category,
+            int Number,
+            QuestType GoalType,
+            int GoalData,
+            string Name,
+            int Reward,
+            string DataBit,
+            int RewardType,
+            int TimeUnlock,
+            int TimeLock)
         {
             this.Id = Id;
             this.Category = Category;
@@ -26,22 +36,19 @@
             this.DataBit = DataBit;
             this.RewardType = RewardType;
             this.TimeUnlock = TimeUnlock;
-            this.HasEnded = (TimeLock >= PlusEnvironment.GetUnixTimestamp() && TimeLock > 0) ? true : false;
+            HasEnded = TimeLock >= PlusEnvironment.GetUnixTimestamp() && TimeLock > 0 ? true : false;
         }
 
-        public string ActionName
-        {
-            get { return QuestTypeUtillity.GetString(GoalType); }
-        }
+        public string ActionName => QuestTypeUtillity.GetString(GoalType);
 
         public bool IsCompleted(int UserProgress)
         {
             switch (GoalType)
             {
                 default:
-                    return (UserProgress >= GoalData);
+                    return UserProgress >= GoalData;
                 case QuestType.EXPLORE_FIND_ITEM:
-                    return (UserProgress >= 1);
+                    return UserProgress >= 1;
             }
         }
     }

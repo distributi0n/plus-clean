@@ -1,27 +1,27 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.Communication.Packets.Incoming.Messenger
+﻿namespace Plus.Communication.Packets.Incoming.Messenger
 {
-    class DeclineBuddyEvent : IPacketEvent
+    using HabboHotel.GameClients;
+
+    internal sealed class DeclineBuddyEvent : IPacketEvent
     {
-        public void Parse(HabboHotel.GameClients.GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient Session, ClientPacket Packet)
         {
             if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            {
                 return;
+            }
 
-            bool DeclineAll = Packet.PopBoolean();
-            int Amount = Packet.PopInt();
-         
+            var DeclineAll = Packet.PopBoolean();
+            var Amount = Packet.PopInt();
             if (!DeclineAll)
             {
-                int RequestId = Packet.PopInt();
+                var RequestId = Packet.PopInt();
                 Session.GetHabbo().GetMessenger().HandleRequest(RequestId);
             }
             else
-                Session.GetHabbo().GetMessenger().HandleAllRequests();          
+            {
+                Session.GetHabbo().GetMessenger().HandleAllRequests();
+            }
         }
     }
 }

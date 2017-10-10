@@ -1,21 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms;
-
-namespace Plus.Communication.Packets.Outgoing.Rooms.Settings
+﻿namespace Plus.Communication.Packets.Outgoing.Rooms.Settings
 {
-    class GetRoomFilterListComposer : ServerPacket
+    using HabboHotel.Rooms;
+
+    internal class GetRoomFilterListComposer : ServerPacket
     {
-        public GetRoomFilterListComposer(Room Instance)
-            : base(ServerPacketHeader.GetRoomFilterListMessageComposer)
+        public GetRoomFilterListComposer(Room Instance) : base(ServerPacketHeader.GetRoomFilterListMessageComposer)
         {
-            base.WriteInteger(Instance.WordFilterList.Count);
-            foreach (string Word in Instance.WordFilterList)
+            WriteInteger(Instance.WordFilterList.Count);
+            foreach (var Word in Instance.WordFilterList)
             {
-               base.WriteString(Word);
+                WriteString(Word);
             }
         }
     }

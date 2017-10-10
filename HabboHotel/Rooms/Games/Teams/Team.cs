@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-namespace Plus.HabboHotel.Rooms.Games.Teams
+﻿namespace Plus.HabboHotel.Rooms.Games.Teams
 {
     public enum TEAM
     {

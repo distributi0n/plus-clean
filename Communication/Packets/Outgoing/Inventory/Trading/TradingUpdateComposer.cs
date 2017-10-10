@@ -1,55 +1,50 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
-
-using Plus.HabboHotel.Rooms.Trading;
-using Plus.HabboHotel.Items;
-
-namespace Plus.Communication.Packets.Outgoing.Inventory.Trading
+﻿namespace Plus.Communication.Packets.Outgoing.Inventory.Trading
 {
-    class TradingUpdateComposer : ServerPacket
-    {
-        public TradingUpdateComposer(Trade trade)
-            : base(ServerPacketHeader.TradingUpdateMessageComposer)
-        {
-            foreach (TradeUser user in trade.Users.ToList())
-            {
-                base.WriteInteger(user.RoomUser.UserId);
-                base.WriteInteger(user.OfferedItems.Count);
+    using System.Linq;
+    using HabboHotel.Items;
+    using HabboHotel.Rooms.Trading;
 
-                foreach (Item item in user.OfferedItems.Values)
+    internal class TradingUpdateComposer : ServerPacket
+    {
+        public TradingUpdateComposer(Trade trade) : base(ServerPacketHeader.TradingUpdateMessageComposer)
+        {
+            foreach (var user in trade.Users.ToList())
+            {
+                WriteInteger(user.RoomUser.UserId);
+                WriteInteger(user.OfferedItems.Count);
+                foreach (var item in user.OfferedItems.Values)
                 {
-                    base.WriteInteger(item.Id);
-                    base.WriteString(item.GetBaseItem().Type.ToString().ToLower());
-                    base.WriteInteger(item.Id);
-                    base.WriteInteger(item.Data.SpriteId);
-                    base.WriteInteger(0);//Not sure.
+                    WriteInteger(item.Id);
+                    WriteString(item.GetBaseItem().Type.ToString().ToLower());
+                    WriteInteger(item.Id);
+                    WriteInteger(item.Data.SpriteId);
+                    WriteInteger(0); //Not sure.
                     if (item.LimitedNo > 0)
                     {
-                        base.WriteBoolean(false);//Stackable
-                        base.WriteInteger(256);
-                        base.WriteString("");
-                        base.WriteInteger(item.LimitedNo);
-                        base.WriteInteger(item.LimitedTot);
+                        WriteBoolean(false); //Stackable
+                        WriteInteger(256);
+                        WriteString("");
+                        WriteInteger(item.LimitedNo);
+                        WriteInteger(item.LimitedTot);
                     }
                     else
                     {
-                        base.WriteBoolean(true);//Stackable
-                        base.WriteInteger(0);
-                        base.WriteString("");
+                        WriteBoolean(true); //Stackable
+                        WriteInteger(0);
+                        WriteString("");
                     }
-
-                    base.WriteInteger(0);
-                    base.WriteInteger(0);
-                    base.WriteInteger(0);
-
+                    WriteInteger(0);
+                    WriteInteger(0);
+                    WriteInteger(0);
                     if (item.GetBaseItem().Type == 's')
-                        base.WriteInteger(0);
+                    {
+                        WriteInteger(0);
+                    }
                 }
 
-                base.WriteInteger(user.OfferedItems.Count);//Item Count
-                base.WriteInteger(user.OfferedItems.Values.Where(x => x.Data.InteractionType == InteractionType.EXCHANGE).Sum(t => t.Data.BehaviourData));
+                WriteInteger(user.OfferedItems.Count); //Item Count
+                WriteInteger(user.OfferedItems.Values.Where(x => x.Data.InteractionType == InteractionType.EXCHANGE)
+                    .Sum(t => t.Data.BehaviourData));
             }
         }
     }
