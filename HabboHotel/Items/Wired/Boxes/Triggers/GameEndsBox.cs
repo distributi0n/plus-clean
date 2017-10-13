@@ -7,10 +7,10 @@
 
     internal class GameEndsBox : IWiredItem
     {
-        public GameEndsBox(Room Instance, Item Item)
+        public GameEndsBox(Room instance, Item item)
         {
-            this.Item = Item;
-            this.Instance = Instance;
+            Item = item;
+            Instance = instance;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -22,33 +22,33 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
         }
 
         public bool Execute(params object[] Params)
         {
-            var Effects = Instance.GetWired().GetEffects(this);
-            var Conditions = Instance.GetWired().GetConditions(this);
-            foreach (var Condition in Conditions)
+            var effects = Instance.GetWired().GetEffects(this);
+            var conditions = Instance.GetWired().GetConditions(this);
+            foreach (var condition in conditions)
             {
-                Instance.GetWired().OnEvent(Condition.Item);
+                Instance.GetWired().OnEvent(condition.Item);
             }
 
             //Check the ICollection to find the random addon effect.
-            var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
-            if (HasRandomEffectAddon)
+            var hasRandomEffectAddon = effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+            if (hasRandomEffectAddon)
             {
                 //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
-                if (!RandomBox.Execute())
+                var randomBox = effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                if (!randomBox.Execute())
                 {
                     return false;
                 }
 
                 //Success! Let's get our selected box and continue.
-                var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
-                if (!SelectedBox.Execute())
+                var selectedBox = Instance.GetWired().GetRandomEffect(effects.ToList());
+                if (!selectedBox.Execute())
                 {
                     return false;
                 }
@@ -56,25 +56,25 @@
                 //Woo! Almost there captain, now lets broadcast the update to the room instance.
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(RandomBox.Item);
-                    Instance.GetWired().OnEvent(SelectedBox.Item);
+                    Instance.GetWired().OnEvent(randomBox.Item);
+                    Instance.GetWired().OnEvent(selectedBox.Item);
                 }
             }
             else
             {
-                foreach (var Effect in Effects)
+                foreach (var effect in effects)
                 {
-                    foreach (var User in Instance.GetRoomUserManager().GetRoomUsers().ToList())
+                    foreach (var user in Instance.GetRoomUserManager().GetRoomUsers().ToList())
                     {
-                        if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null)
+                        if (user == null || user.GetClient() == null || user.GetClient().GetHabbo() == null)
                         {
                             continue;
                         }
 
-                        Effect.Execute(User.GetClient().GetHabbo());
+                        effect.Execute(user.GetClient().GetHabbo());
                     }
 
-                    Instance.GetWired().OnEvent(Effect.Item);
+                    Instance.GetWired().OnEvent(effect.Item);
                 }
             }
 

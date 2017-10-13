@@ -7,31 +7,29 @@
 
     internal class NavigatorSearchResultSetComposer : ServerPacket
     {
-        public NavigatorSearchResultSetComposer(string Category,
-            string Data,
-            ICollection<SearchResultList> SearchResultLists,
-            GameClient Session,
-            int GoBack = 1,
-            int FetchLimit = 12) : base(ServerPacketHeader.NavigatorSearchResultSetMessageComposer)
+        public NavigatorSearchResultSetComposer(string category, string data, ICollection<SearchResultList> searchResultLists, GameClient session, int goBack = 1,
+                                                int fetchLimit = 12)
+            : base(ServerPacketHeader.NavigatorSearchResultSetMessageComposer)
         {
-            WriteString(Category); //Search code.
-            WriteString(Data); //Text?
-            WriteInteger(SearchResultLists.Count); //Count
-            foreach (var SearchResult in SearchResultLists.ToList())
+            WriteString(category); //Search code.
+            WriteString(data); //Text?
+
+            WriteInteger(searchResultLists.Count); //Count
+            foreach (var searchResult in searchResultLists.ToList())
             {
-                WriteString(SearchResult.CategoryIdentifier);
-                WriteString(SearchResult.PublicName);
-                WriteInteger(NavigatorSearchAllowanceUtility.GetIntegerValue(SearchResult.SearchAllowance) != 0
-                    ? GoBack
-                    : NavigatorSearchAllowanceUtility.GetIntegerValue(SearchResult
-                        .SearchAllowance)); //0 = nothing, 1 = show more, 2 = back Action allowed.
+                WriteString(searchResult.CategoryIdentifier);
+                WriteString(searchResult.PublicName);
+                WriteInteger(NavigatorSearchAllowanceUtility.GetIntegerValue(searchResult.SearchAllowance) != 0
+                    ? goBack
+                    : NavigatorSearchAllowanceUtility.GetIntegerValue(searchResult.SearchAllowance)); //0 = nothing, 1 = show more, 2 = back Action allowed.
                 WriteBoolean(false); //True = minimized, false = open.
-                WriteInteger(SearchResult.ViewMode == NavigatorViewMode.REGULAR
+                WriteInteger(searchResult.ViewMode == NavigatorViewMode.REGULAR
                     ? 0
-                    : SearchResult.ViewMode == NavigatorViewMode.THUMBNAIL
+                    : searchResult.ViewMode == NavigatorViewMode.THUMBNAIL
                         ? 1
                         : 0); //View mode, 0 = tiny/regular, 1 = thumbnail
-                NavigatorHandler.Search(this, SearchResult, Data, Session, FetchLimit);
+
+                NavigatorHandler.Search(this, searchResult, data, session, fetchLimit);
             }
         }
     }

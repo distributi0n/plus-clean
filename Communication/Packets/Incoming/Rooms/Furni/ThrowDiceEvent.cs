@@ -4,27 +4,25 @@
 
     internal class ThrowDiceEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
-            if (Item == null)
+            var item = room.GetRoomItemHandler().GetItem(packet.PopInt());
+            if (item == null)
             {
                 return;
             }
 
-            var hasRights = false;
-            if (Room.CheckRights(Session, false, true))
-            {
-                hasRights = true;
-            }
-            var request = Packet.PopInt();
-            Item.Interactor.OnTrigger(Session, Item, request, hasRights);
+            var hasRights = room.CheckRights(session, false, true);
+
+            var request = packet.PopInt();
+
+            item.Interactor.OnTrigger(session, item, request, hasRights);
         }
     }
 }

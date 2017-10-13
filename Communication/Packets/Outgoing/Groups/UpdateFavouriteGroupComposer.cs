@@ -4,13 +4,13 @@
 
     internal class UpdateFavouriteGroupComposer : ServerPacket
     {
-        public UpdateFavouriteGroupComposer(Group Group, int VirtualId) : base(ServerPacketHeader
-            .UpdateFavouriteGroupMessageComposer)
+        public UpdateFavouriteGroupComposer(Group group, int virtualId)
+            : base(ServerPacketHeader.UpdateFavouriteGroupMessageComposer)
         {
-            WriteInteger(VirtualId); //Sends 0 on .COM
-            WriteInteger(Group != null ? Group.Id : 0);
+            WriteInteger(virtualId); //Sends 0 on .COM
+            WriteInteger(group != null ? group.Id : 0);
             WriteInteger(3);
-            WriteString(Group != null ? Group.Name : string.Empty);
+            WriteString(group != null ? group.Name : string.Empty);
         }
     }
 }

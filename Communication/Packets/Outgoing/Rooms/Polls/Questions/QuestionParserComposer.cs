@@ -2,7 +2,8 @@
 {
     internal class QuestionParserComposer : ServerPacket
     {
-        public QuestionParserComposer() : base(ServerPacketHeader.QuestionParserMessageComposer)
+        public QuestionParserComposer()
+            : base(ServerPacketHeader.QuestionParserMessageComposer)
         {
             WriteString("MATCHING_POLL");
             WriteInteger(2686); //??

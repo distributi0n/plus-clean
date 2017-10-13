@@ -5,27 +5,29 @@
 
     internal class OpenPlayerProfileEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var userID = Packet.PopInt();
-            var IsMe = Packet.PopBoolean();
-            var targetData = PlusEnvironment.GetHabboById(userID);
+            var userId = packet.PopInt();
+            var isMe = packet.PopBoolean();
+
+            var targetData = PlusEnvironment.GetHabboById(userId);
             if (targetData == null)
             {
-                Session.SendNotification("An error occured whilst finding that user's profile.");
+                session.SendNotification("An error occured whilst finding that user's profile.");
                 return;
             }
 
-            var Groups = PlusEnvironment.GetGame().GetGroupManager().GetGroupsForUser(targetData.Id);
+            var groups = PlusEnvironment.GetGame().GetGroupManager().GetGroupsForUser(targetData.Id);
+
             var friendCount = 0;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "SELECT COUNT(0) FROM `messenger_friendships` WHERE (`user_one_id` = @userid OR `user_two_id` = @userid)");
-                dbClient.AddParameter("userid", userID);
+                dbClient.SetQuery("SELECT COUNT(0) FROM `messenger_friendships` WHERE (`user_one_id` = @userid OR `user_two_id` = @userid)");
+                dbClient.AddParameter("userid", userId);
                 friendCount = dbClient.GetInteger();
             }
-            Session.SendPacket(new ProfileInformationComposer(targetData, Session, Groups, friendCount));
+
+            session.SendPacket(new ProfileInformationComposer(targetData, session, groups, friendCount));
         }
     }
 }

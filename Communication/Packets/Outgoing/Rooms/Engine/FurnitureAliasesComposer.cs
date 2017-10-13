@@ -2,7 +2,8 @@
 {
     internal class FurnitureAliasesComposer : ServerPacket
     {
-        public FurnitureAliasesComposer() : base(ServerPacketHeader.FurnitureAliasesMessageComposer)
+        public FurnitureAliasesComposer()
+            : base(ServerPacketHeader.FurnitureAliasesMessageComposer)
         {
             WriteInteger(0);
         }

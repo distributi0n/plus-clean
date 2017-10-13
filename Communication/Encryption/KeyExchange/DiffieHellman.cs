@@ -5,9 +5,9 @@
 
     public sealed class DiffieHellman
     {
-        public readonly int BITLENGTH = 32;
+        public readonly int Bitlength = 32;
 
-        private BigInteger PrivateKey;
+        private BigInteger _privateKey;
 
         public DiffieHellman()
         {
@@ -16,7 +16,7 @@
 
         public DiffieHellman(int b)
         {
-            BITLENGTH = b;
+            Bitlength = b;
             Initialize();
         }
 
@@ -39,19 +39,19 @@
             {
                 if (!ignoreBaseKeys)
                 {
-                    Prime = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
-                    Generator = BigInteger.genPseudoPrime(BITLENGTH, 10, rand);
+                    Prime = BigInteger.genPseudoPrime(Bitlength, 10, rand);
+                    Generator = BigInteger.genPseudoPrime(Bitlength, 10, rand);
                 }
-                var bytes = new byte[BITLENGTH / 8];
+                var bytes = new byte[Bitlength / 8];
                 Randomizer.NextBytes(bytes);
-                PrivateKey = new BigInteger(bytes);
+                _privateKey = new BigInteger(bytes);
                 if (Generator > Prime)
                 {
                     var temp = Prime;
                     Prime = Generator;
                     Generator = temp;
                 }
-                PublicKey = Generator.modPow(PrivateKey, Prime);
+                PublicKey = Generator.modPow(_privateKey, Prime);
                 if (!ignoreBaseKeys)
                 {
                     break;
@@ -59,6 +59,6 @@
             }
         }
 
-        public BigInteger CalculateSharedKey(BigInteger m) => m.modPow(PrivateKey, Prime);
+        public BigInteger CalculateSharedKey(BigInteger m) => m.modPow(_privateKey, Prime);
     }
 }

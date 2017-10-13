@@ -2,10 +2,11 @@
 {
     internal class CarryObjectComposer : ServerPacket
     {
-        public CarryObjectComposer(int virtualID, int itemID) : base(ServerPacketHeader.CarryObjectMessageComposer)
+        public CarryObjectComposer(int virtualId, int itemId)
+            : base(ServerPacketHeader.CarryObjectMessageComposer)
         {
-            WriteInteger(virtualID);
-            WriteInteger(itemID);
+            WriteInteger(virtualId);
+            WriteInteger(itemId);
         }
     }
 }

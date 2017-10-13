@@ -2,9 +2,10 @@
 {
     internal class GnomeBoxComposer : ServerPacket
     {
-        public GnomeBoxComposer(int ItemId) : base(ServerPacketHeader.GnomeBoxMessageComposer)
+        public GnomeBoxComposer(int itemId)
+            : base(ServerPacketHeader.GnomeBoxMessageComposer)
         {
-            WriteInteger(ItemId);
+            WriteInteger(itemId);
         }
     }
 }

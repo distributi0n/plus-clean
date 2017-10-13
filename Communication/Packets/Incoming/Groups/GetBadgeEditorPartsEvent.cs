@@ -7,7 +7,8 @@
     {
         public void Parse(GameClient session, ClientPacket packet)
         {
-            session.SendPacket(new BadgeEditorPartsComposer(PlusEnvironment.GetGame().GetGroupManager().BadgeBases,
+            session.SendPacket(new BadgeEditorPartsComposer(
+                PlusEnvironment.GetGame().GetGroupManager().BadgeBases,
                 PlusEnvironment.GetGame().GetGroupManager().BadgeSymbols,
                 PlusEnvironment.GetGame().GetGroupManager().BadgeBaseColours,
                 PlusEnvironment.GetGame().GetGroupManager().BadgeSymbolColours,

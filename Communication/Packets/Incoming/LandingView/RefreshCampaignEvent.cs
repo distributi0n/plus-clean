@@ -5,11 +5,12 @@
 
     internal class RefreshCampaignEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
             try
             {
-                var parseCampaings = Packet.PopString();
+                var parseCampaings = packet.PopString();
+
                 if (parseCampaings.Contains("gamesmaker"))
                 {
                     return;
@@ -17,6 +18,7 @@
 
                 var campaingName = "";
                 var parser = parseCampaings.Split(';');
+
                 for (var i = 0; i < parser.Length; i++)
                 {
                     if (string.IsNullOrEmpty(parser[i]) || parser[i].EndsWith(","))
@@ -28,10 +30,11 @@
                     campaingName = data[1];
                 }
 
-                Session.SendPacket(new CampaignComposer(parseCampaings, campaingName));
+                session.SendPacket(new CampaignComposer(parseCampaings, campaingName));
             }
             catch
             {
+                // ignored
             }
         }
     }

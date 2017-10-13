@@ -6,42 +6,47 @@
 
     internal class LookToEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
-            {
-                return;
-            }
-            if (User.IsAsleep)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.UnIdle();
-            var X = Packet.PopInt();
-            var Y = Packet.PopInt();
-            if (X == User.X && Y == User.Y || User.IsWalking || User.RidingHorse)
+            if (user.IsAsleep)
             {
                 return;
             }
 
-            var Rot = Rotation.Calculate(User.X, User.Y, X, Y);
-            User.SetRot(Rot, false);
-            User.UpdateNeeded = true;
-            if (User.RidingHorse)
+            user.UnIdle();
+
+            var x = packet.PopInt();
+            var y = packet.PopInt();
+
+            if (x == user.X && y == user.Y || user.IsWalking || user.RidingHorse)
             {
-                var Horse = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByVirtualId(User.HorseID);
-                if (Horse != null)
+                return;
+            }
+
+            var rot = Rotation.Calculate(user.X, user.Y, x, y);
+
+            user.SetRot(rot, false);
+            user.UpdateNeeded = true;
+
+            if (user.RidingHorse)
+            {
+                var horse = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByVirtualId(user.HorseID);
+                if (horse != null)
                 {
-                    Horse.SetRot(Rot, false);
-                    Horse.UpdateNeeded = true;
+                    horse.SetRot(rot, false);
+                    horse.UpdateNeeded = true;
                 }
             }
         }

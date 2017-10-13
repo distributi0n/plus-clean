@@ -5,9 +5,9 @@
 
     internal class GetSongInfoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new TraxSongInfoComposer());
+            session.SendPacket(new TraxSongInfoComposer());
         }
     }
 }

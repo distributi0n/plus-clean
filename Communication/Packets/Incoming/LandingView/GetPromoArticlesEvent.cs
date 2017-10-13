@@ -5,10 +5,11 @@
 
     internal class GetPromoArticlesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var LandingPromotions = PlusEnvironment.GetGame().GetLandingManager().GetPromotionItems();
-            Session.SendPacket(new PromoArticlesComposer(LandingPromotions));
+            var landingPromotions = PlusEnvironment.GetGame().GetLandingManager().GetPromotionItems();
+
+            session.SendPacket(new PromoArticlesComposer(landingPromotions));
         }
     }
 }

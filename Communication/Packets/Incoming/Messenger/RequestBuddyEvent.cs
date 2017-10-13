@@ -3,18 +3,18 @@
     using HabboHotel.GameClients;
     using HabboHotel.Quests;
 
-    internal sealed class RequestBuddyEvent : IPacketEvent
+    internal class RequestBuddyEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            if (session?.GetHabbo() == null || session.GetHabbo().GetMessenger() == null)
             {
                 return;
             }
 
-            if (Session.GetHabbo().GetMessenger().RequestBuddy(Packet.PopString()))
+            if (session.GetHabbo().GetMessenger().RequestBuddy(packet.PopString()))
             {
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.SOCIAL_FRIEND);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.SocialFriend);
             }
         }
     }

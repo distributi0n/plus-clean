@@ -191,7 +191,7 @@
                 if (Client.GetHabbo().GetPermissions().HasRight("mod_tool") &&
                     !Client.GetHabbo().GetPermissions().HasRight("staff_ignore_advertisement_reports"))
                 {
-                    Client.SendPacket(new MOTDNotificationComposer(Builder.ToString()));
+                    Client.SendPacket(new MotdNotificationComposer(Builder.ToString()));
                 }
             }
         }
@@ -220,7 +220,7 @@
         public void CreateAndStartClient(int clientID, ConnectionInformation connection)
         {
             var Client = new GameClient(clientID, connection);
-            if (_clients.TryAdd(Client.ConnectionID, Client))
+            if (_clients.TryAdd(Client.ConnectionId, Client))
             {
                 Client.StartConnection();
             }
@@ -381,7 +381,7 @@
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

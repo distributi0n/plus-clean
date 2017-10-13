@@ -199,7 +199,7 @@
                         }
                         else if (GetBotData().TargetUser == 0)
                         {
-                            nextCoord = GetRoom().GetGameMap().getRandomWalkableSquare();
+                            nextCoord = GetRoom().GetGameMap().GetRandomWalkableSquare();
                             GetRoomUser().MoveTo(nextCoord.X, nextCoord.Y);
                         }
                         break;

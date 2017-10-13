@@ -2,7 +2,8 @@
 {
     internal class PetBreedingComposer : ServerPacket
     {
-        public PetBreedingComposer() : base(ServerPacketHeader.PetBreedingMessageComposer)
+        public PetBreedingComposer()
+            : base(ServerPacketHeader.PetBreedingMessageComposer)
         {
             WriteInteger(219005779); //An Id?
             {
@@ -19,6 +20,7 @@
                 WriteInteger(1337);
                 WriteString("1 0 D4D4D4");
                 WriteString("Sledmore");
+
                 WriteInteger(4); //Count
                 {
                     WriteInteger(1);

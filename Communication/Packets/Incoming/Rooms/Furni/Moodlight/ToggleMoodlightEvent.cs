@@ -6,39 +6,42 @@
 
     internal class ToggleMoodlightEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true) || Room.MoodlightData == null)
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Room.MoodlightData.ItemId);
-            if (Item == null || Item.GetBaseItem().InteractionType != InteractionType.MOODLIGHT)
+            if (!room.CheckRights(session, true) || room.MoodlightData == null)
             {
                 return;
             }
 
-            if (Room.MoodlightData.Enabled)
+            var item = room.GetRoomItemHandler().GetItem(room.MoodlightData.ItemId);
+            if (item == null || item.GetBaseItem().InteractionType != InteractionType.Moodlight)
             {
-                Room.MoodlightData.Disable();
+                return;
+            }
+
+            if (room.MoodlightData.Enabled)
+            {
+                room.MoodlightData.Disable();
             }
             else
             {
-                Room.MoodlightData.Enable();
+                room.MoodlightData.Enable();
             }
-            Item.ExtraData = Room.MoodlightData.GenerateExtraData();
-            Item.UpdateState();
+
+            item.ExtraData = room.MoodlightData.GenerateExtraData();
+            item.UpdateState();
         }
     }
 }

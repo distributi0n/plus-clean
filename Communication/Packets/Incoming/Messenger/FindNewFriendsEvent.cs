@@ -6,17 +6,18 @@
 
     internal class FindNewFriendsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Instance = PlusEnvironment.GetGame().GetRoomManager().TryGetRandomLoadedRoom();
-            if (Instance != null)
+            var instance = PlusEnvironment.GetGame().GetRoomManager().TryGetRandomLoadedRoom();
+
+            if (instance != null)
             {
-                Session.SendPacket(new FindFriendsProcessResultComposer(true));
-                Session.SendPacket(new RoomForwardComposer(Instance.Id));
+                session.SendPacket(new FindFriendsProcessResultComposer(true));
+                session.SendPacket(new RoomForwardComposer(instance.Id));
             }
             else
             {
-                Session.SendPacket(new FindFriendsProcessResultComposer(false));
+                session.SendPacket(new FindFriendsProcessResultComposer(false));
             }
         }
     }

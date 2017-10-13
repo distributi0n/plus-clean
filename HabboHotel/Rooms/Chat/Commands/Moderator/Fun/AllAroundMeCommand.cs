@@ -11,23 +11,23 @@
 
         public string Description => "Need some attention? Pull all of the users to you.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            var Users = Room.GetRoomUserManager().GetRoomUsers();
-            foreach (var U in Users.ToList())
+            var users = room.GetRoomUserManager().GetRoomUsers();
+            foreach (var u in users.ToList())
             {
-                if (U == null || Session.GetHabbo().Id == U.UserId)
+                if (u == null || session.GetHabbo().Id == u.UserId)
                 {
                     continue;
                 }
 
-                U.MoveTo(User.X, User.Y, true);
+                u.MoveTo(user.X, user.Y, true);
             }
         }
     }

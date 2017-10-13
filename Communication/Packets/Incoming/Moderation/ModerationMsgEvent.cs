@@ -4,22 +4,19 @@
 
     internal class ModerationMsgEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_alert"))
+            if (session?.GetHabbo() == null || !session.GetHabbo().GetPermissions().HasRight("mod_alert"))
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var Message = Packet.PopString();
-            var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(UserId);
-            if (Client == null)
-            {
-                return;
-            }
+            var userId = packet.PopInt();
+            var message = packet.PopString();
 
-            Client.SendNotification(Message);
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
+
+            client?.SendNotification(message);
         }
     }
 }

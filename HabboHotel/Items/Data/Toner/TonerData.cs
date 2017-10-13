@@ -11,29 +11,29 @@
         public int Lightness;
         public int Saturation;
 
-        public TonerData(int Item)
+        public TonerData(int item)
         {
-            ItemId = Item;
-            DataRow Row;
+            ItemId = item;
+            DataRow row;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT enabled,data1,data2,data3 FROM room_items_toner WHERE id=" + ItemId + " LIMIT 1");
-                Row = dbClient.GetRow();
+                row = dbClient.GetRow();
             }
-            if (Row == null)
+            if (row == null)
             {
                 //throw new NullReferenceException("No toner data found in the database for " + ItemId);
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.RunQuery("INSERT INTO `room_items_toner` VALUES (" + ItemId + ",'0',0,0,0)");
                     dbClient.SetQuery("SELECT enabled,data1,data2,data3 FROM room_items_toner WHERE id=" + ItemId + " LIMIT 1");
-                    Row = dbClient.GetRow();
+                    row = dbClient.GetRow();
                 }
             }
-            Enabled = int.Parse(Row[0].ToString());
-            Hue = Convert.ToInt32(Row[1]);
-            Saturation = Convert.ToInt32(Row[2]);
-            Lightness = Convert.ToInt32(Row[3]);
+            Enabled = int.Parse(row[0].ToString());
+            Hue = Convert.ToInt32(row[1]);
+            Saturation = Convert.ToInt32(row[2]);
+            Lightness = Convert.ToInt32(row[3]);
         }
     }
 }

@@ -5,17 +5,18 @@
 
     internal class GameListComposer : ServerPacket
     {
-        public GameListComposer(ICollection<GameData> Games) : base(ServerPacketHeader.GameListMessageComposer)
+        public GameListComposer(ICollection<GameData> games)
+            : base(ServerPacketHeader.GameListMessageComposer)
         {
             WriteInteger(PlusEnvironment.GetGame().GetGameDataManager().GetCount()); //Game count
-            foreach (var Game in Games)
+            foreach (var game in games)
             {
-                WriteInteger(Game.GameId);
-                WriteString(Game.GameName);
-                WriteString(Game.ColourOne);
-                WriteString(Game.ColourTwo);
-                WriteString(Game.ResourcePath);
-                WriteString(Game.StringThree);
+                WriteInteger(game.GameId);
+                WriteString(game.GameName);
+                WriteString(game.ColourOne);
+                WriteString(game.ColourTwo);
+                WriteString(game.ResourcePath);
+                WriteString(game.StringThree);
             }
         }
     }

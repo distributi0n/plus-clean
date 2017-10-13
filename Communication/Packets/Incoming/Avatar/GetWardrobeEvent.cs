@@ -3,11 +3,11 @@
     using HabboHotel.GameClients;
     using Outgoing.Avatar;
 
-    internal sealed class GetWardrobeEvent : IPacketEvent
+    internal class GetWardrobeEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new WardrobeComposer(Session));
+            session.SendPacket(new WardrobeComposer(session));
         }
     }
 }

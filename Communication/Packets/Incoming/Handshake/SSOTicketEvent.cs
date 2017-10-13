@@ -2,22 +2,22 @@
 {
     using HabboHotel.GameClients;
 
-    public sealed class SSOTicketEvent : IPacketEvent
+    internal class SsoTicketEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.RC4Client == null || Session.GetHabbo() != null)
+            if (session?.Rc4Client == null || session.GetHabbo() != null)
             {
                 return;
             }
 
-            var SSO = Packet.PopString();
-            if (string.IsNullOrEmpty(SSO) || SSO.Length < 15)
+            var sso = packet.PopString();
+            if (string.IsNullOrEmpty(sso) || sso.Length < 15)
             {
                 return;
             }
 
-            Session.TryAuthenticate(SSO);
+            session.TryAuthenticate(sso);
         }
     }
 }

@@ -7,11 +7,11 @@
 
     public class CommandManager
     {
-        private readonly Dictionary<string, IRCONCommand> _commands;
+        private readonly Dictionary<string, IRconCommand> _commands;
 
         public CommandManager()
         {
-            _commands = new Dictionary<string, IRCONCommand>();
+            _commands = new Dictionary<string, IRconCommand>();
             RegisterUser();
             RegisterHotel();
         }
@@ -24,10 +24,10 @@
             }
 
             var cmd = data.Split(Convert.ToChar(1))[0];
-            IRCONCommand command = null;
+            IRconCommand command;
             if (_commands.TryGetValue(cmd.ToLower(), out command))
             {
-                string param = null;
+                string param;
                 string[] parameters = null;
                 if (data.Split(Convert.ToChar(1))[1] != null)
                 {
@@ -50,7 +50,7 @@
             Register("sync_user_currency", new SyncUserCurrencyCommand());
             Register("reload_user_currency", new ReloadUserCurrencyCommand());
             Register("reload_user_rank", new ReloadUserRankCommand());
-            Register("reload_user_vip_rank", new ReloadUserVIPRankCommand());
+            Register("reload_user_vip_rank", new ReloadUserVipRankCommand());
             Register("progress_user_achievement", new ProgressUserAchievementCommand());
             Register("give_user_badge", new GiveUserBadgeCommand());
             Register("take_user_badge", new TakeUserBadgeCommand());
@@ -69,7 +69,7 @@
             Register("reload_filter", new ReloadFilterCommand());
         }
 
-        public void Register(string commandText, IRCONCommand command)
+        public void Register(string commandText, IRconCommand command)
         {
             _commands.Add(commandText, command);
         }

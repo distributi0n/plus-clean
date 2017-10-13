@@ -11,21 +11,21 @@
 
         public string Description => "Allows you to go faceless!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null || User.GetClient() == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null || user.GetClient() == null)
             {
                 return;
             }
 
             string[] headParts;
-            var figureParts = Session.GetHabbo().Look.Split('.');
-            foreach (var Part in figureParts)
+            var figureParts = session.GetHabbo().Look.Split('.');
+            foreach (var part in figureParts)
             {
-                if (Part.StartsWith("hd"))
+                if (part.StartsWith("hd"))
                 {
-                    headParts = Part.Split('-');
+                    headParts = part.Split('-');
                     if (!headParts[1].Equals("99999"))
                     {
                         headParts[1] = "99999";
@@ -35,21 +35,21 @@
                         return;
                     }
 
-                    Session.GetHabbo().Look = Session.GetHabbo().Look.Replace(Part, "hd-" + headParts[1] + "-" + headParts[2]);
+                    session.GetHabbo().Look = session.GetHabbo().Look.Replace(part, "hd-" + headParts[1] + "-" + headParts[2]);
                     break;
                 }
             }
 
-            Session.GetHabbo().Look = PlusEnvironment.GetFigureManager()
-                .ProcessFigure(Session.GetHabbo().Look, Session.GetHabbo().Gender,
-                    Session.GetHabbo().GetClothing().GetClothingParts, true);
+            session.GetHabbo().Look = PlusEnvironment.GetFigureManager()
+                .ProcessFigure(session.GetHabbo().Look, session.GetHabbo().Gender,
+                    session.GetHabbo().GetClothing().GetClothingParts, true);
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `users` SET `look` = '" + Session.GetHabbo().Look + "' WHERE `id` = '" +
-                                  Session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `users` SET `look` = '" + session.GetHabbo().Look + "' WHERE `id` = '" +
+                                  session.GetHabbo().Id + "' LIMIT 1");
             }
-            Session.SendPacket(new UserChangeComposer(User, true));
-            Session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(User, false));
+            session.SendPacket(new UserChangeComposer(user, true));
+            session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(user, false));
         }
     }
 }

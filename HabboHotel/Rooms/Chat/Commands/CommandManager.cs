@@ -16,7 +16,7 @@
     public class CommandManager
     {
         private readonly Dictionary<string, IChatCommand> _commands;
-        private readonly string _prefix = ":";
+        private readonly string _prefix;
 
         public CommandManager(string Prefix)
         {
@@ -57,7 +57,7 @@
                     List.Append(":" + CmdList.Key + " " + CmdList.Value.Parameters + " - " + CmdList.Value.Description + "\n");
                 }
 
-                Session.SendPacket(new MOTDNotificationComposer(List.ToString()));
+                Session.SendPacket(new MotdNotificationComposer(List.ToString()));
                 return true;
             }
 
@@ -83,7 +83,7 @@
                     }
                 }
 
-                Session.GetHabbo().IChatCommand = Cmd;
+                Session.GetHabbo().ChatCommand = Cmd;
                 Session.GetHabbo().CurrentRoom.GetWired()
                     .TriggerEvent(WiredBoxType.TriggerUserSaysCommand, Session.GetHabbo(), this);
                 Cmd.Execute(Session, Session.GetHabbo().CurrentRoom, Split);
@@ -133,7 +133,7 @@
             Register("kickpets", new KickPetsCommand());
             Register("kickbots", new KickBotsCommand());
             Register("room", new RoomCommand());
-            Register("dnd", new DNDCommand());
+            Register("dnd", new DndCommand());
             Register("disablegifts", new DisableGiftsCommand());
             Register("convertcredits", new ConvertCreditsCommand());
             Register("disablewhispers", new DisableWhispersCommand());
@@ -147,8 +147,8 @@
         private void RegisterModerator()
         {
             Register("ban", new BanCommand());
-            Register("mip", new MIPCommand());
-            Register("ipban", new IPBanCommand());
+            Register("mip", new MipCommand());
+            Register("ipban", new IpBanCommand());
             Register("ui", new UserInfoCommand());
             Register("userinfo", new UserInfoCommand());
             Register("sa", new StaffAlertCommand());
@@ -187,7 +187,7 @@
             Register("allaroundme", new AllAroundMeCommand());
             Register("forcesit", new ForceSitCommand());
             Register("ignorewhispers", new IgnoreWhispersCommand());
-            Register("forced_effects", new DisableForcedFXCommand());
+            Register("forced_effects", new DisableForcedFxCommand());
             Register("makesay", new MakeSayCommand());
             Register("flaguser", new FlagUserCommand());
         }
@@ -198,7 +198,7 @@
             Register("update", new UpdateCommand());
             Register("deletegroup", new DeleteGroupCommand());
             Register("carry", new CarryCommand());
-            Register("goto", new GOTOCommand());
+            Register("goto", new GotoCommand());
         }
 
         public void Register(string CommandText, IChatCommand Command)

@@ -2,7 +2,8 @@
 {
     internal class YouAreNotControllerComposer : ServerPacket
     {
-        public YouAreNotControllerComposer() : base(ServerPacketHeader.YouAreNotControllerMessageComposer)
+        public YouAreNotControllerComposer()
+            : base(ServerPacketHeader.YouAreNotControllerMessageComposer)
         {
         }
     }

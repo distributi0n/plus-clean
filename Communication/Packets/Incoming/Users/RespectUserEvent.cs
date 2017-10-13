@@ -8,47 +8,49 @@
 
     internal class RespectUserEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
-            {
-                return;
-            }
-            if (!Session.GetHabbo().InRoom || Session.GetHabbo().GetStats().DailyRespectPoints <= 0)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            if (!session.GetHabbo().InRoom || session.GetHabbo().GetStats().DailyRespectPoints <= 0)
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Packet.PopInt());
-            if (User == null || User.GetClient() == null || User.GetClient().GetHabbo().Id == Session.GetHabbo().Id || User.IsBot)
+            Room room = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (ThisUser == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(packet.PopInt());
+            if (user == null || user.GetClient() == null || user.GetClient().GetHabbo().Id == session.GetHabbo().Id || user.IsBot)
             {
                 return;
             }
 
-            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.SOCIAL_RESPECT);
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_RespectGiven", 1);
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(User.GetClient(), "ACH_RespectEarned", 1);
-            Session.GetHabbo().GetStats().DailyRespectPoints -= 1;
-            Session.GetHabbo().GetStats().RespectGiven += 1;
-            User.GetClient().GetHabbo().GetStats().Respect += 1;
-            if (Room.RespectNotificationsEnabled)
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (thisUser == null)
             {
-                Room.SendPacket(new RespectNotificationComposer(User.GetClient().GetHabbo().Id,
-                    User.GetClient().GetHabbo().GetStats().Respect));
+                return;
             }
-            Room.SendPacket(new ActionComposer(ThisUser.VirtualId, 7));
+
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.SocialRespect);
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_RespectGiven", 1);
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(user.GetClient(), "ACH_RespectEarned", 1);
+
+            session.GetHabbo().GetStats().DailyRespectPoints -= 1;
+            session.GetHabbo().GetStats().RespectGiven += 1;
+            user.GetClient().GetHabbo().GetStats().Respect += 1;
+
+            if (room.RespectNotificationsEnabled)
+            {
+                room.SendPacket(new RespectNotificationComposer(user.GetClient().GetHabbo().Id, user.GetClient().GetHabbo().GetStats().Respect));
+            }
+            room.SendPacket(new ActionComposer(thisUser.VirtualId, 7));
         }
     }
 }

@@ -5,22 +5,25 @@
 
     internal class GetRoomBannedUsersComposer : ServerPacket
     {
-        public GetRoomBannedUsersComposer(Room instance) : base(ServerPacketHeader.GetRoomBannedUsersMessageComposer)
+        public GetRoomBannedUsersComposer(Room instance)
+            : base(ServerPacketHeader.GetRoomBannedUsersMessageComposer)
         {
             WriteInteger(instance.Id);
+
             WriteInteger(instance.GetBans().BannedUsers().Count); //Count
-            foreach (var Id in instance.GetBans().BannedUsers().ToList())
+            foreach (var id in instance.GetBans().BannedUsers().ToList())
             {
-                var Data = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                if (Data == null)
+                var data = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(id);
+
+                if (data == null)
                 {
                     WriteInteger(0);
                     WriteString("Unknown Error");
                 }
                 else
                 {
-                    WriteInteger(Data.Id);
-                    WriteString(Data.Username);
+                    WriteInteger(data.Id);
+                    WriteString(data.Username);
                 }
             }
         }

@@ -2,11 +2,11 @@
 {
     internal class PresentDeliverErrorMessageComposer : ServerPacket
     {
-        public PresentDeliverErrorMessageComposer(bool CreditError, bool DucketError) : base(ServerPacketHeader
-            .PresentDeliverErrorMessageComposer)
+        public PresentDeliverErrorMessageComposer(bool creditError, bool ducketError)
+            : base(ServerPacketHeader.PresentDeliverErrorMessageComposer)
         {
-            WriteBoolean(CreditError); //Do we have enough credits?
-            WriteBoolean(DucketError); //Do we have enough duckets?
+            WriteBoolean(creditError); //Do we have enough credits?
+            WriteBoolean(ducketError); //Do we have enough duckets?
         }
     }
 }

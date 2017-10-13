@@ -8,10 +8,10 @@
 
     internal class GiveUserBadgeBox : IWiredItem
     {
-        public GiveUserBadgeBox(Room Instance, Item Item)
+        public GiveUserBadgeBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -29,11 +29,11 @@
 
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Badge = Packet.PopString();
-            StringData = Badge;
+            var unknown = packet.PopInt();
+            var badge = packet.PopString();
+            StringData = badge;
         }
 
         public bool Execute(params object[] Params)
@@ -43,20 +43,20 @@
                 return false;
             }
 
-            var Owner = PlusEnvironment.GetHabboById(Item.UserID);
-            if (Owner == null || !Owner.GetPermissions().HasRight("room_item_wired_rewards"))
+            var owner = PlusEnvironment.GetHabboById(Item.UserId);
+            if (owner == null || !owner.GetPermissions().HasRight("room_item_wired_rewards"))
             {
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null || Player.GetClient() == null)
+            var player = (Habbo) Params[0];
+            if (player == null || player.GetClient() == null)
             {
                 return false;
             }
 
-            var User = Player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Player.Username);
-            if (User == null)
+            var user = player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(player.Username);
+            if (user == null)
             {
                 return false;
             }
@@ -65,16 +65,16 @@
                 return false;
             }
 
-            if (Player.GetBadgeComponent().HasBadge(StringData))
+            if (player.GetBadgeComponent().HasBadge(StringData))
             {
-                Player.GetClient()
-                    .SendPacket(new WhisperComposer(User.VirtualId, "Oops, it appears you have already recieved this badge!", 0,
-                        User.LastBubble));
+                player.GetClient()
+                    .SendPacket(new WhisperComposer(user.VirtualId, "Oops, it appears you have already recieved this badge!", 0,
+                        user.LastBubble));
             }
             else
             {
-                Player.GetBadgeComponent().GiveBadge(StringData, true, Player.GetClient());
-                Player.GetClient().SendNotification("You have recieved a badge!");
+                player.GetBadgeComponent().GiveBadge(StringData, true, player.GetClient());
+                player.GetClient().SendNotification("You have recieved a badge!");
             }
             return true;
         }

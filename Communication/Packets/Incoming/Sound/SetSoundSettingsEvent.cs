@@ -4,30 +4,31 @@
 
     internal class SetSoundSettingsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Volume = "";
+            var volume = "";
             for (var i = 0; i < 3; i++)
             {
-                var Vol = Packet.PopInt();
-                if (Vol < 0 || Vol > 100)
+                var vol = packet.PopInt();
+                if (vol < 0 || vol > 100)
                 {
-                    Vol = 100;
+                    vol = 100;
                 }
+
                 if (i < 2)
                 {
-                    Volume += Vol + ",";
+                    volume += vol + ",";
                 }
                 else
                 {
-                    Volume += Vol;
+                    volume += vol;
                 }
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE users SET volume = @volume WHERE `id` = '" + Session.GetHabbo().Id + "' LIMIT 1");
-                dbClient.AddParameter("volume", Volume);
+                dbClient.SetQuery("UPDATE users SET volume = @volume WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.AddParameter("volume", volume);
                 dbClient.RunQuery();
             }
         }

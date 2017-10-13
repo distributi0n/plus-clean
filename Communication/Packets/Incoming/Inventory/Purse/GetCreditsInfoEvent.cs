@@ -5,11 +5,10 @@
 
     internal class GetCreditsInfoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
-            Session.SendPacket(new ActivityPointsComposer(Session.GetHabbo().Duckets, Session.GetHabbo().Diamonds,
-                Session.GetHabbo().GOTWPoints));
+            session.SendPacket(new CreditBalanceComposer(session.GetHabbo().Credits));
+            session.SendPacket(new ActivityPointsComposer(session.GetHabbo().Duckets, session.GetHabbo().Diamonds, session.GetHabbo().GotwPoints));
         }
     }
 }

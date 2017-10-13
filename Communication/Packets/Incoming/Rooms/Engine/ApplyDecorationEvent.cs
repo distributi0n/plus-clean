@@ -8,77 +8,88 @@
 
     internal class ApplyDecorationEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true))
+            Room room = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Item = Session.GetHabbo().GetInventoryComponent().GetItem(Packet.PopInt());
-            if (Item == null)
-            {
-                return;
-            }
-            if (Item.GetBaseItem() == null)
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
-            var DecorationKey = string.Empty;
-            switch (Item.GetBaseItem().InteractionType)
+            var item = session.GetHabbo().GetInventoryComponent().GetItem(packet.PopInt());
+            if (item == null)
             {
-                case InteractionType.FLOOR:
-                    DecorationKey = "floor";
+                return;
+            }
+
+            if (item.GetBaseItem() == null)
+            {
+                return;
+            }
+
+            var decorationKey = string.Empty;
+            switch (item.GetBaseItem().InteractionType)
+            {
+                case InteractionType.Floor:
+                    decorationKey = "floor";
                     break;
-                case InteractionType.WALLPAPER:
-                    DecorationKey = "wallpaper";
+
+                case InteractionType.Wallpaper:
+                    decorationKey = "wallpaper";
                     break;
-                case InteractionType.LANDSCAPE:
-                    DecorationKey = "landscape";
+
+                case InteractionType.Landscape:
+                    decorationKey = "landscape";
                     break;
             }
-            switch (DecorationKey)
+
+            switch (decorationKey)
             {
                 case "floor":
-                    Room.Floor = Item.ExtraData;
-                    Room.RoomData.Floor = Item.ExtraData;
-                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_DECORATION_FLOOR);
-                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_RoomDecoFloor", 1);
+                    room.Floor = item.ExtraData;
+                    room.RoomData.Floor = item.ExtraData;
+
+                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniDecorationFloor);
+                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_RoomDecoFloor", 1);
                     break;
+
                 case "wallpaper":
-                    Room.Wallpaper = Item.ExtraData;
-                    Room.RoomData.Wallpaper = Item.ExtraData;
-                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_DECORATION_WALL);
-                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_RoomDecoWallpaper", 1);
+                    room.Wallpaper = item.ExtraData;
+                    room.RoomData.Wallpaper = item.ExtraData;
+
+                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniDecorationWall);
+                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_RoomDecoWallpaper", 1);
                     break;
+
                 case "landscape":
-                    Room.Landscape = Item.ExtraData;
-                    Room.RoomData.Landscape = Item.ExtraData;
-                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_RoomDecoLandscape", 1);
+                    room.Landscape = item.ExtraData;
+                    room.RoomData.Landscape = item.ExtraData;
+
+                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_RoomDecoLandscape", 1);
                     break;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `rooms` SET `" + DecorationKey + "` = @extradata WHERE `id` = '" + Room.RoomId +
-                                  "' LIMIT 1");
-                dbClient.AddParameter("extradata", Item.ExtraData);
+                dbClient.SetQuery("UPDATE `rooms` SET `" + decorationKey + "` = @extradata WHERE `id` = '" + room.RoomId + "' LIMIT 1");
+                dbClient.AddParameter("extradata", item.ExtraData);
                 dbClient.RunQuery();
-                dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + Item.Id + "' LIMIT 1");
+
+                dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + item.Id + "' LIMIT 1");
             }
-            Session.GetHabbo().GetInventoryComponent().RemoveItem(Item.Id);
-            Room.SendPacket(new RoomPropertyComposer(DecorationKey, Item.ExtraData));
+
+            session.GetHabbo().GetInventoryComponent().RemoveItem(item.Id);
+            room.SendPacket(new RoomPropertyComposer(decorationKey, item.ExtraData));
         }
     }
 }

@@ -2,9 +2,10 @@
 {
     internal class RoomSettingsSavedComposer : ServerPacket
     {
-        public RoomSettingsSavedComposer(int roomID) : base(ServerPacketHeader.RoomSettingsSavedMessageComposer)
+        public RoomSettingsSavedComposer(int roomId)
+            : base(ServerPacketHeader.RoomSettingsSavedMessageComposer)
         {
-            WriteInteger(roomID);
+            WriteInteger(roomId);
         }
     }
 }

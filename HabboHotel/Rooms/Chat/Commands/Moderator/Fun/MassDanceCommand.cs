@@ -13,37 +13,37 @@
 
         public string Description => "Force everyone in the room to dance to a dance of your choice.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter a dance ID. (1-4)");
+                session.SendWhisper("Please enter a dance ID. (1-4)");
                 return;
             }
 
-            var DanceId = Convert.ToInt32(Params[1]);
-            if (DanceId < 0 || DanceId > 4)
+            var danceId = Convert.ToInt32(Params[1]);
+            if (danceId < 0 || danceId > 4)
             {
-                Session.SendWhisper("Please enter a dance ID. (1-4)");
+                session.SendWhisper("Please enter a dance ID. (1-4)");
                 return;
             }
 
-            var Users = Room.GetRoomUserManager().GetRoomUsers();
-            if (Users.Count > 0)
+            var users = room.GetRoomUserManager().GetRoomUsers();
+            if (users.Count > 0)
             {
-                foreach (var U in Users.ToList())
+                foreach (var u in users.ToList())
                 {
-                    if (U == null)
+                    if (u == null)
                     {
                         continue;
                     }
 
-                    if (U.CarryItemID > 0)
+                    if (u.CarryItemID > 0)
                     {
-                        U.CarryItemID = 0;
+                        u.CarryItemID = 0;
                     }
-                    U.DanceId = DanceId;
-                    Room.SendPacket(new DanceComposer(U, DanceId));
+                    u.DanceId = danceId;
+                    room.SendPacket(new DanceComposer(u, danceId));
                 }
             }
         }

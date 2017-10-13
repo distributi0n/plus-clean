@@ -4,24 +4,21 @@
 
     internal class AchievementProgressedComposer : ServerPacket
     {
-        public AchievementProgressedComposer(Achievement Achievement,
-            int TargetLevel,
-            AchievementLevel TargetLevelData,
-            int TotalLevels,
-            UserAchievement UserData) : base(ServerPacketHeader.AchievementProgressedMessageComposer)
+        public AchievementProgressedComposer(Achievement achievement, int targetLevel, AchievementLevel targetLevelData, int totalLevels, UserAchievement userData)
+            : base(ServerPacketHeader.AchievementProgressedMessageComposer)
         {
-            WriteInteger(Achievement.Id); // Unknown (ID?)
-            WriteInteger(TargetLevel); // Target level
-            WriteString(Achievement.GroupName + TargetLevel); // Target name/desc/badge
+            WriteInteger(achievement.Id); // Unknown (ID?)
+            WriteInteger(targetLevel); // Target level
+            WriteString(achievement.GroupName + targetLevel); // Target name/desc/badge
             WriteInteger(1); // Progress req/target 
-            WriteInteger(TargetLevelData.Requirement); // Reward in Pixels
-            WriteInteger(TargetLevelData.RewardPixels); // Reward Ach Score
+            WriteInteger(targetLevelData.Requirement); // Reward in Pixels
+            WriteInteger(targetLevelData.RewardPixels); // Reward Ach Score
             WriteInteger(0); // ?
-            WriteInteger(UserData != null ? UserData.Progress : 0); // Current progress
-            WriteBoolean(UserData != null ? UserData.Level >= TotalLevels : false); // Set 100% completed(??)
-            WriteString(Achievement.Category); // Category
+            WriteInteger(userData?.Progress ?? 0); // Current progress
+            WriteBoolean(userData != null && userData.Level >= totalLevels); // Set 100% completed(??)
+            WriteString(achievement.Category); // Category
             WriteString(string.Empty);
-            WriteInteger(TotalLevels); // Total amount of levels 
+            WriteInteger(totalLevels); // Total amount of levels 
             WriteInteger(0);
         }
     }

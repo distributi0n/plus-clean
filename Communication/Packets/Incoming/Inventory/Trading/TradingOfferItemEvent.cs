@@ -7,69 +7,77 @@
 
     internal class TradingOfferItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var RoomUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (RoomUser == null)
+            var roomUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (roomUser == null)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            Trade Trade = null;
-            if (!RoomUser.IsTrading)
+            var itemId = packet.PopInt();
+
+            Trade trade;
+
+            if (!roomUser.IsTrading)
             {
-                Session.SendPacket(new TradingClosedComposer(Session.GetHabbo().Id));
+                session.SendPacket(new TradingClosedComposer(session.GetHabbo().Id));
                 return;
             }
 
-            if (!Room.GetTrading().TryGetTrade(RoomUser.TradeId, out Trade))
+            if (!room.GetTrading().TryGetTrade(roomUser.TradeId, out trade))
             {
-                Session.SendPacket(new TradingClosedComposer(Session.GetHabbo().Id));
+                session.SendPacket(new TradingClosedComposer(session.GetHabbo().Id));
                 return;
             }
 
-            var Item = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
-            if (Item == null)
-            {
-                return;
-            }
-            if (!Trade.CanChange)
+            var item = session.GetHabbo().GetInventoryComponent().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            var TradeUser = Trade.Users[0];
-            if (TradeUser.RoomUser != RoomUser)
-            {
-                TradeUser = Trade.Users[1];
-            }
-            if (TradeUser.OfferedItems.ContainsKey(Item.Id))
+            if (!trade.CanChange)
             {
                 return;
             }
 
-            Trade.RemoveAccepted();
-            if (TradeUser.OfferedItems.Count <= 499)
+            var tradeUser = trade.Users[0];
+
+            if (tradeUser.RoomUser != roomUser)
             {
-                var TotalLTDs = TradeUser.OfferedItems.Where(x => x.Value.LimitedNo > 0).Count();
-                if (TotalLTDs < 9)
+                tradeUser = trade.Users[1];
+            }
+
+            if (tradeUser.OfferedItems.ContainsKey(item.Id))
+            {
+                return;
+            }
+
+            trade.RemoveAccepted();
+
+            if (tradeUser.OfferedItems.Count <= 499)
+            {
+                var totalLtDs = tradeUser.OfferedItems.Count(x => x.Value.LimitedNo > 0);
+
+                if (totalLtDs < 9)
                 {
-                    TradeUser.OfferedItems.Add(Item.Id, Item);
+                    tradeUser.OfferedItems.Add(item.Id, item);
                 }
             }
-            Trade.SendPacket(new TradingUpdateComposer(Trade));
+
+            trade.SendPacket(new TradingUpdateComposer(trade));
         }
     }
 }

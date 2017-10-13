@@ -9,59 +9,56 @@
 
     internal class JoinGroupEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(Packet.PopInt(), out Group))
-            {
-                return;
-            }
-            if (Group.IsMember(Session.GetHabbo().Id) ||
-                Group.IsAdmin(Session.GetHabbo().Id) ||
-                Group.HasRequest(Session.GetHabbo().Id) && Group.GroupType == GroupType.PRIVATE)
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(packet.PopInt(), out var group))
             {
                 return;
             }
 
-            var Groups = PlusEnvironment.GetGame().GetGroupManager().GetGroupsForUser(Session.GetHabbo().Id);
-            if (Groups.Count >= 1500)
+            if (group.IsMember(session.GetHabbo().Id) || group.IsAdmin(session.GetHabbo().Id) || group.HasRequest(session.GetHabbo().Id) && group.GroupType == GroupType.PRIVATE)
             {
-                Session.SendPacket(
-                    new BroadcastMessageAlertComposer(
-                        "Oops, it appears that you've hit the group membership limit! You can only join upto 1,500 groups."));
                 return;
             }
 
-            Group.AddMember(Session.GetHabbo().Id);
-            if (Group.GroupType == GroupType.LOCKED)
+            var groups = PlusEnvironment.GetGame().GetGroupManager().GetGroupsForUser(session.GetHabbo().Id);
+            if (groups.Count >= 1500)
             {
-                var GroupAdmins = (from Client in PlusEnvironment.GetGame().GetClientManager().GetClients.ToList()
-                    where Client != null && Client.GetHabbo() != null && Group.IsAdmin(Client.GetHabbo().Id)
-                    select Client).ToList();
-                foreach (var Client in GroupAdmins)
+                session.SendPacket(new BroadcastMessageAlertComposer("Oops, it appears that you've hit the group membership limit! You can only join upto 1,500 groups."));
+                return;
+            }
+
+            group.AddMember(session.GetHabbo().Id);
+
+            if (group.GroupType == GroupType.LOCKED)
+            {
+                var groupAdmins = (from client in PlusEnvironment.GetGame().GetClientManager().GetClients.ToList()
+                    where client?.GetHabbo() != null && @group.IsAdmin(client.GetHabbo().Id)
+                    select client).ToList();
+                foreach (var client in groupAdmins)
                 {
-                    Client.SendPacket(new GroupMembershipRequestedComposer(Group.Id, Session.GetHabbo(), 3));
+                    client.SendPacket(new GroupMembershipRequestedComposer(group.Id, session.GetHabbo(), 3));
                 }
 
-                Session.SendPacket(new GroupInfoComposer(Group, Session));
+                session.SendPacket(new GroupInfoComposer(group, session));
             }
             else
             {
-                Session.SendPacket(new GroupFurniConfigComposer(PlusEnvironment.GetGame().GetGroupManager()
-                    .GetGroupsForUser(Session.GetHabbo().Id)));
-                Session.SendPacket(new GroupInfoComposer(Group, Session));
-                if (Session.GetHabbo().CurrentRoom != null)
+                session.SendPacket(new GroupFurniConfigComposer(PlusEnvironment.GetGame().GetGroupManager().GetGroupsForUser(session.GetHabbo().Id)));
+                session.SendPacket(new GroupInfoComposer(group, session));
+
+                if (session.GetHabbo().CurrentRoom != null)
                 {
-                    Session.GetHabbo().CurrentRoom.SendPacket(new RefreshFavouriteGroupComposer(Session.GetHabbo().Id));
+                    session.GetHabbo().CurrentRoom.SendPacket(new RefreshFavouriteGroupComposer(session.GetHabbo().Id));
                 }
                 else
                 {
-                    Session.SendPacket(new RefreshFavouriteGroupComposer(Session.GetHabbo().Id));
+                    session.SendPacket(new RefreshFavouriteGroupComposer(session.GetHabbo().Id));
                 }
             }
         }

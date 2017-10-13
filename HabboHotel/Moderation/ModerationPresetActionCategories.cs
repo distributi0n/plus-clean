@@ -2,10 +2,10 @@
 {
     internal class ModerationPresetActionCategories
     {
-        public ModerationPresetActionCategories(int Id, string Caption)
+        public ModerationPresetActionCategories(int id, string caption)
         {
-            this.Id = Id;
-            this.Caption = Caption;
+            Id = id;
+            Caption = caption;
         }
 
         public int Id { get; set; }

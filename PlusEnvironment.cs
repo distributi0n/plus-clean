@@ -40,7 +40,7 @@
         private static LanguageManager _languageManager;
         private static SettingsManager _settingsManager;
         private static DatabaseManager _manager;
-        private static RCONSocket _rcon;
+        private static RconSocket _rcon;
         private static FigureDataManager _figureManager;
 
         // TODO: Get rid?
@@ -120,16 +120,16 @@
                 var connectionString = new MySqlConnectionStringBuilder
                 {
                     ConnectionTimeout = 10,
-                    Database = GetConfig().data["db.name"],
+                    Database = GetConfig().Data["db.name"],
                     DefaultCommandTimeout = 30,
                     Logging = false,
-                    MaximumPoolSize = uint.Parse(GetConfig().data["db.pool.maxsize"]),
-                    MinimumPoolSize = uint.Parse(GetConfig().data["db.pool.minsize"]),
-                    Password = GetConfig().data["db.password"],
+                    MaximumPoolSize = uint.Parse(GetConfig().Data["db.pool.maxsize"]),
+                    MinimumPoolSize = uint.Parse(GetConfig().Data["db.pool.minsize"]),
+                    Password = GetConfig().Data["db.password"],
                     Pooling = true,
-                    Port = uint.Parse(GetConfig().data["db.port"]),
-                    Server = GetConfig().data["db.hostname"],
-                    UserID = GetConfig().data["db.username"],
+                    Port = uint.Parse(GetConfig().Data["db.port"]),
+                    Server = GetConfig().Data["db.hostname"],
+                    UserID = GetConfig().Data["db.username"],
                     AllowZeroDateTime = true,
                     ConvertZeroDateTime = true
                 };
@@ -162,26 +162,25 @@
                 _figureManager.Init();
 
                 //Have our encryption ready.
-                HabboEncryptionV2.Initialize(new RSAKeys());
+                HabboEncryptionV2.Initialize(new RsaKeys());
 
                 //Make sure RCON is connected before we allow clients to connect.
-                _rcon = new RCONSocket(GetConfig().data["rcon.tcp.bindip"],
-                    int.Parse(GetConfig().data["rcon.tcp.port"]),
-                    GetConfig().data["rcon.tcp.allowedaddr"].Split(Convert.ToChar(";")));
+                _rcon = new RconSocket(GetConfig().Data["rcon.tcp.bindip"],
+                    int.Parse(GetConfig().Data["rcon.tcp.port"]),
+                    GetConfig().Data["rcon.tcp.allowedaddr"].Split(Convert.ToChar(";")));
 
                 //Accept connections.
-                _connectionManager = new ConnectionHandling(int.Parse(GetConfig().data["game.tcp.port"]),
-                    int.Parse(GetConfig().data["game.tcp.conlimit"]),
-                    int.Parse(GetConfig().data["game.tcp.conperip"]),
-                    GetConfig().data["game.tcp.enablenagles"].ToLower() == "true");
-                _connectionManager.init();
+                _connectionManager = new ConnectionHandling(int.Parse(GetConfig().Data["game.tcp.port"]),
+                    int.Parse(GetConfig().Data["game.tcp.conperip"]),
+                    GetConfig().Data["game.tcp.enablenagles"].ToLower() == "true");
+                _connectionManager.Init();
                 _game = new Game();
                 _game.StartGameLoop();
                 var TimeUsed = DateTime.Now - ServerStarted;
                 Console.WriteLine();
                 log.Info("EMULATOR -> READY! (" + TimeUsed.Seconds + " s, " + TimeUsed.Milliseconds + " ms)");
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 log.Error("Please check your configuration file - some values appear to be missing.");
                 log.Error("Press any key to shut down ...");
@@ -214,6 +213,11 @@
         {
             var ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
             return ts.TotalSeconds;
+        }
+
+        public static void MyHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            PerformShutDown();
         }
 
         public static long Now()
@@ -394,7 +398,7 @@
 
         public static Game GetGame() => _game;
 
-        public static RCONSocket GetRCONSocket() => _rcon;
+        public static RconSocket GetRCONSocket() => _rcon;
 
         public static FigureDataManager GetFigureManager() => _figureManager;
 

@@ -2,7 +2,8 @@
 {
     internal class GiftWrappingErrorComposer : ServerPacket
     {
-        public GiftWrappingErrorComposer() : base(ServerPacketHeader.GiftWrappingErrorMessageComposer)
+        public GiftWrappingErrorComposer()
+            : base(ServerPacketHeader.GiftWrappingErrorMessageComposer)
         {
         }
     }

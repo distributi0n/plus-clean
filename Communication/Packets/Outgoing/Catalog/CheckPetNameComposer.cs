@@ -2,10 +2,11 @@
 {
     public class CheckPetNameComposer : ServerPacket
     {
-        public CheckPetNameComposer(int Error, string ExtraData) : base(ServerPacketHeader.CheckPetNameMessageComposer)
+        public CheckPetNameComposer(int error, string extraData)
+            : base(ServerPacketHeader.CheckPetNameMessageComposer)
         {
-            WriteInteger(Error); //0 = nothing, 1 = too long, 2 = too short, 3 = invalid characters
-            WriteString(ExtraData);
+            WriteInteger(error); //0 = nothing, 1 = too long, 2 = too short, 3 = invalid characters
+            WriteString(extraData);
         }
     }
 }

@@ -114,7 +114,7 @@
                         PassQuest = true;
                     }
                     break;
-                case QuestType.EXPLORE_FIND_ITEM:
+                case QuestType.ExploreFindItem:
                     if (EventData != UserQuest.GoalData)
                     {
                         return;
@@ -123,7 +123,7 @@
                     NewProgress = Convert.ToInt32(UserQuest.GoalData);
                     PassQuest = true;
                     break;
-                case QuestType.STAND_ON:
+                case QuestType.StandOn:
                     if (EventData != UserQuest.GoalData)
                     {
                         return;
@@ -132,14 +132,14 @@
                     NewProgress = Convert.ToInt32(UserQuest.GoalData);
                     PassQuest = true;
                     break;
-                case QuestType.XMAS_PARTY:
+                case QuestType.XmasParty:
                     NewProgress++;
                     if (NewProgress == UserQuest.GoalData)
                     {
                         PassQuest = true;
                     }
                     break;
-                case QuestType.GIVE_ITEM:
+                case QuestType.GiveItem:
                     if (EventData != UserQuest.GoalData)
                     {
                         return;
@@ -165,13 +165,13 @@
                                       "' LIMIT 1");
                 }
             }
-            Session.GetHabbo().quests[Session.GetHabbo().GetStats().QuestID] = NewProgress;
+            Session.GetHabbo().Quests[Session.GetHabbo().GetStats().QuestID] = NewProgress;
             Session.SendPacket(new QuestStartedComposer(Session, UserQuest));
             if (PassQuest)
             {
                 Session.GetHabbo()
                     .GetMessenger()
-                    .BroadcastAchievement(Session.GetHabbo().Id, MessengerEventTypes.QUEST_COMPLETED,
+                    .BroadcastAchievement(Session.GetHabbo().Id, MessengerEventTypes.QuestCompleted,
                         UserQuest.Category + "." + UserQuest.Name);
                 Session.GetHabbo().GetStats().QuestID = 0;
                 Session.GetHabbo().QuestLastCompleted = UserQuest.Id;

@@ -5,10 +5,11 @@
 
     internal class GetNavigatorFlatsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Categories = PlusEnvironment.GetGame().GetNavigator().GetEventCategories();
-            Session.SendPacket(new NavigatorFlatCatsComposer(Categories, Session.GetHabbo().Rank));
+            var categories = PlusEnvironment.GetGame().GetNavigator().GetEventCategories();
+
+            session.SendPacket(new NavigatorFlatCatsComposer(categories));
         }
     }
 }

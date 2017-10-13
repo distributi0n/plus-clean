@@ -6,65 +6,69 @@
     using Outgoing.Catalog;
     using Outgoing.Rooms.Engine;
 
-    public class PurchaseRoomPromotionEvent : IPacketEvent
+    internal class PurchaseRoomPromotionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var PageId = Packet.PopInt();
-            var ItemId = Packet.PopInt();
-            var RoomId = Packet.PopInt();
-            var Name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            var junk3 = Packet.PopBoolean();
-            var Desc = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            var CategoryId = Packet.PopInt();
-            var Data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(RoomId);
-            if (Data == null)
-            {
-                return;
-            }
-            if (Data.OwnerId != Session.GetHabbo().Id)
+            packet.PopInt();
+            packet.PopInt();
+
+            var roomId = packet.PopInt();
+            var name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+
+            packet.PopBoolean();
+
+            var desc = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+            var categoryId = packet.PopInt();
+
+            var data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomId);
+
+            if (data?.OwnerId != session.GetHabbo().Id)
             {
                 return;
             }
 
-            if (Data.Promotion == null)
+            if (data.Promotion == null)
             {
-                Data.Promotion = new RoomPromotion(Name, Desc, CategoryId);
+                data.Promotion = new RoomPromotion(name, desc, categoryId);
             }
             else
             {
-                Data.Promotion.Name = Name;
-                Data.Promotion.Description = Desc;
-                Data.Promotion.TimestampExpires += 7200;
+                data.Promotion.Name = name;
+                data.Promotion.Description = desc;
+                data.Promotion.TimestampExpires += 7200;
             }
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery(
                     "REPLACE INTO `room_promotions` (`room_id`,`title`,`description`,`timestamp_start`,`timestamp_expire`,`category_id`) VALUES (@room_id, @title, @description, @start, @expires, @CategoryId)");
-                dbClient.AddParameter("room_id", RoomId);
-                dbClient.AddParameter("title", Name);
-                dbClient.AddParameter("description", Desc);
-                dbClient.AddParameter("start", Data.Promotion.TimestampStarted);
-                dbClient.AddParameter("expires", Data.Promotion.TimestampExpires);
-                dbClient.AddParameter("CategoryId", CategoryId);
+                dbClient.AddParameter("room_id", roomId);
+                dbClient.AddParameter("title", name);
+                dbClient.AddParameter("description", desc);
+                dbClient.AddParameter("start", data.Promotion.TimestampStarted);
+                dbClient.AddParameter("expires", data.Promotion.TimestampExpires);
+                dbClient.AddParameter("CategoryId", categoryId);
                 dbClient.RunQuery();
             }
-            if (!Session.GetHabbo().GetBadgeComponent().HasBadge("RADZZ"))
+
+            if (!session.GetHabbo().GetBadgeComponent().HasBadge("RADZZ"))
             {
-                Session.GetHabbo().GetBadgeComponent().GiveBadge("RADZZ", true, Session);
+                session.GetHabbo().GetBadgeComponent().GiveBadge("RADZZ", true, session);
             }
-            Session.SendPacket(new PurchaseOKComposer());
-            if (Session.GetHabbo().InRoom && Session.GetHabbo().CurrentRoomId == RoomId)
+
+            session.SendPacket(new PurchaseOkComposer());
+            if (session.GetHabbo().InRoom && session.GetHabbo().CurrentRoomId == roomId)
             {
-                Session.GetHabbo().CurrentRoom.SendPacket(new RoomEventComposer(Data, Data.Promotion));
+                session.GetHabbo().CurrentRoom.SendPacket(new RoomEventComposer(data, data.Promotion));
             }
-            Session.GetHabbo().GetMessenger()
-                .BroadcastAchievement(Session.GetHabbo().Id, MessengerEventTypes.EVENT_STARTED, Name);
+
+            session.GetHabbo().GetMessenger().BroadcastAchievement(session.GetHabbo().Id, MessengerEventTypes.EventStarted, name);
         }
     }
 }

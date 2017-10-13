@@ -4,12 +4,13 @@
 
     internal class GetRoomFilterListComposer : ServerPacket
     {
-        public GetRoomFilterListComposer(Room Instance) : base(ServerPacketHeader.GetRoomFilterListMessageComposer)
+        public GetRoomFilterListComposer(Room instance)
+            : base(ServerPacketHeader.GetRoomFilterListMessageComposer)
         {
-            WriteInteger(Instance.WordFilterList.Count);
-            foreach (var Word in Instance.WordFilterList)
+            WriteInteger(instance.WordFilterList.Count);
+            foreach (var word in instance.WordFilterList)
             {
-                WriteString(Word);
+                WriteString(word);
             }
         }
     }

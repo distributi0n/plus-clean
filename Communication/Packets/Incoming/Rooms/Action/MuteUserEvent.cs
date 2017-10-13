@@ -4,43 +4,44 @@
 
     internal class MuteUserEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var RoomId = Packet.PopInt();
-            var Time = Packet.PopInt();
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
-            {
-                return;
-            }
-            if (Room.WhoCanMute == 0 && !Room.CheckRights(Session, true) && Room.Group == null ||
-                Room.WhoCanMute == 1 && !Room.CheckRights(Session) && Room.Group == null ||
-                Room.Group != null && !Room.CheckRights(Session, false, true))
+            var userId = packet.PopInt();
+            var time = packet.PopInt();
+
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Target = Room.GetRoomUserManager().GetRoomUserByHabbo(PlusEnvironment.GetUsernameById(UserId));
-            if (Target == null)
-            {
-                return;
-            }
-            if (Target.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (room.WhoCanMute == 0 && !room.CheckRights(session, true) && room.Group == null || room.WhoCanMute == 1 && !room.CheckRights(session) && room.Group == null ||
+                room.Group != null && !room.CheckRights(session, false, true))
             {
                 return;
             }
 
-            if (Room.MutedUsers.ContainsKey(UserId))
+            var target = room.GetRoomUserManager().GetRoomUserByHabbo(PlusEnvironment.GetUsernameById(userId));
+            if (target == null)
             {
-                if (Room.MutedUsers[UserId] < PlusEnvironment.GetUnixTimestamp())
+                return;
+            }
+
+            if (target.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool"))
+            {
+                return;
+            }
+
+            if (room.MutedUsers.ContainsKey(userId))
+            {
+                if (room.MutedUsers[userId] < PlusEnvironment.GetUnixTimestamp())
                 {
-                    Room.MutedUsers.Remove(UserId);
+                    room.MutedUsers.Remove(userId);
                 }
                 else
                 {
@@ -48,9 +49,10 @@
                 }
             }
 
-            Room.MutedUsers.Add(UserId, PlusEnvironment.GetUnixTimestamp() + Time * 60);
-            Target.GetClient().SendWhisper("The room owner has muted you for " + Time + " minutes!");
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_SelfModMuteSeen", 1);
+            room.MutedUsers.Add(userId, PlusEnvironment.GetUnixTimestamp() + time * 60);
+
+            target.GetClient().SendWhisper("The room owner has muted you for " + time + " minutes!");
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_SelfModMuteSeen", 1);
         }
     }
 }

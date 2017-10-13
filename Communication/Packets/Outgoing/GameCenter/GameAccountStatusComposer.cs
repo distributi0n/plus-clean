@@ -2,9 +2,10 @@
 {
     internal class GameAccountStatusComposer : ServerPacket
     {
-        public GameAccountStatusComposer(int GameID) : base(ServerPacketHeader.GameAccountStatusMessageComposer)
+        public GameAccountStatusComposer(int gameId)
+            : base(ServerPacketHeader.GameAccountStatusMessageComposer)
         {
-            WriteInteger(GameID);
+            WriteInteger(gameId);
             WriteInteger(-1); // Games Left
             WriteInteger(0); //Was 16?
         }

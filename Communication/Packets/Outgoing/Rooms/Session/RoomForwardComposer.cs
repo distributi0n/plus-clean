@@ -2,9 +2,10 @@
 {
     public class RoomForwardComposer : ServerPacket
     {
-        public RoomForwardComposer(int RoomId) : base(ServerPacketHeader.RoomForwardMessageComposer)
+        public RoomForwardComposer(int roomId)
+            : base(ServerPacketHeader.RoomForwardMessageComposer)
         {
-            WriteInteger(RoomId);
+            WriteInteger(roomId);
         }
     }
 }

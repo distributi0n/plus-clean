@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.Packets.Incoming
 {
-    public static class ClientPacketHeader
+    internal static class ClientPacketHeader
     {
         // Handshake
         internal const int InitCryptoMessageEvent = 3392; //316

@@ -9,55 +9,50 @@
 
     internal class PickUpBotEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var BotId = Packet.PopInt();
-            if (BotId == 0)
+            var botId = packet.PopInt();
+            if (botId == 0)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            RoomUser BotUser = null;
-            if (!Room.GetRoomUserManager().TryGetBot(BotId, out BotUser))
+            RoomUser botUser;
+            if (!room.GetRoomUserManager().TryGetBot(botId, out botUser))
             {
                 return;
             }
 
-            if (Session.GetHabbo().Id != BotUser.BotData.ownerID &&
-                !Session.GetHabbo().GetPermissions().HasRight("bot_place_any_override"))
+            if (session.GetHabbo().Id != botUser.BotData.OwnerId && !session.GetHabbo().GetPermissions().HasRight("bot_place_any_override"))
             {
-                Session.SendWhisper("You can only pick up your own bots!");
+                session.SendWhisper("You can only pick up your own bots!");
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `bots` SET `room_id` = '0' WHERE `id` = @id LIMIT 1");
-                dbClient.AddParameter("id", BotId);
+                dbClient.AddParameter("id", botId);
                 dbClient.RunQuery();
             }
-            Room.GetGameMap().RemoveUserFromMap(BotUser, new Point(BotUser.X, BotUser.Y));
-            Session.GetHabbo()
-                .GetInventoryComponent()
-                .TryAddBot(new Bot(Convert.ToInt32(BotUser.BotData.Id),
-                    Convert.ToInt32(BotUser.BotData.ownerID),
-                    BotUser.BotData.Name,
-                    BotUser.BotData.Motto,
-                    BotUser.BotData.Look,
-                    BotUser.BotData.Gender));
-            Session.SendPacket(new BotInventoryComposer(Session.GetHabbo().GetInventoryComponent().GetBots()));
-            Room.GetRoomUserManager().RemoveBot(BotUser.VirtualId, false);
+
+            room.GetGameMap().RemoveUserFromMap(botUser, new Point(botUser.X, botUser.Y));
+
+            session.GetHabbo().GetInventoryComponent().TryAddBot(new Bot(Convert.ToInt32(botUser.BotData.Id), Convert.ToInt32(botUser.BotData.OwnerId), botUser.BotData.Name,
+                botUser.BotData.Motto, botUser.BotData.Look, botUser.BotData.Gender));
+            session.SendPacket(new BotInventoryComposer(session.GetHabbo().GetInventoryComponent().GetBots()));
+            room.GetRoomUserManager().RemoveBot(botUser.VirtualId, false);
         }
     }
 }

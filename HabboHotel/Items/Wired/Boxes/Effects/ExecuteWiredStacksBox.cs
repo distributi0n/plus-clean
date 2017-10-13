@@ -8,10 +8,10 @@
 
     internal class ExecuteWiredStacksBox : IWiredItem
     {
-        public ExecuteWiredStacksBox(Room Instance, Item Item)
+        public ExecuteWiredStacksBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -29,21 +29,21 @@
 
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
         }
@@ -55,42 +55,42 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            foreach (var Item in SetItems.Values.ToList())
+            foreach (var item in SetItems.Values.ToList())
             {
-                if (Item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(Item) || !Item.IsWired)
+                if (item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(item) || !item.IsWired)
                 {
                     continue;
                 }
 
-                IWiredItem WiredItem;
-                if (Instance.GetWired().TryGet(Item.Id, out WiredItem))
+                IWiredItem wiredItem;
+                if (Instance.GetWired().TryGet(item.Id, out wiredItem))
                 {
-                    if (WiredItem.Type == WiredBoxType.EffectExecuteWiredStacks)
+                    if (wiredItem.Type == WiredBoxType.EffectExecuteWiredStacks)
                     {
                         continue;
                     }
 
-                    var Effects = Instance.GetWired().GetEffects(WiredItem);
-                    if (Effects.Count > 0)
+                    var effects = Instance.GetWired().GetEffects(wiredItem);
+                    if (effects.Count > 0)
                     {
-                        foreach (var EffectItem in Effects.ToList())
+                        foreach (var effectItem in effects.ToList())
                         {
-                            if (SetItems.ContainsKey(EffectItem.Item.Id) && EffectItem.Item.Id != Item.Id)
+                            if (SetItems.ContainsKey(effectItem.Item.Id) && effectItem.Item.Id != item.Id)
                             {
                                 continue;
                             }
-                            if (EffectItem.Type == WiredBoxType.EffectExecuteWiredStacks)
+                            if (effectItem.Type == WiredBoxType.EffectExecuteWiredStacks)
                             {
                                 continue;
                             }
 
-                            EffectItem.Execute(Player);
+                            effectItem.Execute(player);
                         }
                     }
                 }

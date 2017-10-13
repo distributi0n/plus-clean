@@ -7,42 +7,47 @@
 
     internal class ObjectsComposer : ServerPacket
     {
-        public ObjectsComposer(Item[] Objects, Room Room) : base(ServerPacketHeader.ObjectsMessageComposer)
+        public ObjectsComposer(Item[] objects, Room room)
+            : base(ServerPacketHeader.ObjectsMessageComposer)
         {
             WriteInteger(1);
-            WriteInteger(Room.OwnerId);
-            WriteString(Room.OwnerName);
-            WriteInteger(Objects.Length);
-            foreach (var Item in Objects)
+
+            WriteInteger(room.OwnerId);
+            WriteString(room.OwnerName);
+
+            WriteInteger(objects.Length);
+            foreach (var item in objects)
             {
-                WriteFloorItem(Item, Convert.ToInt32(Item.UserID));
+                WriteFloorItem(item, Convert.ToInt32(item.UserId));
             }
         }
 
-        private void WriteFloorItem(Item Item, int UserID)
+        private void WriteFloorItem(Item item, int userId)
         {
-            WriteInteger(Item.Id);
-            WriteInteger(Item.GetBaseItem().SpriteId);
-            WriteInteger(Item.GetX);
-            WriteInteger(Item.GetY);
-            WriteInteger(Item.Rotation);
-            WriteString(string.Format("{0:0.00}", TextHandling.GetString(Item.GetZ)));
+            WriteInteger(item.Id);
+            WriteInteger(item.GetBaseItem().SpriteId);
+            WriteInteger(item.GetX);
+            WriteInteger(item.GetY);
+            WriteInteger(item.Rotation);
+            WriteString($"{TextHandling.GetString(item.GetZ):0.00}");
             WriteString(string.Empty);
-            if (Item.LimitedNo > 0)
+
+            if (item.LimitedNo > 0)
             {
                 WriteInteger(1);
                 WriteInteger(256);
-                WriteString(Item.ExtraData);
-                WriteInteger(Item.LimitedNo);
-                WriteInteger(Item.LimitedTot);
+                WriteString(item.ExtraData);
+                WriteInteger(item.LimitedNo);
+                WriteInteger(item.LimitedTot);
             }
             else
             {
-                ItemBehaviourUtility.GenerateExtradata(Item, this);
+                ItemBehaviourUtility.GenerateExtradata(item, this);
             }
+
             WriteInteger(-1); // to-do: check
-            WriteInteger(Item.GetBaseItem().Modes > 1 ? 1 : 0);
-            WriteInteger(UserID);
+            WriteInteger(item.GetBaseItem().Modes > 1 ? 1 : 0);
+            WriteInteger(userId);
         }
     }
 }

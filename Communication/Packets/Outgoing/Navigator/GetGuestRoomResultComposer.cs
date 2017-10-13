@@ -5,72 +5,75 @@
 
     internal class GetGuestRoomResultComposer : ServerPacket
     {
-        public GetGuestRoomResultComposer(GameClient Session, RoomData Data, bool isLoading, bool checkEntry) : base(
-            ServerPacketHeader
-                .GetGuestRoomResultMessageComposer)
+        public GetGuestRoomResultComposer(GameClient session, RoomData data, bool isLoading, bool checkEntry)
+            : base(ServerPacketHeader.GetGuestRoomResultMessageComposer)
         {
             WriteBoolean(isLoading);
-            WriteInteger(Data.Id);
-            WriteString(Data.Name);
-            WriteInteger(Data.OwnerId);
-            WriteString(Data.OwnerName);
-            WriteInteger(RoomAccessUtility.GetRoomAccessPacketNum(Data.Access));
-            WriteInteger(Data.UsersNow);
-            WriteInteger(Data.UsersMax);
-            WriteString(Data.Description);
-            WriteInteger(Data.TradeSettings);
-            WriteInteger(Data.Score);
+            WriteInteger(data.Id);
+            WriteString(data.Name);
+            WriteInteger(data.OwnerId);
+            WriteString(data.OwnerName);
+            WriteInteger(RoomAccessUtility.GetRoomAccessPacketNum(data.Access));
+            WriteInteger(data.UsersNow);
+            WriteInteger(data.UsersMax);
+            WriteString(data.Description);
+            WriteInteger(data.TradeSettings);
+            WriteInteger(data.Score);
             WriteInteger(0); //Top rated room rank.
-            WriteInteger(Data.Category);
-            WriteInteger(Data.Tags.Count);
-            foreach (var Tag in Data.Tags)
+            WriteInteger(data.Category);
+
+            WriteInteger(data.Tags.Count);
+            foreach (var tag in data.Tags)
             {
-                WriteString(Tag);
+                WriteString(tag);
             }
 
-            if (Data.Group != null && Data.Promotion != null)
+            if (data.Group != null && data.Promotion != null)
             {
                 WriteInteger(62); //What?
-                WriteInteger(Data.Group == null ? 0 : Data.Group.Id);
-                WriteString(Data.Group == null ? "" : Data.Group.Name);
-                WriteString(Data.Group == null ? "" : Data.Group.Badge);
-                WriteString(Data.Promotion != null ? Data.Promotion.Name : "");
-                WriteString(Data.Promotion != null ? Data.Promotion.Description : "");
-                WriteInteger(Data.Promotion != null ? Data.Promotion.MinutesLeft : 0);
+
+                WriteInteger(data.Group == null ? 0 : data.Group.Id);
+                WriteString(data.Group == null ? "" : data.Group.Name);
+                WriteString(data.Group == null ? "" : data.Group.Badge);
+
+                WriteString(data.Promotion != null ? data.Promotion.Name : "");
+                WriteString(data.Promotion != null ? data.Promotion.Description : "");
+                WriteInteger(data.Promotion != null ? data.Promotion.MinutesLeft : 0);
             }
-            else if (Data.Group != null && Data.Promotion == null)
+            else if (data.Group != null && data.Promotion == null)
             {
                 WriteInteger(58); //What?
-                WriteInteger(Data.Group == null ? 0 : Data.Group.Id);
-                WriteString(Data.Group == null ? "" : Data.Group.Name);
-                WriteString(Data.Group == null ? "" : Data.Group.Badge);
+                WriteInteger(data.Group == null ? 0 : data.Group.Id);
+                WriteString(data.Group == null ? "" : data.Group.Name);
+                WriteString(data.Group == null ? "" : data.Group.Badge);
             }
-            else if (Data.Group == null && Data.Promotion != null)
+            else if (data.Group == null && data.Promotion != null)
             {
                 WriteInteger(60); //What?
-                WriteString(Data.Promotion != null ? Data.Promotion.Name : "");
-                WriteString(Data.Promotion != null ? Data.Promotion.Description : "");
-                WriteInteger(Data.Promotion != null ? Data.Promotion.MinutesLeft : 0);
+                WriteString(data.Promotion != null ? data.Promotion.Name : "");
+                WriteString(data.Promotion != null ? data.Promotion.Description : "");
+                WriteInteger(data.Promotion != null ? data.Promotion.MinutesLeft : 0);
             }
             else
             {
                 WriteInteger(56); //What?
             }
+
             WriteBoolean(checkEntry);
             WriteBoolean(false);
             WriteBoolean(false);
             WriteBoolean(false);
-            WriteInteger(Data.WhoCanMute);
-            WriteInteger(Data.WhoCanKick);
-            WriteInteger(Data.WhoCanBan);
-            WriteBoolean(
-                Session.GetHabbo().GetPermissions().HasRight("mod_tool") ||
-                Data.OwnerName == Session.GetHabbo().Username); //Room muting.
-            WriteInteger(Data.chatMode);
-            WriteInteger(Data.chatSize);
-            WriteInteger(Data.chatSpeed);
-            WriteInteger(Data.extraFlood); //Hearing distance
-            WriteInteger(Data.chatDistance); //Flood!!
+
+            WriteInteger(data.WhoCanMute);
+            WriteInteger(data.WhoCanKick);
+            WriteInteger(data.WhoCanBan);
+
+            WriteBoolean(session.GetHabbo().GetPermissions().HasRight("mod_tool") || data.OwnerName == session.GetHabbo().Username); //Room muting.
+            WriteInteger(data.chatMode);
+            WriteInteger(data.chatSize);
+            WriteInteger(data.chatSpeed);
+            WriteInteger(data.extraFlood); //Hearing distance
+            WriteInteger(data.chatDistance); //Flood!!
         }
     }
 }

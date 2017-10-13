@@ -2,7 +2,8 @@
 {
     internal class TradingFinishComposer : ServerPacket
     {
-        public TradingFinishComposer() : base(ServerPacketHeader.TradingFinishMessageComposer)
+        public TradingFinishComposer()
+            : base(ServerPacketHeader.TradingFinishMessageComposer)
         {
         }
     }

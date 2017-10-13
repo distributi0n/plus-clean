@@ -5,17 +5,19 @@
 
     internal class BuddyRequestsComposer : ServerPacket
     {
-        public BuddyRequestsComposer(ICollection<MessengerRequest> requests) : base(ServerPacketHeader
-            .BuddyRequestsMessageComposer)
+        public BuddyRequestsComposer(ICollection<MessengerRequest> requests)
+            : base(ServerPacketHeader.BuddyRequestsMessageComposer)
         {
             WriteInteger(requests.Count);
             WriteInteger(requests.Count);
-            foreach (var Request in requests)
+
+            foreach (var request in requests)
             {
-                WriteInteger(Request.From);
-                WriteString(Request.Username);
-                var User = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Request.From);
-                WriteString(User != null ? User.Look : "");
+                WriteInteger(request.From);
+                WriteString(request.Username);
+
+                var user = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(request.From);
+                WriteString(user != null ? user.Look : "");
             }
         }
     }

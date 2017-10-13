@@ -6,33 +6,35 @@
     using Interfaces;
     using MySql.Data.MySqlClient;
 
-    public class DatabaseConnection : IDatabaseClient, IDisposable
+    internal class DatabaseConnection : IDatabaseClient
     {
         private readonly IQueryAdapter _adapter;
         private readonly MySqlConnection _con;
 
-        public DatabaseConnection(string ConnectionStr)
+        public DatabaseConnection(string connectionStr)
         {
-            _con = new MySqlConnection(ConnectionStr);
+            _con = new MySqlConnection(connectionStr);
             _adapter = new NormalQueryReactor(this);
         }
 
-        public void connect()
+        public void Connect()
         {
-            if (_con.State == ConnectionState.Closed)
+            if (_con.State != ConnectionState.Closed)
             {
-                try
-                {
-                    _con.Open();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
+                return;
+            }
+
+            try
+            {
+                _con.Open();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
         }
 
-        public void disconnect()
+        public void Disconnect()
         {
             if (_con.State == ConnectionState.Open)
             {
@@ -42,12 +44,12 @@
 
         public IQueryAdapter GetQueryReactor() => _adapter;
 
-        public void reportDone()
+        public void ReportDone()
         {
             Dispose();
         }
 
-        public MySqlCommand createNewCommand() => _con.CreateCommand();
+        public MySqlCommand CreateNewCommand() => _con.CreateCommand();
 
         public void Dispose()
         {
@@ -59,7 +61,7 @@
             GC.SuppressFinalize(this);
         }
 
-        public void prepare()
+        public void Prepare()
         {
             // nothing here
         }

@@ -4,57 +4,57 @@
 
     public class InteractorScoreboard : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (!HasRights)
+            if (!hasRights)
             {
                 return;
             }
 
-            var OldValue = 0;
-            if (!int.TryParse(Item.ExtraData, out OldValue))
+            var oldValue = 0;
+            if (!int.TryParse(item.ExtraData, out oldValue))
             {
             }
-            if (Request == 1)
+            if (request == 1)
             {
-                if (Item.pendingReset && OldValue > 0)
+                if (item.PendingReset && oldValue > 0)
                 {
-                    OldValue = 0;
-                    Item.pendingReset = false;
+                    oldValue = 0;
+                    item.PendingReset = false;
                 }
                 else
                 {
-                    OldValue = OldValue + 60;
-                    Item.UpdateNeeded = false;
+                    oldValue = oldValue + 60;
+                    item.UpdateNeeded = false;
                 }
             }
-            else if (Request == 2)
+            else if (request == 2)
             {
-                Item.UpdateNeeded = !Item.UpdateNeeded;
-                Item.pendingReset = true;
+                item.UpdateNeeded = !item.UpdateNeeded;
+                item.PendingReset = true;
             }
-            Item.ExtraData = OldValue.ToString();
-            Item.UpdateState();
+            item.ExtraData = oldValue.ToString();
+            item.UpdateState();
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
-            var OldValue = 0;
-            if (!int.TryParse(Item.ExtraData, out OldValue))
+            var oldValue = 0;
+            if (!int.TryParse(item.ExtraData, out oldValue))
             {
             }
-            OldValue = OldValue + 60;
-            Item.UpdateNeeded = false;
-            Item.ExtraData = OldValue.ToString();
-            Item.UpdateState();
+            oldValue = oldValue + 60;
+            item.UpdateNeeded = false;
+            item.ExtraData = oldValue.ToString();
+            item.UpdateState();
         }
     }
 }

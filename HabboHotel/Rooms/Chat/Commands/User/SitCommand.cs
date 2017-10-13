@@ -10,33 +10,33 @@
 
         public string Description => "Allows you to sit down in your current spot.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
-            if (User.Statusses.ContainsKey("lie") || User.isLying || User.RidingHorse || User.IsWalking)
+            if (user.Statusses.ContainsKey("lie") || user.isLying || user.RidingHorse || user.IsWalking)
             {
                 return;
             }
 
-            if (!User.Statusses.ContainsKey("sit"))
+            if (!user.Statusses.ContainsKey("sit"))
             {
-                if (User.RotBody % 2 == 0)
+                if (user.RotBody % 2 == 0)
                 {
-                    if (User == null)
+                    if (user == null)
                     {
                         return;
                     }
 
                     try
                     {
-                        User.Statusses.Add("sit", "1.0");
-                        User.Z -= 0.35;
-                        User.isSitting = true;
-                        User.UpdateNeeded = true;
+                        user.Statusses.Add("sit", "1.0");
+                        user.Z -= 0.35;
+                        user.isSitting = true;
+                        user.UpdateNeeded = true;
                     }
                     catch
                     {
@@ -44,20 +44,20 @@
                 }
                 else
                 {
-                    User.RotBody--;
-                    User.Statusses.Add("sit", "1.0");
-                    User.Z -= 0.35;
-                    User.isSitting = true;
-                    User.UpdateNeeded = true;
+                    user.RotBody--;
+                    user.Statusses.Add("sit", "1.0");
+                    user.Z -= 0.35;
+                    user.isSitting = true;
+                    user.UpdateNeeded = true;
                 }
             }
-            else if (User.isSitting)
+            else if (user.isSitting)
             {
-                User.Z += 0.35;
-                User.Statusses.Remove("sit");
-                User.Statusses.Remove("1.0");
-                User.isSitting = false;
-                User.UpdateNeeded = true;
+                user.Z += 0.35;
+                user.Statusses.Remove("sit");
+                user.Statusses.Remove("1.0");
+                user.isSitting = false;
+                user.UpdateNeeded = true;
             }
         }
     }

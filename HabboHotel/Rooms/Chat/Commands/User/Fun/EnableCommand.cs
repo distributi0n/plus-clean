@@ -11,67 +11,67 @@
 
         public string Description => "Gives you the ability to set an effect on your user!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("You must enter an effect ID!");
+                session.SendWhisper("You must enter an effect ID!");
                 return;
             }
 
-            if (!Room.EnablesEnabled && !Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!room.EnablesEnabled && !session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                Session.SendWhisper(
+                session.SendWhisper(
                     "Oops, it appears that the room owner has disabled the ability to use the enable command in here.");
                 return;
             }
 
-            var ThisUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
-            if (ThisUser == null)
+            var thisUser = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Username);
+            if (thisUser == null)
             {
                 return;
             }
 
-            if (ThisUser.RidingHorse)
+            if (thisUser.RidingHorse)
             {
-                Session.SendWhisper("You cannot enable effects whilst riding a horse!");
+                session.SendWhisper("You cannot enable effects whilst riding a horse!");
                 return;
             }
 
-            if (ThisUser.Team != TEAM.NONE)
+            if (thisUser.Team != TEAM.NONE)
             {
                 return;
             }
-            if (ThisUser.isLying)
-            {
-                return;
-            }
-
-            var EffectId = 0;
-            if (!int.TryParse(Params[1], out EffectId))
-            {
-                return;
-            }
-            if (EffectId > int.MaxValue || EffectId < int.MinValue)
+            if (thisUser.isLying)
             {
                 return;
             }
 
-            if ((EffectId == 102 || EffectId == 187) && !Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            var effectId = 0;
+            if (!int.TryParse(Params[1], out effectId))
             {
-                Session.SendWhisper("Sorry, only staff members can use this effects.");
+                return;
+            }
+            if (effectId > int.MaxValue || effectId < int.MinValue)
+            {
                 return;
             }
 
-            if (EffectId == 178 &&
-                !Session.GetHabbo().GetPermissions().HasRight("gold_vip") &&
-                !Session.GetHabbo().GetPermissions().HasRight("events_staff"))
+            if ((effectId == 102 || effectId == 187) && !session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                Session.SendWhisper("Sorry, only Gold VIP and Events Staff members can use this effect.");
+                session.SendWhisper("Sorry, only staff members can use this effects.");
                 return;
             }
 
-            Session.GetHabbo().Effects().ApplyEffect(EffectId);
+            if (effectId == 178 &&
+                !session.GetHabbo().GetPermissions().HasRight("gold_vip") &&
+                !session.GetHabbo().GetPermissions().HasRight("events_staff"))
+            {
+                session.SendWhisper("Sorry, only Gold VIP and Events Staff members can use this effect.");
+                return;
+            }
+
+            session.GetHabbo().Effects().ApplyEffect(effectId);
         }
     }
 }

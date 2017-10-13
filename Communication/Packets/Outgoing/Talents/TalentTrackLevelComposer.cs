@@ -2,7 +2,8 @@
 {
     internal class TalentTrackLevelComposer : ServerPacket
     {
-        public TalentTrackLevelComposer() : base(ServerPacketHeader.TalentTrackLevelMessageComposer)
+        public TalentTrackLevelComposer()
+            : base(ServerPacketHeader.TalentTrackLevelMessageComposer)
         {
             WriteString("citizenship");
             WriteInteger(0);

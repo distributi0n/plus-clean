@@ -5,15 +5,15 @@
 
     internal class GetCatalogRoomPromotionComposer : ServerPacket
     {
-        public GetCatalogRoomPromotionComposer(List<RoomData> UsersRooms) : base(
-            ServerPacketHeader.PromotableRoomsMessageComposer)
+        public GetCatalogRoomPromotionComposer(List<RoomData> usersRooms)
+            : base(ServerPacketHeader.PromotableRoomsMessageComposer)
         {
             WriteBoolean(true); //wat
-            WriteInteger(UsersRooms.Count); //Count of rooms?
-            foreach (var Room in UsersRooms)
+            WriteInteger(usersRooms.Count); //Count of rooms?
+            foreach (var room in usersRooms)
             {
-                WriteInteger(Room.Id);
-                WriteString(Room.Name);
+                WriteInteger(room.Id);
+                WriteString(room.Name);
                 WriteBoolean(true);
             }
         }

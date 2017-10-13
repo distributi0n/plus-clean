@@ -6,12 +6,11 @@
 
     internal class GetPromotableRoomsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Rooms = Session.GetHabbo().UsersRooms;
-            Rooms = Rooms.Where(x => x.Promotion == null || x.Promotion.TimestampExpires < PlusEnvironment.GetUnixTimestamp())
-                .ToList();
-            Session.SendPacket(new PromotableRoomsComposer(Rooms));
+            var rooms = session.GetHabbo().UsersRooms;
+            rooms = rooms.Where(x => x.Promotion == null || x.Promotion.TimestampExpires < PlusEnvironment.GetUnixTimestamp()).ToList();
+            session.SendPacket(new PromotableRoomsComposer(rooms));
         }
     }
 }

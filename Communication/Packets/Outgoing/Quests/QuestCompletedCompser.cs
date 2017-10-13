@@ -2,7 +2,8 @@
 {
     internal class QuestCompletedCompser : ServerPacket
     {
-        public QuestCompletedCompser() : base(ServerPacketHeader.QuestCompletedMessageComposer)
+        public QuestCompletedCompser()
+            : base(ServerPacketHeader.QuestCompletedMessageComposer)
         {
         }
     }

@@ -54,20 +54,20 @@
 
     public sealed class PacketManager
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.Communication.Packets");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.Communication.Packets");
 
         private readonly TaskFactory _eventDispatcher;
 
+        private readonly bool _ignoreTasks = true;
+
         private readonly Dictionary<int, IPacketEvent> _incomingPackets;
+
+        private readonly int _maximumRunTimeInSec = 300; // 5 minutes
         private readonly Dictionary<int, string> _packetNames;
 
         private readonly ConcurrentDictionary<int, Task> _runningTasks;
 
-        private readonly bool IgnoreTasks = true;
-
-        private readonly int MaximumRunTimeInSec = 300; // 5 minutes
-
-        private readonly bool ThrowUserErrors = false;
+        private readonly bool _throwUserErrors = false;
 
         public PacketManager()
         {
@@ -107,82 +107,82 @@
             RegisterNames();
         }
 
-        public void TryExecutePacket(GameClient Session, ClientPacket Packet)
+        public void TryExecutePacket(GameClient session, ClientPacket packet)
         {
-            IPacketEvent Pak = null;
-            if (!_incomingPackets.TryGetValue(Packet.Id, out Pak))
+            IPacketEvent pak = null;
+            if (!_incomingPackets.TryGetValue(packet.Id, out pak))
             {
                 if (Debugger.IsAttached)
                 {
-                    log.Debug("Unhandled Packet: " + Packet);
+                    Log.Debug("Unhandled Packet: " + packet);
                 }
                 return;
             }
 
             if (Debugger.IsAttached)
             {
-                if (_packetNames.ContainsKey(Packet.Id))
+                if (_packetNames.ContainsKey(packet.Id))
                 {
-                    log.Debug("Handled Packet: [" + Packet.Id + "] " + _packetNames[Packet.Id]);
+                    Log.Debug("Handled Packet: [" + packet.Id + "] " + _packetNames[packet.Id]);
                 }
                 else
                 {
-                    log.Debug("Handled Packet: [" + Packet.Id + "] UnnamedPacketEvent");
+                    Log.Debug("Handled Packet: [" + packet.Id + "] UnnamedPacketEvent");
                 }
             }
-            if (!IgnoreTasks)
+            if (!_ignoreTasks)
             {
-                ExecutePacketAsync(Session, Packet, Pak);
+                ExecutePacketAsync(session, packet, pak);
             }
             else
             {
-                Pak.Parse(Session, Packet);
+                pak.Parse(session, packet);
             }
         }
 
-        private void ExecutePacketAsync(GameClient Session, ClientPacket Packet, IPacketEvent Pak)
+        private void ExecutePacketAsync(GameClient session, ClientPacket packet, IPacketEvent pak)
         {
-            var Start = DateTime.Now;
-            var CancelSource = new CancellationTokenSource();
-            var Token = CancelSource.Token;
+            var start = DateTime.Now;
+            var cancelSource = new CancellationTokenSource();
+            var token = cancelSource.Token;
             var t = _eventDispatcher.StartNew(() =>
                 {
-                    Pak.Parse(Session, Packet);
-                    Token.ThrowIfCancellationRequested();
+                    pak.Parse(session, packet);
+                    token.ThrowIfCancellationRequested();
                 },
-                Token);
+                token);
             _runningTasks.TryAdd(t.Id, t);
             try
             {
-                if (!t.Wait(MaximumRunTimeInSec * 1000, Token))
+                if (!t.Wait(_maximumRunTimeInSec * 1000, token))
                 {
-                    CancelSource.Cancel();
+                    cancelSource.Cancel();
                 }
             }
             catch (AggregateException ex)
             {
                 foreach (var e in ex.Flatten().InnerExceptions)
                 {
-                    if (ThrowUserErrors)
+                    if (_throwUserErrors)
                     {
                         throw e;
                     }
                     else
                     {
                         //log.Fatal("Unhandled Error: " + e.Message + " - " + e.StackTrace);
-                        Session.Disconnect();
+                        session.Disconnect();
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                Session.Disconnect();
+                session.Disconnect();
             }
             finally
             {
-                Task RemovedTask = null;
-                _runningTasks.TryRemove(t.Id, out RemovedTask);
-                CancelSource.Dispose();
+                Task removedTask = null;
+                _runningTasks.TryRemove(t.Id, out removedTask);
+                cancelSource.Dispose();
 
                 //log.Debug("Event took " + (DateTime.Now - Start).Milliseconds + "ms to complete.");
             }
@@ -206,8 +206,8 @@
             _incomingPackets.Add(ClientPacketHeader.GetClientVersionMessageEvent, new GetClientVersionEvent());
             _incomingPackets.Add(ClientPacketHeader.InitCryptoMessageEvent, new InitCryptoEvent());
             _incomingPackets.Add(ClientPacketHeader.GenerateSecretKeyMessageEvent, new GenerateSecretKeyEvent());
-            _incomingPackets.Add(ClientPacketHeader.UniqueIdMessageEvent, new UniqueIDEvent());
-            _incomingPackets.Add(ClientPacketHeader.SsoTicketMessageEvent, new SSOTicketEvent());
+            _incomingPackets.Add(ClientPacketHeader.UniqueIdMessageEvent, new UniqueIdEvent());
+            _incomingPackets.Add(ClientPacketHeader.SsoTicketMessageEvent, new SsoTicketEvent());
             _incomingPackets.Add(ClientPacketHeader.InfoRetrieveMessageEvent, new InfoRetrieveEvent());
             _incomingPackets.Add(ClientPacketHeader.PingMessageEvent, new PingEvent());
         }

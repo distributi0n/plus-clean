@@ -1,47 +1,38 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Rooms.AI.Pets
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Rooms;
     using Outgoing.Rooms.AI.Pets;
 
     internal class GetPetInformationEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var PetId = Packet.PopInt();
-            RoomUser Pet = null;
-            if (!Session.GetHabbo().CurrentRoom.GetRoomUserManager().TryGetPet(PetId, out Pet))
+            var petId = packet.PopInt();
+
+            if (!session.GetHabbo().CurrentRoom.GetRoomUserManager().TryGetPet(petId, out var pet))
             {
-                //Okay so, we've established we have no pets in this room by this virtual Id, let us check out users, maybe they're creeping as a pet?!
-                var User = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(PetId);
-                if (User == null)
+                var user = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(petId);
+
+                if (user?.GetClient() == null || user.GetClient().GetHabbo() == null)
                 {
                     return;
                 }
 
-                //Check some values first, please!
-                if (User.GetClient() == null || User.GetClient().GetHabbo() == null)
-                {
-                    return;
-                }
-
-                //And boom! Let us send the information composer 8-).
-                Session.SendPacket(new PetInformationComposer(User.GetClient().GetHabbo()));
+                session.SendPacket(new PetInformationComposer(user.GetClient().GetHabbo()));
                 return;
             }
 
-            //Continue as a regular pet..
-            if (Pet.RoomId != Session.GetHabbo().CurrentRoomId || Pet.PetData == null)
+            if (pet.RoomId != session.GetHabbo().CurrentRoomId || pet.PetData == null)
             {
                 return;
             }
 
-            Session.SendPacket(new PetInformationComposer(Pet.PetData));
+            session.SendPacket(new PetInformationComposer(pet.PetData));
         }
     }
 }

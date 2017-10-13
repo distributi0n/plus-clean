@@ -3,11 +3,11 @@
     using HabboHotel.GameClients;
     using Outgoing.Moderation;
 
-    internal sealed class OpenHelpToolEvent : IPacketEvent
+    internal class OpenHelpToolEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new OpenHelpToolComposer());
+            session.SendPacket(new OpenHelpToolComposer());
         }
     }
 }

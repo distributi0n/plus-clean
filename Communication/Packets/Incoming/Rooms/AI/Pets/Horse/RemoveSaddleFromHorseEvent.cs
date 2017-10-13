@@ -11,60 +11,57 @@
 
     internal class RemoveSaddleFromHorseEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            RoomUser PetUser = null;
-            if (!Room.GetRoomUserManager().TryGetPet(Packet.PopInt(), out PetUser))
-            {
-                return;
-            }
-            if (PetUser.PetData == null || PetUser.PetData.OwnerId != Session.GetHabbo().Id)
+            RoomUser petUser;
+            if (!room.GetRoomUserManager().TryGetPet(packet.PopInt(), out petUser))
             {
                 return;
             }
 
-            //Fetch the furniture Id for the pets current saddle.
-            var SaddleId = ItemUtility.GetSaddleId(PetUser.PetData.Saddle);
+            if (petUser.PetData == null || petUser.PetData.OwnerId != session.GetHabbo().Id)
+            {
+                return;
+            }
 
-            //Remove the saddle from the pet.
-            PetUser.PetData.Saddle = 0;
+            var saddleId = ItemUtility.GetSaddleId(petUser.PetData.Saddle);
+
+            petUser.PetData.Saddle = 0;
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `bots_petdata` SET `have_saddle` = '0' WHERE `id` = '" + PetUser.PetData.PetId +
-                                  "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `bots_petdata` SET `have_saddle` = '0' WHERE `id` = '" + petUser.PetData.PetId + "' LIMIT 1");
             }
 
-            //Give the saddle back to the user.
-            ItemData ItemData = null;
-            if (!PlusEnvironment.GetGame().GetItemManager().GetItem(SaddleId, out ItemData))
+            ItemData itemData;
+            if (!PlusEnvironment.GetGame().GetItemManager().GetItem(saddleId, out itemData))
             {
                 return;
             }
 
-            var Item = ItemFactory.CreateSingleItemNullable(ItemData, Session.GetHabbo(), "", "", 0, 0, 0);
-            if (Item != null)
+            var item = ItemFactory.CreateSingleItemNullable(itemData, session.GetHabbo(), "");
+            if (item != null)
             {
-                Session.GetHabbo().GetInventoryComponent().TryAddItem(Item);
-                Session.SendPacket(new FurniListNotificationComposer(Item.Id, 1));
-                Session.SendPacket(new PurchaseOKComposer());
-                Session.SendPacket(new FurniListAddComposer(Item));
-                Session.SendPacket(new FurniListUpdateComposer());
+                session.GetHabbo().GetInventoryComponent().TryAddItem(item);
+                session.SendPacket(new FurniListNotificationComposer(item.Id, 1));
+                session.SendPacket(new PurchaseOkComposer());
+                session.SendPacket(new FurniListAddComposer(item));
+                session.SendPacket(new FurniListUpdateComposer());
             }
 
-            //Update the Pet and the Pet figure information.
-            Room.SendPacket(new UsersComposer(PetUser));
-            Room.SendPacket(new PetHorseFigureInformationComposer(PetUser));
+            room.SendPacket(new UsersComposer(petUser));
+            room.SendPacket(new PetHorseFigureInformationComposer(petUser));
         }
     }
 }

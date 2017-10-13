@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.User
 {
-    internal class ReloadUserVIPRankCommand : IRCONCommand
+    internal class ReloadUserVipRankCommand : IRconCommand
     {
         public string Description => "This command is used to reload a users VIP rank and permissions.";
 
@@ -8,14 +8,13 @@
 
         public bool TryExecute(string[] parameters)
         {
-            var userId = 0;
-            if (!int.TryParse(parameters[0], out userId))
+            if (!int.TryParse(parameters[0], out var userId))
             {
                 return false;
             }
 
             var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
-            if (client == null || client.GetHabbo() == null)
+            if (client?.GetHabbo() == null)
             {
                 return false;
             }
@@ -24,7 +23,7 @@
             {
                 dbClient.SetQuery("SELECT `rank_vip` FROM `users` WHERE `id` = @userId LIMIT 1");
                 dbClient.AddParameter("userId", userId);
-                client.GetHabbo().VIPRank = dbClient.GetInteger();
+                client.GetHabbo().VipRank = dbClient.GetInteger();
             }
             client.GetHabbo().GetPermissions().Init(client.GetHabbo());
             return true;

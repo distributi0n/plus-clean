@@ -8,10 +8,10 @@
 
     internal class FurniDoesntMatchStateAndPositionBox : IWiredItem
     {
-        public FurniDoesntMatchStateAndPositionBox(Room Instance, Item Item)
+        public FurniDoesntMatchStateAndPositionBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -29,28 +29,28 @@
 
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var State = Packet.PopInt();
-            var Direction = Packet.PopInt();
-            var Placement = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var unknown = packet.PopInt();
+            var state = packet.PopInt();
+            var direction = packet.PopInt();
+            var placement = packet.PopInt();
+            var unknown2 = packet.PopString();
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            StringData = State + ";" + Direction + ";" + Placement;
+            StringData = state + ";" + direction + ";" + placement;
         }
 
         public bool Execute(params object[] Params)
@@ -64,9 +64,9 @@
                 return false;
             }
 
-            foreach (var Item in SetItems.Values.ToList())
+            foreach (var item in SetItems.Values.ToList())
             {
-                if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                if (!Instance.GetRoomItemHandler().GetFloor.Contains(item))
                 {
                     continue;
                 }
@@ -78,8 +78,8 @@
                         continue;
                     }
 
-                    var II = Instance.GetRoomItemHandler().GetItem(Convert.ToInt32(I.Split(':')[0]));
-                    if (II == null)
+                    var ii = Instance.GetRoomItemHandler().GetItem(Convert.ToInt32(I.Split(':')[0]));
+                    if (ii == null)
                     {
                         continue;
                     }
@@ -88,7 +88,7 @@
                     var part = partsString[1].Split(',');
                     if (int.Parse(StringData.Split(';')[0]) == 1) //State
                     {
-                        if (II.ExtraData == part[4])
+                        if (ii.ExtraData == part[4])
                         {
                             return false;
                         }
@@ -96,7 +96,7 @@
 
                     if (int.Parse(StringData.Split(';')[1]) == 1) //Direction
                     {
-                        if (II.Rotation == Convert.ToInt32(part[3]))
+                        if (ii.Rotation == Convert.ToInt32(part[3]))
                         {
                             return false;
                         }
@@ -104,8 +104,8 @@
 
                     if (int.Parse(StringData.Split(';')[2]) == 1) //Position
                     {
-                        if (II.GetX == Convert.ToInt32(part[0]) && II.GetY == Convert.ToInt32(part[1]) &&
-                            II.GetZ == Convert.ToDouble(part[2]))
+                        if (ii.GetX == Convert.ToInt32(part[0]) && ii.GetY == Convert.ToInt32(part[1]) &&
+                            ii.GetZ == Convert.ToDouble(part[2]))
                         {
                             return false;
                         }

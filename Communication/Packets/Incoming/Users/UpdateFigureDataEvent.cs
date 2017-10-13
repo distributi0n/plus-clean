@@ -10,68 +10,72 @@
 
     internal class UpdateFigureDataEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session == null || session.GetHabbo() == null)
             {
                 return;
             }
 
-            var Gender = Packet.PopString().ToUpper();
-            var Look = PlusEnvironment.GetFigureManager()
-                .ProcessFigure(Packet.PopString(), Gender, Session.GetHabbo().GetClothing().GetClothingParts, true);
-            if (Look == Session.GetHabbo().Look)
+            var gender = packet.PopString().ToUpper();
+            var look = PlusEnvironment.GetFigureManager().ProcessFigure(packet.PopString(), gender, session.GetHabbo().GetClothing().GetClothingParts, true);
+
+            if (look == session.GetHabbo().Look)
             {
                 return;
             }
 
-            if ((DateTime.Now - Session.GetHabbo().LastClothingUpdateTime).TotalSeconds <= 2.0)
+            if ((DateTime.Now - session.GetHabbo().LastClothingUpdateTime).TotalSeconds <= 2.0)
             {
-                Session.GetHabbo().ClothingUpdateWarnings += 1;
-                if (Session.GetHabbo().ClothingUpdateWarnings >= 25)
+                session.GetHabbo().ClothingUpdateWarnings += 1;
+                if (session.GetHabbo().ClothingUpdateWarnings >= 25)
                 {
-                    Session.GetHabbo().SessionClothingBlocked = true;
+                    session.GetHabbo().SessionClothingBlocked = true;
                 }
                 return;
             }
 
-            if (Session.GetHabbo().SessionClothingBlocked)
+            if (session.GetHabbo().SessionClothingBlocked)
             {
                 return;
             }
 
-            Session.GetHabbo().LastClothingUpdateTime = DateTime.Now;
-            string[] AllowedGenders = {"M", "F"};
-            if (!AllowedGenders.Contains(Gender))
+            session.GetHabbo().LastClothingUpdateTime = DateTime.Now;
+
+            string[] allowedGenders = {"M", "F"};
+            if (!allowedGenders.Contains(gender))
             {
-                Session.SendPacket(new BroadcastMessageAlertComposer("Sorry, you chose an invalid gender."));
+                session.SendPacket(new BroadcastMessageAlertComposer("Sorry, you chose an invalid gender."));
                 return;
             }
 
-            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.PROFILE_CHANGE_LOOK);
-            Session.GetHabbo().Look = PlusEnvironment.FilterFigure(Look);
-            Session.GetHabbo().Gender = Gender.ToLower();
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.ProfileChangeLook);
+
+            session.GetHabbo().Look = PlusEnvironment.FilterFigure(look);
+            session.GetHabbo().Gender = gender.ToLower();
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `users` SET `look` = @look, `gender` = @gender WHERE `id` = '" + Session.GetHabbo().Id +
-                                  "' LIMIT 1");
-                dbClient.AddParameter("look", Look);
-                dbClient.AddParameter("gender", Gender);
+                dbClient.SetQuery("UPDATE `users` SET `look` = @look, `gender` = @gender WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.AddParameter("look", look);
+                dbClient.AddParameter("gender", gender);
                 dbClient.RunQuery();
             }
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_AvatarLooks", 1);
-            Session.SendPacket(new AvatarAspectUpdateComposer(Look, Gender));
-            if (Session.GetHabbo().Look.Contains("ha-1006"))
+
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_AvatarLooks", 1);
+            session.SendPacket(new AvatarAspectUpdateComposer(look, gender));
+            if (session.GetHabbo().Look.Contains("ha-1006"))
             {
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.WEAR_HAT);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.WearHat);
             }
-            if (Session.GetHabbo().InRoom)
+
+            if (session.GetHabbo().InRoom)
             {
-                var RoomUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-                if (RoomUser != null)
+                var roomUser = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+                if (roomUser != null)
                 {
-                    Session.SendPacket(new UserChangeComposer(RoomUser, true));
-                    Session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(RoomUser, false));
+                    session.SendPacket(new UserChangeComposer(roomUser, true));
+                    session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(roomUser, false));
                 }
             }
         }

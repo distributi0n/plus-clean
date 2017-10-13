@@ -4,11 +4,11 @@
 
     internal class PopularRoomTagsResultComposer : ServerPacket
     {
-        public PopularRoomTagsResultComposer(ICollection<KeyValuePair<string, int>> Tags) : base(
-            ServerPacketHeader.PopularRoomTagsResultMessageComposer)
+        public PopularRoomTagsResultComposer(ICollection<KeyValuePair<string, int>> tags)
+            : base(ServerPacketHeader.PopularRoomTagsResultMessageComposer)
         {
-            WriteInteger(Tags.Count);
-            foreach (var tag in Tags)
+            WriteInteger(tags.Count);
+            foreach (var tag in tags)
             {
                 WriteString(tag.Key);
                 WriteInteger(tag.Value);

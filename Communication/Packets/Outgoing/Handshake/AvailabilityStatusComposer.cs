@@ -2,7 +2,8 @@
 {
     internal class AvailabilityStatusComposer : ServerPacket
     {
-        public AvailabilityStatusComposer() : base(ServerPacketHeader.AvailabilityStatusMessageComposer)
+        public AvailabilityStatusComposer()
+            : base(ServerPacketHeader.AvailabilityStatusMessageComposer)
         {
             WriteBoolean(true);
             WriteBoolean(false);

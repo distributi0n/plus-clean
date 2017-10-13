@@ -10,24 +10,24 @@
 
         public string Description => "Ignore bot chat or enable it again.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            Session.GetHabbo().AllowBotSpeech = !Session.GetHabbo().AllowBotSpeech;
+            session.GetHabbo().AllowBotSpeech = !session.GetHabbo().AllowBotSpeech;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery("UPDATE `users` SET `bots_muted` = '" +
-                                  (Session.GetHabbo().AllowBotSpeech ? 1 : 0) +
+                                  (session.GetHabbo().AllowBotSpeech ? 1 : 0) +
                                   "' WHERE `id` = '" +
-                                  Session.GetHabbo().Id +
+                                  session.GetHabbo().Id +
                                   "' LIMIT 1");
             }
-            if (Session.GetHabbo().AllowBotSpeech)
+            if (session.GetHabbo().AllowBotSpeech)
             {
-                Session.SendWhisper("Change successful, you can no longer see speech from bots.");
+                session.SendWhisper("Change successful, you can no longer see speech from bots.");
             }
             else
             {
-                Session.SendWhisper("Change successful, you can now see speech from bots.");
+                session.SendWhisper("Change successful, you can now see speech from bots.");
             }
         }
     }

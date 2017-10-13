@@ -4,9 +4,10 @@
 
     internal class AvatarEffectExpiredComposer : ServerPacket
     {
-        public AvatarEffectExpiredComposer(AvatarEffect Effect) : base(ServerPacketHeader.AvatarEffectExpiredMessageComposer)
+        public AvatarEffectExpiredComposer(AvatarEffect effect)
+            : base(ServerPacketHeader.AvatarEffectExpiredMessageComposer)
         {
-            WriteInteger(Effect.SpriteId);
+            WriteInteger(effect.SpriteId);
         }
     }
 }

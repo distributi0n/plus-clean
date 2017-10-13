@@ -5,15 +5,15 @@
 
     internal class GetPetInventoryEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session.GetHabbo().GetInventoryComponent() == null)
+            if (session.GetHabbo().GetInventoryComponent() == null)
             {
                 return;
             }
 
-            var Pets = Session.GetHabbo().GetInventoryComponent().GetPets();
-            Session.SendPacket(new PetInventoryComposer(Pets));
+            var pets = session.GetHabbo().GetInventoryComponent().GetPets();
+            session.SendPacket(new PetInventoryComposer(pets));
         }
     }
 }

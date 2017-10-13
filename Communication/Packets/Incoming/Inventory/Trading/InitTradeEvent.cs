@@ -1,113 +1,110 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Inventory.Trading
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Rooms.Trading;
     using Outgoing.Inventory.Trading;
 
     internal class InitTradeEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var UserId = Packet.PopInt();
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            var userId = packet.PopInt();
+
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+
+            var roomUser = room?.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (roomUser == null)
             {
                 return;
             }
 
-            var RoomUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (RoomUser == null)
+            var targetUser = room.GetRoomUserManager().GetRoomUserByVirtualId(userId);
+            if (targetUser == null)
             {
                 return;
             }
 
-            var TargetUser = Room.GetRoomUserManager().GetRoomUserByVirtualId(UserId);
-            if (TargetUser == null)
+            if (session.GetHabbo().TradingLockExpiry > 0)
             {
-                return;
-            }
-
-            if (Session.GetHabbo().TradingLockExpiry > 0)
-            {
-                if (Session.GetHabbo().TradingLockExpiry > PlusEnvironment.GetUnixTimestamp())
+                if (session.GetHabbo().TradingLockExpiry > PlusEnvironment.GetUnixTimestamp())
                 {
-                    Session.SendNotification("You're currently banned from trading.");
+                    session.SendNotification("You're currently banned from trading.");
                     return;
                 }
 
-                Session.GetHabbo().TradingLockExpiry = 0;
-                Session.SendNotification("Your trading ban has now expired.");
+                session.GetHabbo().TradingLockExpiry = 0;
+                session.SendNotification("Your trading ban has now expired.");
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `user_info` SET `trading_locked` = '0' WHERE `id` = '" + Session.GetHabbo().Id +
-                                      "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `user_info` SET `trading_locked` = '0' WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
                 }
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("room_trade_override"))
+            if (!session.GetHabbo().GetPermissions().HasRight("room_trade_override"))
             {
-                if (Room.TradeSettings == 0)
+                if (room.TradeSettings == 0)
                 {
-                    Session.SendPacket(new TradingErrorComposer(6, TargetUser.GetUsername()));
+                    session.SendPacket(new TradingErrorComposer(6, targetUser.GetUsername()));
                     return;
                 }
 
-                if (Room.TradeSettings == 1 && Room.OwnerId != Session.GetHabbo().Id)
+                if (room.TradeSettings == 1 && room.OwnerId != session.GetHabbo().Id)
                 {
-                    Session.SendPacket(new TradingErrorComposer(6, TargetUser.GetUsername()));
+                    session.SendPacket(new TradingErrorComposer(6, targetUser.GetUsername()));
                     return;
                 }
             }
 
-            if (RoomUser.IsTrading && RoomUser.TradePartner != TargetUser.UserId)
+            if (roomUser.IsTrading && roomUser.TradePartner != targetUser.UserId)
             {
-                Session.SendPacket(new TradingErrorComposer(7, TargetUser.GetUsername()));
+                session.SendPacket(new TradingErrorComposer(7, targetUser.GetUsername()));
                 return;
             }
 
-            if (TargetUser.IsTrading && TargetUser.TradePartner != RoomUser.UserId)
+            if (targetUser.IsTrading && targetUser.TradePartner != roomUser.UserId)
             {
-                Session.SendPacket(new TradingErrorComposer(8, TargetUser.GetUsername()));
+                session.SendPacket(new TradingErrorComposer(8, targetUser.GetUsername()));
                 return;
             }
 
-            if (!TargetUser.GetClient().GetHabbo().AllowTradingRequests)
+            if (!targetUser.GetClient().GetHabbo().AllowTradingRequests)
             {
-                Session.SendPacket(new TradingErrorComposer(4, TargetUser.GetUsername()));
+                session.SendPacket(new TradingErrorComposer(4, targetUser.GetUsername()));
                 return;
             }
 
-            if (TargetUser.GetClient().GetHabbo().TradingLockExpiry > 0)
+            if (targetUser.GetClient().GetHabbo().TradingLockExpiry > 0)
             {
-                Session.SendPacket(new TradingErrorComposer(4, TargetUser.GetUsername()));
+                session.SendPacket(new TradingErrorComposer(4, targetUser.GetUsername()));
                 return;
             }
 
-            Trade Trade = null;
-            if (!Room.GetTrading().StartTrade(RoomUser, TargetUser, out Trade))
+            if (!room.GetTrading().StartTrade(roomUser, targetUser, out var trade))
             {
-                Session.SendNotification("An error occured trying to start this trade");
+                session.SendNotification("An error occured trying to start this trade");
                 return;
             }
 
-            if (TargetUser.HasStatus("trd"))
+            if (targetUser.HasStatus("trd"))
             {
-                TargetUser.RemoveStatus("trd");
+                targetUser.RemoveStatus("trd");
             }
-            if (RoomUser.HasStatus("trd"))
+            if (roomUser.HasStatus("trd"))
             {
-                RoomUser.RemoveStatus("trd");
+                roomUser.RemoveStatus("trd");
             }
-            TargetUser.SetStatus("trd");
-            TargetUser.UpdateNeeded = true;
-            RoomUser.SetStatus("trd");
-            RoomUser.UpdateNeeded = true;
-            Trade.SendPacket(new TradingStartComposer(RoomUser.UserId, TargetUser.UserId));
+
+            targetUser.SetStatus("trd");
+            targetUser.UpdateNeeded = true;
+            roomUser.SetStatus("trd");
+            roomUser.UpdateNeeded = true;
+
+            trade.SendPacket(new TradingStartComposer(roomUser.UserId, targetUser.UserId));
         }
     }
 }

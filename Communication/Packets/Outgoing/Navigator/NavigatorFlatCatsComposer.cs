@@ -6,14 +6,14 @@
 
     internal class NavigatorFlatCatsComposer : ServerPacket
     {
-        public NavigatorFlatCatsComposer(ICollection<SearchResultList> Categories, int Rank) : base(ServerPacketHeader
-            .NavigatorFlatCatsMessageComposer)
+        public NavigatorFlatCatsComposer(ICollection<SearchResultList> categories)
+            : base(ServerPacketHeader.NavigatorFlatCatsMessageComposer)
         {
-            WriteInteger(Categories.Count);
-            foreach (var Category in Categories.ToList())
+            WriteInteger(categories.Count);
+            foreach (var category in categories.ToList())
             {
-                WriteInteger(Category.Id);
-                WriteString(Category.PublicName);
+                WriteInteger(category.Id);
+                WriteString(category.PublicName);
                 WriteBoolean(true); //TODO
             }
         }

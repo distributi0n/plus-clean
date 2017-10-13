@@ -6,19 +6,19 @@
 
     internal class FigureSetIdsComposer : ServerPacket
     {
-        public FigureSetIdsComposer(ICollection<ClothingParts> ClothingParts) : base(ServerPacketHeader
-            .FigureSetIdsMessageComposer)
+        public FigureSetIdsComposer(ICollection<ClothingParts> clothingParts)
+            : base(ServerPacketHeader.FigureSetIdsMessageComposer)
         {
-            WriteInteger(ClothingParts.Count);
-            foreach (var Part in ClothingParts.ToList())
+            WriteInteger(clothingParts.Count);
+            foreach (var part in clothingParts.ToList())
             {
-                WriteInteger(Part.PartId);
+                WriteInteger(part.PartId);
             }
 
-            WriteInteger(ClothingParts.Count);
-            foreach (var Part in ClothingParts.ToList())
+            WriteInteger(clothingParts.Count);
+            foreach (var part in clothingParts.ToList())
             {
-                WriteString(Part.Part);
+                WriteString(part.Part);
             }
         }
     }

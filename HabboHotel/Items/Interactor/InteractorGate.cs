@@ -5,94 +5,94 @@
 
     public class InteractorGate : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            var Modes = Item.GetBaseItem().Modes - 1;
-            if (!HasRights)
+            var modes = item.GetBaseItem().Modes - 1;
+            if (!hasRights)
             {
                 return;
             }
 
-            if (Modes <= 0)
+            if (modes <= 0)
             {
-                Item.UpdateState(false, true);
+                item.UpdateState(false, true);
             }
-            var CurrentMode = 0;
-            var NewMode = 0;
-            if (!int.TryParse(Item.ExtraData, out CurrentMode))
+            var currentMode = 0;
+            var newMode = 0;
+            if (!int.TryParse(item.ExtraData, out currentMode))
             {
             }
-            if (CurrentMode <= 0)
+            if (currentMode <= 0)
             {
-                NewMode = 1;
+                newMode = 1;
             }
-            else if (CurrentMode >= Modes)
+            else if (currentMode >= modes)
             {
-                NewMode = 0;
+                newMode = 0;
             }
             else
             {
-                NewMode = CurrentMode + 1;
+                newMode = currentMode + 1;
             }
-            if (NewMode == 0)
+            if (newMode == 0)
             {
-                if (!Item.GetRoom().GetGameMap().itemCanBePlacedHere(Item.GetX, Item.GetY))
+                if (!item.GetRoom().GetGameMap().ItemCanBePlacedHere(item.GetX, item.GetY))
                 {
                     return;
                 }
             }
 
-            Item.ExtraData = NewMode.ToString();
-            Item.UpdateState();
-            Item.GetRoom().GetGameMap().updateMapForItem(Item);
-            Item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, Session.GetHabbo(), Item);
+            item.ExtraData = newMode.ToString();
+            item.UpdateState();
+            item.GetRoom().GetGameMap().UpdateMapForItem(item);
+            item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, session.GetHabbo(), item);
 
             //Item.GetRoom().GenerateMaps();
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
-            var Modes = Item.GetBaseItem().Modes - 1;
-            if (Modes <= 0)
+            var modes = item.GetBaseItem().Modes - 1;
+            if (modes <= 0)
             {
-                Item.UpdateState(false, true);
+                item.UpdateState(false, true);
             }
-            var CurrentMode = 0;
-            var NewMode = 0;
-            if (!int.TryParse(Item.ExtraData, out CurrentMode))
+            var currentMode = 0;
+            var newMode = 0;
+            if (!int.TryParse(item.ExtraData, out currentMode))
             {
             }
-            if (CurrentMode <= 0)
+            if (currentMode <= 0)
             {
-                NewMode = 1;
+                newMode = 1;
             }
-            else if (CurrentMode >= Modes)
+            else if (currentMode >= modes)
             {
-                NewMode = 0;
+                newMode = 0;
             }
             else
             {
-                NewMode = CurrentMode + 1;
+                newMode = currentMode + 1;
             }
-            if (NewMode == 0)
+            if (newMode == 0)
             {
-                if (!Item.GetRoom().GetGameMap().itemCanBePlacedHere(Item.GetX, Item.GetY))
+                if (!item.GetRoom().GetGameMap().ItemCanBePlacedHere(item.GetX, item.GetY))
                 {
                     return;
                 }
             }
 
-            Item.ExtraData = NewMode.ToString();
-            Item.UpdateState();
-            Item.GetRoom().GetGameMap().updateMapForItem(Item);
+            item.ExtraData = newMode.ToString();
+            item.UpdateState();
+            item.GetRoom().GetGameMap().UpdateMapForItem(item);
 
             //Item.GetRoom().GenerateMaps();
         }

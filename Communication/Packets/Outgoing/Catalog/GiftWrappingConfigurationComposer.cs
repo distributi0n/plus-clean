@@ -2,7 +2,8 @@
 {
     public class GiftWrappingConfigurationComposer : ServerPacket
     {
-        public GiftWrappingConfigurationComposer() : base(ServerPacketHeader.GiftWrappingConfigurationMessageComposer)
+        public GiftWrappingConfigurationComposer()
+            : base(ServerPacketHeader.GiftWrappingConfigurationMessageComposer)
         {
             WriteBoolean(true);
             WriteInteger(1);

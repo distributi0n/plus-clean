@@ -2,10 +2,11 @@
 {
     public class ActionComposer : ServerPacket
     {
-        public ActionComposer(int VirtualId, int Action) : base(ServerPacketHeader.ActionMessageComposer)
+        public ActionComposer(int virtualId, int action)
+            : base(ServerPacketHeader.ActionMessageComposer)
         {
-            WriteInteger(VirtualId);
-            WriteInteger(Action);
+            WriteInteger(virtualId);
+            WriteInteger(action);
         }
     }
 }

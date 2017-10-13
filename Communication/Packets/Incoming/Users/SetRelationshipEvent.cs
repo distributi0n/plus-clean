@@ -9,97 +9,94 @@
 
     internal class SetRelationshipEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            if (session == null || session.GetHabbo() == null || session.GetHabbo().GetMessenger() == null)
             {
                 return;
             }
 
-            var User = Packet.PopInt();
-            var Type = Packet.PopInt();
-            if (!Session.GetHabbo().GetMessenger().FriendshipExists(User))
+            var user = packet.PopInt();
+            var type = packet.PopInt();
+
+            if (!session.GetHabbo().GetMessenger().FriendshipExists(user))
             {
-                Session.SendPacket(
-                    new BroadcastMessageAlertComposer("Oops, you can only set a relationship where a friendship exists."));
+                session.SendPacket(new BroadcastMessageAlertComposer("Oops, you can only set a relationship where a friendship exists."));
                 return;
             }
 
-            if (Type < 0 || Type > 3)
+            if (type < 0 || type > 3)
             {
-                Session.SendPacket(new BroadcastMessageAlertComposer("Oops, you've chosen an invalid relationship type."));
+                session.SendPacket(new BroadcastMessageAlertComposer("Oops, you've chosen an invalid relationship type."));
                 return;
             }
 
-            if (Session.GetHabbo().Relationships.Count > 2000)
+            if (session.GetHabbo().Relationships.Count > 2000)
             {
-                Session.SendPacket(new BroadcastMessageAlertComposer("Sorry, you're limited to a total of 2000 relationships."));
+                session.SendPacket(new BroadcastMessageAlertComposer("Sorry, you're limited to a total of 2000 relationships."));
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                if (Type == 0)
+                if (type == 0)
                 {
-                    dbClient.SetQuery("SELECT `id` FROM `user_relationships` WHERE `user_id` = '" +
-                                      Session.GetHabbo().Id +
-                                      "' AND `target` = @target LIMIT 1");
-                    dbClient.AddParameter("target", User);
-                    var Id = dbClient.GetInteger();
-                    dbClient.SetQuery("DELETE FROM `user_relationships` WHERE `user_id` = '" +
-                                      Session.GetHabbo().Id +
-                                      "' AND `target` = @target LIMIT 1");
-                    dbClient.AddParameter("target", User);
+                    dbClient.SetQuery("SELECT `id` FROM `user_relationships` WHERE `user_id` = '" + session.GetHabbo().Id + "' AND `target` = @target LIMIT 1");
+                    dbClient.AddParameter("target", user);
+                    var id = dbClient.GetInteger();
+
+                    dbClient.SetQuery("DELETE FROM `user_relationships` WHERE `user_id` = '" + session.GetHabbo().Id + "' AND `target` = @target LIMIT 1");
+                    dbClient.AddParameter("target", user);
                     dbClient.RunQuery();
-                    if (Session.GetHabbo().Relationships.ContainsKey(User))
+
+                    if (session.GetHabbo().Relationships.ContainsKey(user))
                     {
-                        Session.GetHabbo().Relationships.Remove(User);
+                        session.GetHabbo().Relationships.Remove(user);
                     }
                 }
                 else
                 {
-                    dbClient.SetQuery("SELECT `id` FROM `user_relationships` WHERE `user_id` = '" +
-                                      Session.GetHabbo().Id +
-                                      "' AND `target` = @target LIMIT 1");
-                    dbClient.AddParameter("target", User);
-                    var Id = dbClient.GetInteger();
-                    if (Id > 0)
+                    dbClient.SetQuery("SELECT `id` FROM `user_relationships` WHERE `user_id` = '" + session.GetHabbo().Id + "' AND `target` = @target LIMIT 1");
+                    dbClient.AddParameter("target", user);
+                    var id = dbClient.GetInteger();
+
+                    if (id > 0)
                     {
-                        dbClient.SetQuery("DELETE FROM `user_relationships` WHERE `user_id` = '" +
-                                          Session.GetHabbo().Id +
-                                          "' AND `target` = @target LIMIT 1");
-                        dbClient.AddParameter("target", User);
+                        dbClient.SetQuery("DELETE FROM `user_relationships` WHERE `user_id` = '" + session.GetHabbo().Id + "' AND `target` = @target LIMIT 1");
+                        dbClient.AddParameter("target", user);
                         dbClient.RunQuery();
-                        if (Session.GetHabbo().Relationships.ContainsKey(Id))
+
+                        if (session.GetHabbo().Relationships.ContainsKey(id))
                         {
-                            Session.GetHabbo().Relationships.Remove(Id);
+                            session.GetHabbo().Relationships.Remove(id);
                         }
                     }
-                    dbClient.SetQuery("INSERT INTO `user_relationships` (`user_id`,`target`,`type`) VALUES ('" +
-                                      Session.GetHabbo().Id +
-                                      "', @target, @type)");
-                    dbClient.AddParameter("target", User);
-                    dbClient.AddParameter("type", Type);
+
+                    dbClient.SetQuery("INSERT INTO `user_relationships` (`user_id`,`target`,`type`) VALUES ('" + session.GetHabbo().Id + "', @target, @type)");
+                    dbClient.AddParameter("target", user);
+                    dbClient.AddParameter("type", type);
                     var newId = Convert.ToInt32(dbClient.InsertQuery());
-                    if (!Session.GetHabbo().Relationships.ContainsKey(User))
+
+                    if (!session.GetHabbo().Relationships.ContainsKey(user))
                     {
-                        Session.GetHabbo().Relationships.Add(User, new Relationship(newId, User, Type));
+                        session.GetHabbo().Relationships.Add(user, new Relationship(newId, user, type));
                     }
                 }
-                var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(User);
-                if (Client != null)
+
+                var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(user);
+                if (client != null)
                 {
-                    Session.GetHabbo().GetMessenger().UpdateFriend(User, Client, true);
+                    session.GetHabbo().GetMessenger().UpdateFriend(user, client, true);
                 }
                 else
                 {
-                    var Habbo = PlusEnvironment.GetHabboById(User);
-                    if (Habbo != null)
+                    var habbo = PlusEnvironment.GetHabboById(user);
+                    if (habbo != null)
                     {
-                        MessengerBuddy Buddy = null;
-                        if (Session.GetHabbo().GetMessenger().TryGetFriend(User, out Buddy))
+                        MessengerBuddy buddy = null;
+                        if (session.GetHabbo().GetMessenger().TryGetFriend(user, out buddy))
                         {
-                            Session.SendPacket(new FriendListUpdateComposer(Session, Buddy));
+                            session.SendPacket(new FriendListUpdateComposer(session, buddy));
                         }
                     }
                 }

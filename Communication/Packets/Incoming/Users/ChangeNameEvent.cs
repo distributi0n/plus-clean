@@ -12,156 +12,154 @@
 
     internal class ChangeNameEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+
+            var user = room?.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Username);
+            if (user == null)
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
-            if (User == null)
+            var newName = packet.PopString();
+            var oldName = session.GetHabbo().Username;
+
+            if (newName == oldName)
             {
+                session.GetHabbo().ChangeName(oldName);
+                session.SendPacket(new UpdateUsernameComposer(newName));
                 return;
             }
 
-            var NewName = Packet.PopString();
-            var OldName = Session.GetHabbo().Username;
-            if (NewName == OldName)
+            if (!CanChangeName(session.GetHabbo()))
             {
-                Session.GetHabbo().ChangeName(OldName);
-                Session.SendPacket(new UpdateUsernameComposer(NewName));
+                session.SendNotification("Oops, it appears you currently cannot change your username!");
                 return;
             }
 
-            if (!CanChangeName(Session.GetHabbo()))
-            {
-                Session.SendNotification("Oops, it appears you currently cannot change your username!");
-                return;
-            }
-
-            var InUse = false;
+            bool inUse;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT COUNT(0) FROM `users` WHERE `username` = @name LIMIT 1");
-                dbClient.AddParameter("name", NewName);
-                InUse = dbClient.GetInteger() == 1;
+                dbClient.AddParameter("name", newName);
+                inUse = dbClient.GetInteger() == 1;
             }
-            var Letters = NewName.ToLower().ToCharArray();
-            var AllowedCharacters = "abcdefghijklmnopqrstuvwxyz.,_-;:?!1234567890";
-            foreach (var Chr in Letters)
+
+            var letters = newName.ToLower().ToCharArray();
+            var allowedCharacters = "abcdefghijklmnopqrstuvwxyz.,_-;:?!1234567890";
+
+            foreach (var chr in letters)
             {
-                if (!AllowedCharacters.Contains(Chr))
+                if (!allowedCharacters.Contains(chr))
                 {
                     return;
                 }
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool") && NewName.ToLower().Contains("mod") ||
-                NewName.ToLower().Contains("adm") ||
-                NewName.ToLower().Contains("admin") ||
-                NewName.ToLower().Contains("m0d") ||
-                NewName.ToLower().Contains("mob") ||
-                NewName.ToLower().Contains("m0b"))
-            {
-                return;
-            }
-            if (!NewName.ToLower().Contains("mod") && (Session.GetHabbo().Rank == 2 || Session.GetHabbo().Rank == 3))
-            {
-                return;
-            }
-            if (NewName.Length > 15)
-            {
-                return;
-            }
-            if (NewName.Length < 3)
-            {
-                return;
-            }
-            if (InUse)
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool") && newName.ToLower().Contains("mod") || newName.ToLower().Contains("adm") ||
+                newName.ToLower().Contains("admin")
+                || newName.ToLower().Contains("m0d") || newName.ToLower().Contains("mob") || newName.ToLower().Contains("m0b"))
             {
                 return;
             }
 
-            if (!PlusEnvironment.GetGame().GetClientManager().UpdateClientUsername(Session, OldName, NewName))
+            if (!newName.ToLower().Contains("mod") && (session.GetHabbo().Rank == 2 || session.GetHabbo().Rank == 3))
             {
-                Session.SendNotification("Oops! An issue occoured whilst updating your username.");
-                return;
             }
-
-            Session.GetHabbo().ChangingName = false;
-            Room.GetRoomUserManager().RemoveUserFromRoom(Session, true, false);
-            Session.GetHabbo().ChangeName(NewName);
-            Session.GetHabbo().GetMessenger().OnStatusChanged(true);
-            Session.SendPacket(new UpdateUsernameComposer(NewName));
-            Room.SendPacket(new UserNameChangeComposer(Room.Id, User.VirtualId, NewName));
-            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            else if (newName.Length > 15)
             {
-                dbClient.SetQuery("INSERT INTO `logs_client_namechange` (`user_id`,`new_name`,`old_name`,`timestamp`) VALUES ('" +
-                                  Session.GetHabbo().Id +
-                                  "', @name, '" +
-                                  OldName +
-                                  "', '" +
-                                  PlusEnvironment.GetUnixTimestamp() +
-                                  "')");
-                dbClient.AddParameter("name", NewName);
-                dbClient.RunQuery();
             }
-            ICollection<RoomData> Rooms = Session.GetHabbo().UsersRooms;
-            foreach (var Data in Rooms)
+            else if (newName.Length < 3)
             {
-                if (Data == null)
+            }
+            else if (inUse)
+            {
+            }
+            else
+            {
+                if (!PlusEnvironment.GetGame().GetClientManager().UpdateClientUsername(session, oldName, newName))
                 {
-                    continue;
+                    session.SendNotification("Oops! An issue occoured whilst updating your username.");
+                    return;
                 }
 
-                Data.OwnerName = NewName;
-            }
-            foreach (var UserRoom in PlusEnvironment.GetGame().GetRoomManager().GetRooms().ToList())
-            {
-                if (UserRoom == null || UserRoom.RoomData.OwnerName != NewName)
+                session.GetHabbo().ChangingName = false;
+
+                room.GetRoomUserManager().RemoveUserFromRoom(session, true);
+
+                session.GetHabbo().ChangeName(newName);
+                session.GetHabbo().GetMessenger().OnStatusChanged(true);
+
+                session.SendPacket(new UpdateUsernameComposer(newName));
+                room.SendPacket(new UserNameChangeComposer(room.Id, user.VirtualId, newName));
+
+                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    continue;
+                    dbClient.SetQuery("INSERT INTO `logs_client_namechange` (`user_id`,`new_name`,`old_name`,`timestamp`) VALUES ('" + session.GetHabbo().Id + "', @name, '" +
+                                      oldName + "', '" + PlusEnvironment.GetUnixTimestamp() + "')");
+                    dbClient.AddParameter("name", newName);
+                    dbClient.RunQuery();
                 }
 
-                UserRoom.OwnerName = NewName;
-                UserRoom.RoomData.OwnerName = NewName;
-                UserRoom.SendPacket(new RoomInfoUpdatedComposer(UserRoom.RoomId));
-            }
+                ICollection<RoomData> rooms = session.GetHabbo().UsersRooms;
+                foreach (var data in rooms)
+                {
+                    if (data == null)
+                    {
+                        continue;
+                    }
 
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_Name", 1);
-            Session.SendPacket(new RoomForwardComposer(Room.Id));
+                    data.OwnerName = newName;
+                }
+
+                foreach (var userRoom in PlusEnvironment.GetGame().GetRoomManager().GetRooms().ToList())
+                {
+                    if (userRoom == null || userRoom.RoomData.OwnerName != newName)
+                    {
+                        continue;
+                    }
+
+                    userRoom.OwnerName = newName;
+                    userRoom.RoomData.OwnerName = newName;
+
+                    userRoom.SendPacket(new RoomInfoUpdatedComposer(userRoom.RoomId));
+                }
+
+                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_Name", 1);
+
+                session.SendPacket(new RoomForwardComposer(room.Id));
+            }
         }
 
-        private static bool CanChangeName(Habbo Habbo)
+        private static bool CanChangeName(Habbo habbo)
         {
-            if (Habbo.Rank == 1 && Habbo.VIPRank == 0 && Habbo.LastNameChange == 0)
+            if (habbo.Rank == 1 && habbo.VipRank == 0 && habbo.LastNameChange == 0)
             {
                 return true;
             }
-            if (Habbo.Rank == 1 &&
-                Habbo.VIPRank == 1 &&
-                (Habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 604800 > Habbo.LastNameChange))
+
+            if (habbo.Rank == 1 && habbo.VipRank == 1 && (habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 604800 > habbo.LastNameChange))
             {
                 return true;
             }
-            if (Habbo.Rank == 1 &&
-                Habbo.VIPRank == 2 &&
-                (Habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 86400 > Habbo.LastNameChange))
+
+            if (habbo.Rank == 1 && habbo.VipRank == 2 && (habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 86400 > habbo.LastNameChange))
             {
                 return true;
             }
-            if (Habbo.Rank == 1 && Habbo.VIPRank == 3)
+
+            if (habbo.Rank == 1 && habbo.VipRank == 3)
             {
                 return true;
             }
-            if (Habbo.GetPermissions().HasRight("mod_tool"))
+
+            if (habbo.GetPermissions().HasRight("mod_tool"))
             {
                 return true;
             }

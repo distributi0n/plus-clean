@@ -7,53 +7,59 @@
 
     internal class SetTonerEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true))
-            {
-                return;
-            }
-            if (Room.TonerData == null)
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Room.TonerData.ItemId);
-            if (Item == null || Item.GetBaseItem().InteractionType != InteractionType.TONER)
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
-            var Id = Packet.PopInt();
-            var Int1 = Packet.PopInt();
-            var Int2 = Packet.PopInt();
-            var Int3 = Packet.PopInt();
-            if (Int1 > 255 || Int2 > 255 || Int3 > 255)
+            if (room.TonerData == null)
+            {
+                return;
+            }
+
+            var item = room.GetRoomItemHandler().GetItem(room.TonerData.ItemId);
+
+            if (item == null || item.GetBaseItem().InteractionType != InteractionType.Toner)
+            {
+                return;
+            }
+
+            var id = packet.PopInt();
+            var int1 = packet.PopInt();
+            var int2 = packet.PopInt();
+            var int3 = packet.PopInt();
+
+            if (int1 > 255 || int2 > 255 || int3 > 255)
             {
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "UPDATE `room_items_toner` SET `enabled` = '1', `data1` = @data1, `data2` = @data2, `data3` = @data3 WHERE `id` = @itemId LIMIT 1");
-                dbClient.AddParameter("itemId", Item.Id);
-                dbClient.AddParameter("data1", Int1);
-                dbClient.AddParameter("data3", Int3);
-                dbClient.AddParameter("data2", Int2);
+                dbClient.SetQuery("UPDATE `room_items_toner` SET `enabled` = '1', `data1` = @data1, `data2` = @data2, `data3` = @data3 WHERE `id` = @itemId LIMIT 1");
+                dbClient.AddParameter("itemId", item.Id);
+                dbClient.AddParameter("data1", int1);
+                dbClient.AddParameter("data3", int3);
+                dbClient.AddParameter("data2", int2);
                 dbClient.RunQuery();
             }
-            Room.TonerData.Hue = Int1;
-            Room.TonerData.Saturation = Int2;
-            Room.TonerData.Lightness = Int3;
-            Room.TonerData.Enabled = 1;
-            Room.SendPacket(new ObjectUpdateComposer(Item, Room.OwnerId));
-            Item.UpdateState();
+
+            room.TonerData.Hue = int1;
+            room.TonerData.Saturation = int2;
+            room.TonerData.Lightness = int3;
+            room.TonerData.Enabled = 1;
+
+            room.SendPacket(new ObjectUpdateComposer(item, room.OwnerId));
+            item.UpdateState();
         }
     }
 }

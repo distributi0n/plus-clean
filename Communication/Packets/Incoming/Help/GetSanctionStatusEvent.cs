@@ -2,9 +2,9 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class GetSanctionStatusEvent : IPacketEvent
+    internal class GetSanctionStatusEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
             //Session.SendMessage(new SanctionStatusComposer());
         }

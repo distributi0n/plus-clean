@@ -12,102 +12,102 @@
 
         public string Description => "Pull another user towards you.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you wish to pull.");
+                session.SendWhisper("Please enter the username of the user you wish to pull.");
                 return;
             }
 
-            if (!Room.PullEnabled && !Session.GetHabbo().GetPermissions().HasRight("room_override_custom_config"))
+            if (!room.PullEnabled && !session.GetHabbo().GetPermissions().HasRight("room_override_custom_config"))
             {
-                Session.SendWhisper(
+                session.SendWhisper(
                     "Oops, it appears that the room owner has disabled the ability to use the pull command in here.");
                 return;
             }
 
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
-            if (TargetClient == null)
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            if (targetClient == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            var TargetUser = Room.GetRoomUserManager().GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-            if (TargetUser == null)
+            var targetUser = room.GetRoomUserManager().GetRoomUserByHabbo(targetClient.GetHabbo().Id);
+            if (targetUser == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online or in this room.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online or in this room.");
                 return;
             }
 
-            if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
+            if (targetClient.GetHabbo().Username == session.GetHabbo().Username)
             {
-                Session.SendWhisper("Come on, surely you don't want to push yourself!");
+                session.SendWhisper("Come on, surely you don't want to push yourself!");
                 return;
             }
 
-            if (TargetUser.TeleportEnabled)
+            if (targetUser.TeleportEnabled)
             {
-                Session.SendWhisper("Oops, you cannot push a user whilst they have their teleport mode enabled.");
+                session.SendWhisper("Oops, you cannot push a user whilst they have their teleport mode enabled.");
                 return;
             }
 
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (ThisUser == null)
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (thisUser == null)
             {
                 return;
             }
 
-            if (ThisUser.SetX - 1 == Room.GetGameMap().Model.DoorX)
+            if (thisUser.SetX - 1 == room.GetGameMap().Model.DoorX)
             {
-                Session.SendWhisper("Please don't pull that user out of the room :(!");
+                session.SendWhisper("Please don't pull that user out of the room :(!");
                 return;
             }
 
-            var PushDirection = "down";
-            if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId &&
-                Math.Abs(ThisUser.X - TargetUser.X) < 3 &&
-                Math.Abs(ThisUser.Y - TargetUser.Y) < 3)
+            var pushDirection = "down";
+            if (targetClient.GetHabbo().CurrentRoomId == session.GetHabbo().CurrentRoomId &&
+                Math.Abs(thisUser.X - targetUser.X) < 3 &&
+                Math.Abs(thisUser.Y - targetUser.Y) < 3)
             {
-                Room.SendPacket(new ChatComposer(ThisUser.VirtualId, "*pulls " + Params[1] + " to them*", 0,
-                    ThisUser.LastBubble));
-                if (ThisUser.RotBody == 0)
+                room.SendPacket(new ChatComposer(thisUser.VirtualId, "*pulls " + Params[1] + " to them*", 0,
+                    thisUser.LastBubble));
+                if (thisUser.RotBody == 0)
                 {
-                    PushDirection = "up";
+                    pushDirection = "up";
                 }
-                if (ThisUser.RotBody == 2)
+                if (thisUser.RotBody == 2)
                 {
-                    PushDirection = "right";
+                    pushDirection = "right";
                 }
-                if (ThisUser.RotBody == 4)
+                if (thisUser.RotBody == 4)
                 {
-                    PushDirection = "down";
+                    pushDirection = "down";
                 }
-                if (ThisUser.RotBody == 6)
+                if (thisUser.RotBody == 6)
                 {
-                    PushDirection = "left";
+                    pushDirection = "left";
                 }
-                if (PushDirection == "up")
+                if (pushDirection == "up")
                 {
-                    TargetUser.MoveTo(ThisUser.X, ThisUser.Y - 1);
+                    targetUser.MoveTo(thisUser.X, thisUser.Y - 1);
                 }
-                if (PushDirection == "right")
+                if (pushDirection == "right")
                 {
-                    TargetUser.MoveTo(ThisUser.X + 1, ThisUser.Y);
+                    targetUser.MoveTo(thisUser.X + 1, thisUser.Y);
                 }
-                if (PushDirection == "down")
+                if (pushDirection == "down")
                 {
-                    TargetUser.MoveTo(ThisUser.X, ThisUser.Y + 1);
+                    targetUser.MoveTo(thisUser.X, thisUser.Y + 1);
                 }
-                if (PushDirection == "left")
+                if (pushDirection == "left")
                 {
-                    TargetUser.MoveTo(ThisUser.X - 1, ThisUser.Y);
+                    targetUser.MoveTo(thisUser.X - 1, thisUser.Y);
                 }
                 return;
             }
 
-            Session.SendWhisper("That user is not close enough to you to be pulled, try getting closer!");
+            session.SendWhisper("That user is not close enough to you to be pulled, try getting closer!");
         }
     }
 }

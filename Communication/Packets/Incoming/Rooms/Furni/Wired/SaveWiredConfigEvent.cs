@@ -6,46 +6,48 @@
 
     internal class SaveWiredConfigEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
-            {
-                return;
-            }
-            if (!Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null || !Room.CheckRights(Session, false, true))
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            Session.SendPacket(new HideWiredConfigComposer());
-            var SelectedItem = Room.GetRoomItemHandler().GetItem(ItemId);
-            if (SelectedItem == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null || !room.CheckRights(session, false, true))
             {
                 return;
             }
 
-            IWiredItem Box = null;
-            if (!Session.GetHabbo().CurrentRoom.GetWired().TryGet(ItemId, out Box))
+            var itemId = packet.PopInt();
+
+            session.SendPacket(new HideWiredConfigComposer());
+
+            var selectedItem = room.GetRoomItemHandler().GetItem(itemId);
+            if (selectedItem == null)
             {
                 return;
             }
 
-            if (Box.Type == WiredBoxType.EffectGiveUserBadge &&
-                !Session.GetHabbo().GetPermissions().HasRight("room_item_wired_rewards"))
+            IWiredItem box = null;
+            if (!session.GetHabbo().CurrentRoom.GetWired().TryGet(itemId, out box))
             {
-                Session.SendNotification("You don't have the correct permissions to do this.");
                 return;
             }
 
-            Box.HandleSave(Packet);
-            Session.GetHabbo().CurrentRoom.GetWired().SaveBox(Box);
+            if (box.Type == WiredBoxType.EffectGiveUserBadge && !session.GetHabbo().GetPermissions().HasRight("room_item_wired_rewards"))
+            {
+                session.SendNotification("You don't have the correct permissions to do this.");
+                return;
+            }
+
+            box.HandleSave(packet);
+            session.GetHabbo().CurrentRoom.GetWired().SaveBox(box);
         }
     }
 }

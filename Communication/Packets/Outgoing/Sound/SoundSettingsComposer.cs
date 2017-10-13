@@ -4,19 +4,18 @@
 
     internal class SoundSettingsComposer : ServerPacket
     {
-        public SoundSettingsComposer(ICollection<int> ClientVolumes, bool ChatPreference, bool InvitesStatus,
-            bool FocusPreference, int FriendBarState)
+        public SoundSettingsComposer(ICollection<int> clientVolumes, bool chatPreference, bool invitesStatus, bool focusPreference, int friendBarState)
             : base(ServerPacketHeader.SoundSettingsMessageComposer)
         {
-            foreach (var VolumeValue in ClientVolumes)
+            foreach (var volumeValue in clientVolumes)
             {
-                WriteInteger(VolumeValue);
+                WriteInteger(volumeValue);
             }
 
-            WriteBoolean(ChatPreference);
-            WriteBoolean(InvitesStatus);
-            WriteBoolean(FocusPreference);
-            WriteInteger(FriendBarState);
+            WriteBoolean(chatPreference);
+            WriteBoolean(invitesStatus);
+            WriteBoolean(focusPreference);
+            WriteInteger(friendBarState);
             WriteInteger(0);
             WriteInteger(0);
         }

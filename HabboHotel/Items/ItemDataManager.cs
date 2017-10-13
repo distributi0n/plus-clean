@@ -7,64 +7,64 @@
 
     public class ItemDataManager
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Items.ItemDataManager");
-        public Dictionary<int, ItemData> _gifts; //<SpriteId, Item>
+        private static readonly ILog Log = LogManager.GetLogger("Plus.HabboHotel.Items.ItemDataManager");
+        public Dictionary<int, ItemData> Gifts; //<SpriteId, Item>
 
-        public Dictionary<int, ItemData> _items;
+        public Dictionary<int, ItemData> Items;
 
         public ItemDataManager()
         {
-            _items = new Dictionary<int, ItemData>();
-            _gifts = new Dictionary<int, ItemData>();
+            Items = new Dictionary<int, ItemData>();
+            Gifts = new Dictionary<int, ItemData>();
         }
 
         public void Init()
         {
-            if (_items.Count > 0)
+            if (Items.Count > 0)
             {
-                _items.Clear();
+                Items.Clear();
             }
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `furniture`");
-                var ItemData = dbClient.GetTable();
-                if (ItemData != null)
+                var itemData = dbClient.GetTable();
+                if (itemData != null)
                 {
-                    foreach (DataRow Row in ItemData.Rows)
+                    foreach (DataRow row in itemData.Rows)
                     {
                         try
                         {
-                            var id = Convert.ToInt32(Row["id"]);
-                            var spriteID = Convert.ToInt32(Row["sprite_id"]);
-                            var itemName = Convert.ToString(Row["item_name"]);
-                            var PublicName = Convert.ToString(Row["public_name"]);
-                            var type = Row["type"].ToString();
-                            var width = Convert.ToInt32(Row["width"]);
-                            var length = Convert.ToInt32(Row["length"]);
-                            var height = Convert.ToDouble(Row["stack_height"]);
-                            var allowStack = PlusEnvironment.EnumToBool(Row["can_stack"].ToString());
-                            var allowWalk = PlusEnvironment.EnumToBool(Row["is_walkable"].ToString());
-                            var allowSit = PlusEnvironment.EnumToBool(Row["can_sit"].ToString());
-                            var allowRecycle = PlusEnvironment.EnumToBool(Row["allow_recycle"].ToString());
-                            var allowTrade = PlusEnvironment.EnumToBool(Row["allow_trade"].ToString());
-                            var allowMarketplace = Convert.ToInt32(Row["allow_marketplace_sell"]) == 1;
-                            var allowGift = Convert.ToInt32(Row["allow_gift"]) == 1;
-                            var allowInventoryStack = PlusEnvironment.EnumToBool(Row["allow_inventory_stack"].ToString());
-                            var interactionType = InteractionTypes.GetTypeFromString(Convert.ToString(Row["interaction_type"]));
-                            var behaviourData = Convert.ToInt32(Row["behaviour_data"]);
-                            var cycleCount = Convert.ToInt32(Row["interaction_modes_count"]);
-                            var vendingIDS = Convert.ToString(Row["vending_ids"]);
-                            var heightAdjustable = Convert.ToString(Row["height_adjustable"]);
-                            var EffectId = Convert.ToInt32(Row["effect_id"]);
-                            var IsRare = PlusEnvironment.EnumToBool(Row["is_rare"].ToString());
-                            var ExtraRot = PlusEnvironment.EnumToBool(Row["extra_rot"].ToString());
-                            if (!_gifts.ContainsKey(spriteID))
+                            var id = Convert.ToInt32(row["id"]);
+                            var spriteId = Convert.ToInt32(row["sprite_id"]);
+                            var itemName = Convert.ToString(row["item_name"]);
+                            var publicName = Convert.ToString(row["public_name"]);
+                            var type = row["type"].ToString();
+                            var width = Convert.ToInt32(row["width"]);
+                            var length = Convert.ToInt32(row["length"]);
+                            var height = Convert.ToDouble(row["stack_height"]);
+                            var allowStack = PlusEnvironment.EnumToBool(row["can_stack"].ToString());
+                            var allowWalk = PlusEnvironment.EnumToBool(row["is_walkable"].ToString());
+                            var allowSit = PlusEnvironment.EnumToBool(row["can_sit"].ToString());
+                            var allowRecycle = PlusEnvironment.EnumToBool(row["allow_recycle"].ToString());
+                            var allowTrade = PlusEnvironment.EnumToBool(row["allow_trade"].ToString());
+                            var allowMarketplace = Convert.ToInt32(row["allow_marketplace_sell"]) == 1;
+                            var allowGift = Convert.ToInt32(row["allow_gift"]) == 1;
+                            var allowInventoryStack = PlusEnvironment.EnumToBool(row["allow_inventory_stack"].ToString());
+                            var interactionType = InteractionTypes.GetTypeFromString(Convert.ToString(row["interaction_type"]));
+                            var behaviourData = Convert.ToInt32(row["behaviour_data"]);
+                            var cycleCount = Convert.ToInt32(row["interaction_modes_count"]);
+                            var vendingIds = Convert.ToString(row["vending_ids"]);
+                            var heightAdjustable = Convert.ToString(row["height_adjustable"]);
+                            var effectId = Convert.ToInt32(row["effect_id"]);
+                            var isRare = PlusEnvironment.EnumToBool(row["is_rare"].ToString());
+                            var extraRot = PlusEnvironment.EnumToBool(row["extra_rot"].ToString());
+                            if (!Gifts.ContainsKey(spriteId))
                             {
-                                _gifts.Add(spriteID,
+                                Gifts.Add(spriteId,
                                     new ItemData(id,
-                                        spriteID,
+                                        spriteId,
                                         itemName,
-                                        PublicName,
+                                        publicName,
                                         type,
                                         width,
                                         length,
@@ -80,19 +80,19 @@
                                         interactionType,
                                         behaviourData,
                                         cycleCount,
-                                        vendingIDS,
+                                        vendingIds,
                                         heightAdjustable,
-                                        EffectId,
-                                        IsRare,
-                                        ExtraRot));
+                                        effectId,
+                                        isRare,
+                                        extraRot));
                             }
-                            if (!_items.ContainsKey(id))
+                            if (!Items.ContainsKey(id))
                             {
-                                _items.Add(id,
+                                Items.Add(id,
                                     new ItemData(id,
-                                        spriteID,
+                                        spriteId,
                                         itemName,
-                                        PublicName,
+                                        publicName,
                                         type,
                                         width,
                                         length,
@@ -108,11 +108,11 @@
                                         interactionType,
                                         behaviourData,
                                         cycleCount,
-                                        vendingIDS,
+                                        vendingIds,
                                         heightAdjustable,
-                                        EffectId,
-                                        IsRare,
-                                        ExtraRot));
+                                        effectId,
+                                        isRare,
+                                        extraRot));
                             }
                         }
                         catch (Exception e)
@@ -126,12 +126,12 @@
                 }
             }
 
-            log.Info("Item Manager -> LOADED");
+            Log.Info("Item Manager -> LOADED");
         }
 
-        public bool GetItem(int Id, out ItemData Item)
+        public bool GetItem(int id, out ItemData item)
         {
-            if (_items.TryGetValue(Id, out Item))
+            if (Items.TryGetValue(id, out item))
             {
                 return true;
             }
@@ -141,7 +141,7 @@
 
         public ItemData GetItemByName(string name)
         {
-            foreach (var entry in _items)
+            foreach (var entry in Items)
             {
                 var item = entry.Value;
                 if (item.ItemName == name)
@@ -153,9 +153,9 @@
             return null;
         }
 
-        public bool GetGift(int SpriteId, out ItemData Item)
+        public bool GetGift(int spriteId, out ItemData item)
         {
-            if (_gifts.TryGetValue(SpriteId, out Item))
+            if (Gifts.TryGetValue(spriteId, out item))
             {
                 return true;
             }

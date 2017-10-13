@@ -4,18 +4,18 @@
 
     internal class OpenBotActionComposer : ServerPacket
     {
-        public OpenBotActionComposer(RoomUser BotUser, int ActionId, string BotSpeech) : base(ServerPacketHeader
-            .OpenBotActionMessageComposer)
+        public OpenBotActionComposer(RoomUser botUser, int actionId, string botSpeech)
+            : base(ServerPacketHeader.OpenBotActionMessageComposer)
         {
-            WriteInteger(BotUser.BotData.Id);
-            WriteInteger(ActionId);
-            if (ActionId == 2)
+            WriteInteger(botUser.BotData.Id);
+            WriteInteger(actionId);
+            if (actionId == 2)
             {
-                WriteString(BotSpeech);
+                WriteString(botSpeech);
             }
-            else if (ActionId == 5)
+            else if (actionId == 5)
             {
-                WriteString(BotUser.BotData.Name);
+                WriteString(botUser.BotData.Name);
             }
         }
     }

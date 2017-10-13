@@ -12,22 +12,22 @@
 
         public string Description => "View your current statistics.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var Minutes = Session.GetHabbo().GetStats().OnlineTime / 60;
-            var Hours = Minutes / 60;
-            var OnlineTime = Convert.ToInt32(Hours);
-            var s = OnlineTime == 1 ? "" : "s";
-            var HabboInfo = new StringBuilder();
-            HabboInfo.Append("Your account stats:\r\r");
-            HabboInfo.Append("Currency Info:\r");
-            HabboInfo.Append("Credits: " + Session.GetHabbo().Credits + "\r");
-            HabboInfo.Append("Duckets: " + Session.GetHabbo().Duckets + "\r");
-            HabboInfo.Append("Diamonds: " + Session.GetHabbo().Diamonds + "\r");
-            HabboInfo.Append("Online Time: " + OnlineTime + " Hour" + s + "\r");
-            HabboInfo.Append("Respects: " + Session.GetHabbo().GetStats().Respect + "\r");
-            HabboInfo.Append("GOTW Points: " + Session.GetHabbo().GOTWPoints + "\r\r");
-            Session.SendNotification(HabboInfo.ToString());
+            var minutes = session.GetHabbo().GetStats().OnlineTime / 60;
+            var hours = minutes / 60;
+            var onlineTime = Convert.ToInt32(hours);
+            var s = onlineTime == 1 ? "" : "s";
+            var habboInfo = new StringBuilder();
+            habboInfo.Append("Your account stats:\r\r");
+            habboInfo.Append("Currency Info:\r");
+            habboInfo.Append("Credits: " + session.GetHabbo().Credits + "\r");
+            habboInfo.Append("Duckets: " + session.GetHabbo().Duckets + "\r");
+            habboInfo.Append("Diamonds: " + session.GetHabbo().Diamonds + "\r");
+            habboInfo.Append("Online Time: " + onlineTime + " Hour" + s + "\r");
+            habboInfo.Append("Respects: " + session.GetHabbo().GetStats().Respect + "\r");
+            habboInfo.Append("GOTW Points: " + session.GetHabbo().GotwPoints + "\r\r");
+            session.SendNotification(habboInfo.ToString());
         }
     }
 }

@@ -13,17 +13,17 @@
 
         public string Description => "Kick all of the pets from the room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient Session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(Session, true))
             {
                 Session.SendWhisper("Oops, only the room owner can run this command!");
                 return;
             }
 
-            if (Room.GetRoomUserManager().GetPets().Count > 0)
+            if (room.GetRoomUserManager().GetPets().Count > 0)
             {
-                foreach (var Pet in Room.GetRoomUserManager().GetUserList().ToList())
+                foreach (var Pet in room.GetRoomUserManager().GetUserList().ToList())
                 {
                     if (Pet == null)
                     {
@@ -32,7 +32,7 @@
 
                     if (Pet.RidingHorse)
                     {
-                        var UserRiding = Room.GetRoomUserManager().GetRoomUserByVirtualId(Pet.HorseID);
+                        var UserRiding = room.GetRoomUserManager().GetRoomUserByVirtualId(Pet.HorseID);
                         if (UserRiding != null)
                         {
                             UserRiding.RidingHorse = false;
@@ -56,7 +56,7 @@
                                 pet.PetId +
                                 "' LIMIT 1");
                             dbClient.RunQuery("UPDATE `bots_petdata` SET `experience` = '" +
-                                              pet.experience +
+                                              pet.Experience +
                                               "', `energy` = '" +
                                               pet.Energy +
                                               "', `nutrition` = '" +
@@ -74,14 +74,14 @@
                         if (Target != null)
                         {
                             Target.GetHabbo().GetInventoryComponent().TryAddPet(Pet.PetData);
-                            Room.GetRoomUserManager().RemoveBot(Pet.VirtualId, false);
+                            room.GetRoomUserManager().RemoveBot(Pet.VirtualId, false);
                             Target.SendPacket(new PetInventoryComposer(Target.GetHabbo().GetInventoryComponent().GetPets()));
                             return;
                         }
                     }
 
                     Session.GetHabbo().GetInventoryComponent().TryAddPet(Pet.PetData);
-                    Room.GetRoomUserManager().RemoveBot(Pet.VirtualId, false);
+                    room.GetRoomUserManager().RemoveBot(Pet.VirtualId, false);
                     Session.SendPacket(new PetInventoryComposer(Session.GetHabbo().GetInventoryComponent().GetPets()));
                 }
 

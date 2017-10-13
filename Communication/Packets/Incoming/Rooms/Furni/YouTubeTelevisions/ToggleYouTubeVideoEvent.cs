@@ -5,11 +5,12 @@
 
     internal class ToggleYouTubeVideoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var ItemId = Packet.PopInt(); //Item Id
-            var VideoId = Packet.PopString(); //Video ID
-            Session.SendPacket(new GetYouTubeVideoComposer(ItemId, VideoId));
+            var itemId = packet.PopInt(); //Item Id
+            var videoId = packet.PopString(); //Video ID
+
+            session.SendPacket(new GetYouTubeVideoComposer(itemId, videoId));
         }
     }
 }

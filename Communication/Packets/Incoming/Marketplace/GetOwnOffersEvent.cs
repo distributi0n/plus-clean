@@ -5,9 +5,9 @@
 
     internal class GetOwnOffersEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new MarketPlaceOwnOffersComposer(Session.GetHabbo().Id));
+            session.SendPacket(new MarketPlaceOwnOffersComposer(session.GetHabbo().Id));
         }
     }
 }

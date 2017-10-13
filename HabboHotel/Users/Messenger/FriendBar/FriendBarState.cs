@@ -2,7 +2,7 @@
 {
     public enum FriendBarState
     {
-        OPEN,
-        CLOSED
+        Open,
+        Closed
     }
 }

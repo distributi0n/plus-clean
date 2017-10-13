@@ -10,57 +10,57 @@
 
         public string PermissionRequired => "command_sell_room";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Oops, you forgot to choose a price to sell the room for.");
+                session.SendWhisper("Oops, you forgot to choose a price to sell the room for.");
                 return;
             }
 
-            if (Room.Group != null)
+            if (room.Group != null)
             {
-                Session.SendWhisper("Oops, this room has a group. You must delete the group before you can sell the room.");
+                session.SendWhisper("Oops, this room has a group. You must delete the group before you can sell the room.");
                 return;
             }
 
-            var Price = 0;
-            if (!int.TryParse(Params[1], out Price))
+            var price = 0;
+            if (!int.TryParse(Params[1], out price))
             {
-                Session.SendWhisper("Oops, you've entered an invalid integer.");
+                session.SendWhisper("Oops, you've entered an invalid integer.");
                 return;
             }
 
-            if (Price == 0)
+            if (price == 0)
             {
-                Session.SendWhisper("Oops, you cannot sell a room for 0 credits.");
+                session.SendWhisper("Oops, you cannot sell a room for 0 credits.");
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `rooms` SET `sale_price` = @SalePrice WHERE `id` = @Id LIMIT 1");
-                dbClient.AddParameter("SalePrice", Price);
-                dbClient.AddParameter("Id", Room.Id);
+                dbClient.AddParameter("SalePrice", price);
+                dbClient.AddParameter("Id", room.Id);
                 dbClient.RunQuery();
             }
-            Session.SendNotification(
+            session.SendNotification(
                 "Your room is now up for sale. The the current room visitors have been alerted, any item that belongs to you in this room will be transferred to the new owner once purchased. Other items shall be ejected.");
-            foreach (var User in Room.GetRoomUserManager().GetRoomUsers())
+            foreach (var user in room.GetRoomUserManager().GetRoomUsers())
             {
-                if (User == null || User.GetClient() == null)
+                if (user == null || user.GetClient() == null)
                 {
                     continue;
                 }
 
-                User.GetClient()
+                user.GetClient()
                     .SendWhisper("Attention! This room has been put up for sale, you can buy it now for " +
-                                 Price +
+                                 price +
                                  " credits! Use the :buyroom command.");
             }
         }

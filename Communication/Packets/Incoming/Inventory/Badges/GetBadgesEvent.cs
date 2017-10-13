@@ -5,9 +5,9 @@
 
     internal class GetBadgesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new BadgesComposer(Session));
+            session.SendPacket(new BadgesComposer(session));
         }
     }
 }

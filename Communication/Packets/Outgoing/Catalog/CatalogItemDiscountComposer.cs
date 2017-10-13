@@ -2,7 +2,8 @@
 {
     internal class CatalogItemDiscountComposer : ServerPacket
     {
-        public CatalogItemDiscountComposer() : base(ServerPacketHeader.CatalogItemDiscountMessageComposer)
+        public CatalogItemDiscountComposer()
+            : base(ServerPacketHeader.CatalogItemDiscountMessageComposer)
         {
             WriteInteger(100); //Most you can get.
             WriteInteger(6);

@@ -5,16 +5,16 @@
 
     internal class GoToFlatEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            if (!Session.GetHabbo().EnterRoom(Session.GetHabbo().CurrentRoom))
+            if (!session.GetHabbo().EnterRoom(session.GetHabbo().CurrentRoom))
             {
-                Session.SendPacket(new CloseConnectionComposer());
+                session.SendPacket(new CloseConnectionComposer());
             }
         }
     }

@@ -5,9 +5,9 @@
 
     internal class GetCatalogRoomPromotionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new GetCatalogRoomPromotionComposer(Session.GetHabbo().UsersRooms));
+            session.SendPacket(new GetCatalogRoomPromotionComposer(session.GetHabbo().UsersRooms));
         }
     }
 }

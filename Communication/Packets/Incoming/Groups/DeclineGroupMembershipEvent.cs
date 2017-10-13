@@ -4,28 +4,31 @@
     using HabboHotel.Groups;
     using Outgoing.Groups;
 
-    internal sealed class DeclineGroupMembershipEvent : IPacketEvent
+    internal class DeclineGroupMembershipEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            var UserId = Packet.PopInt();
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
-            {
-                return;
-            }
-            if (Session.GetHabbo().Id != Group.CreatorId && !Group.IsAdmin(Session.GetHabbo().Id))
-            {
-                return;
-            }
-            if (!Group.HasRequest(UserId))
+            var groupId = packet.PopInt();
+            var userId = packet.PopInt();
+
+            Group group;
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out group))
             {
                 return;
             }
 
-            Group.HandleRequest(UserId, false);
-            Session.SendPacket(new UnknownGroupComposer(Group.Id, UserId));
+            if (session.GetHabbo().Id != group.CreatorId && !group.IsAdmin(session.GetHabbo().Id))
+            {
+                return;
+            }
+
+            if (!group.HasRequest(userId))
+            {
+                return;
+            }
+
+            group.HandleRequest(userId, false);
+            session.SendPacket(new UnknownGroupComposer(group.Id, userId));
         }
     }
 }

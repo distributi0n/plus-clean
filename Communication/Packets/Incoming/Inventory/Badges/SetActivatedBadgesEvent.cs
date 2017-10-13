@@ -2,56 +2,57 @@
 {
     using HabboHotel.GameClients;
     using HabboHotel.Quests;
-    using HabboHotel.Rooms;
     using Outgoing.Users;
 
     internal class SetActivatedBadgesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.GetHabbo().GetBadgeComponent().ResetSlots();
+            session.GetHabbo().GetBadgeComponent().ResetSlots();
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `user_badges` SET `badge_slot` = '0' WHERE `user_id` = @userId");
-                dbClient.AddParameter("userId", Session.GetHabbo().Id);
+                dbClient.AddParameter("userId", session.GetHabbo().Id);
                 dbClient.RunQuery();
             }
+
             for (var i = 0; i < 5; i++)
             {
-                var Slot = Packet.PopInt();
-                var Badge = Packet.PopString();
-                if (Badge.Length == 0)
+                var slot = packet.PopInt();
+                var badge = packet.PopString();
+
+                if (badge.Length == 0)
                 {
                     continue;
                 }
 
-                if (!Session.GetHabbo().GetBadgeComponent().HasBadge(Badge) || Slot < 1 || Slot > 5)
+                if (!session.GetHabbo().GetBadgeComponent().HasBadge(badge) || slot < 1 || slot > 5)
                 {
                     return;
                 }
 
-                Session.GetHabbo().GetBadgeComponent().GetBadge(Badge).Slot = Slot;
+                session.GetHabbo().GetBadgeComponent().GetBadge(badge).Slot = slot;
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.SetQuery(
-                        "UPDATE `user_badges` SET `badge_slot` = @slot WHERE `badge_id` = @badge AND `user_id` = @userId LIMIT 1");
-                    dbClient.AddParameter("slot", Slot);
-                    dbClient.AddParameter("badge", Badge);
-                    dbClient.AddParameter("userId", Session.GetHabbo().Id);
+                    dbClient.SetQuery("UPDATE `user_badges` SET `badge_slot` = @slot WHERE `badge_id` = @badge AND `user_id` = @userId LIMIT 1");
+                    dbClient.AddParameter("slot", slot);
+                    dbClient.AddParameter("badge", badge);
+                    dbClient.AddParameter("userId", session.GetHabbo().Id);
                     dbClient.RunQuery();
                 }
             }
 
-            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.PROFILE_BADGE);
-            Room Room;
-            if (Session.GetHabbo().InRoom &&
-                PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.ProfileBadge);
+
+            if (session.GetHabbo().InRoom && PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out _))
             {
-                Session.GetHabbo().CurrentRoom.SendPacket(new HabboUserBadgesComposer(Session.GetHabbo()));
+                session.GetHabbo().CurrentRoom.SendPacket(new HabboUserBadgesComposer(session.GetHabbo()));
             }
             else
             {
-                Session.SendPacket(new HabboUserBadgesComposer(Session.GetHabbo()));
+                session.SendPacket(new HabboUserBadgesComposer(session.GetHabbo()));
             }
         }
     }

@@ -19,12 +19,12 @@
         {
             _i = 0;
             _j = 0;
-            
+
             for (_i = 0; _i < Poolsize; ++_i)
             {
                 _bytes[_i] = (byte) _i;
             }
-            
+
             for (_i = 0; _i < Poolsize; ++_i)
             {
                 _j = (_j + _bytes[_i] + key[_i % key.Count]) & (Poolsize - 1);

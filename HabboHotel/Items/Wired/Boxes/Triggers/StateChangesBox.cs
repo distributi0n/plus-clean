@@ -8,10 +8,10 @@
 
     internal class StateChangesBox : IWiredItem
     {
-        public StateChangesBox(Room Instance, Item Item)
+        public StateChangesBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -23,72 +23,72 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
         }
 
         public bool Execute(params object[] Params)
         {
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var Item = (Item) Params[1];
-            if (Item == null)
+            var item = (Item) Params[1];
+            if (item == null)
             {
                 return false;
             }
-            if (!SetItems.ContainsKey(Item.Id))
+            if (!SetItems.ContainsKey(item.Id))
             {
                 return false;
             }
 
-            var Effects = Instance.GetWired().GetEffects(this);
-            var Conditions = Instance.GetWired().GetConditions(this);
-            foreach (var Condition in Conditions)
+            var effects = Instance.GetWired().GetEffects(this);
+            var conditions = Instance.GetWired().GetConditions(this);
+            foreach (var condition in conditions)
             {
-                if (!Condition.Execute(Player))
+                if (!condition.Execute(player))
                 {
                     return false;
                 }
 
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(Condition.Item);
+                    Instance.GetWired().OnEvent(condition.Item);
                 }
             }
 
             //Check the ICollection to find the random addon effect.
-            var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
-            if (HasRandomEffectAddon)
+            var hasRandomEffectAddon = effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+            if (hasRandomEffectAddon)
             {
                 //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
-                if (!RandomBox.Execute())
+                var randomBox = effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                if (!randomBox.Execute())
                 {
                     return false;
                 }
 
                 //Success! Let's get our selected box and continue.
-                var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
-                if (!SelectedBox.Execute())
+                var selectedBox = Instance.GetWired().GetRandomEffect(effects.ToList());
+                if (!selectedBox.Execute())
                 {
                     return false;
                 }
@@ -96,22 +96,22 @@
                 //Woo! Almost there captain, now lets broadcast the update to the room instance.
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(RandomBox.Item);
-                    Instance.GetWired().OnEvent(SelectedBox.Item);
+                    Instance.GetWired().OnEvent(randomBox.Item);
+                    Instance.GetWired().OnEvent(selectedBox.Item);
                 }
             }
             else
             {
-                foreach (var Effect in Effects)
+                foreach (var effect in effects)
                 {
-                    if (!Effect.Execute(Player))
+                    if (!effect.Execute(player))
                     {
                         return false;
                     }
 
                     if (Instance != null)
                     {
-                        Instance.GetWired().OnEvent(Effect.Item);
+                        Instance.GetWired().OnEvent(effect.Item);
                     }
                 }
             }

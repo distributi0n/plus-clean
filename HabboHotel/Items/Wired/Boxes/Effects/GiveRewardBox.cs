@@ -6,10 +6,10 @@
 
     internal class GiveRewardBox : IWiredItem
     {
-        public GiveRewardBox(Room Instance, Item Item)
+        public GiveRewardBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             if (SetItems.Count > 0)
             {
@@ -25,15 +25,15 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var Time = Packet.PopInt();
-            var Message = Packet.PopString();
+            var unknown = packet.PopInt();
+            var time = packet.PopInt();
+            var message = packet.PopString();
 
             //this.StringData = Time + ";" + Message;
         }

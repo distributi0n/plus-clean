@@ -5,9 +5,8 @@
 
     internal class MarketPlaceOffersComposer : ServerPacket
     {
-        public MarketPlaceOffersComposer(int MinCost, int MaxCost, Dictionary<int, MarketOffer> dictionary,
-            Dictionary<int, int> dictionary2) : base(
-            ServerPacketHeader.MarketPlaceOffersMessageComposer)
+        public MarketPlaceOffersComposer(int minCost, int maxCost, Dictionary<int, MarketOffer> dictionary, Dictionary<int, int> dictionary2)
+            : base(ServerPacketHeader.MarketPlaceOffersMessageComposer)
         {
             WriteInteger(dictionary.Count);
             if (dictionary.Count > 0)
@@ -18,10 +17,12 @@
                     WriteInteger(1); //State
                     WriteInteger(1);
                     WriteInteger(pair.Value.SpriteId);
+
                     WriteInteger(256);
                     WriteString("");
                     WriteInteger(pair.Value.LimitedNumber);
                     WriteInteger(pair.Value.LimitedStack);
+
                     WriteInteger(pair.Value.TotalPrice);
                     WriteInteger(0);
                     WriteInteger(PlusEnvironment.GetGame().GetCatalog().GetMarketplace().AvgPriceForSprite(pair.Value.SpriteId));

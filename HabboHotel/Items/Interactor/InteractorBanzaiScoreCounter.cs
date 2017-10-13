@@ -6,32 +6,32 @@
 
     public class InteractorBanzaiScoreCounter : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
-            if (Item.team == TEAM.NONE)
+            if (item.Team == TEAM.NONE)
             {
                 return;
             }
 
-            Item.ExtraData = Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)].ToString();
-            Item.UpdateState(false, true);
+            item.ExtraData = item.GetRoom().GetGameManager().Points[Convert.ToInt32(item.Team)].ToString();
+            item.UpdateState(false, true);
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (HasRights)
+            if (hasRights)
             {
-                Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)] = 0;
-                Item.ExtraData = "0";
-                Item.UpdateState();
+                item.GetRoom().GetGameManager().Points[Convert.ToInt32(item.Team)] = 0;
+                item.ExtraData = "0";
+                item.UpdateState();
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

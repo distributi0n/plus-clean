@@ -12,104 +12,101 @@
 
     public class ShoutEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            var Message = StringCharFilter.Escape(Packet.PopString());
-            if (Message.Length > 100)
+            var message = StringCharFilter.Escape(packet.PopString());
+            if (message.Length > 100)
             {
-                Message = Message.Substring(0, 100);
+                message = message.Substring(0, 100);
             }
-            var Colour = Packet.PopInt();
-            ChatStyle Style = null;
-            if (!PlusEnvironment.GetGame().GetChatManager().GetChatStyles().TryGetStyle(Colour, out Style) ||
-                Style.RequiredRight.Length > 0 && !Session.GetHabbo().GetPermissions().HasRight(Style.RequiredRight))
+
+            var colour = packet.PopInt();
+
+            ChatStyle style;
+            if (!PlusEnvironment.GetGame().GetChatManager().GetChatStyles().TryGetStyle(colour, out style) ||
+                style.RequiredRight.Length > 0 && !session.GetHabbo().GetPermissions().HasRight(style.RequiredRight))
             {
-                Colour = 0;
+                colour = 0;
             }
-            User.LastBubble = Session.GetHabbo().CustomBubbleId == 0 ? Colour : Session.GetHabbo().CustomBubbleId;
-            if (PlusEnvironment.GetUnixTimestamp() < Session.GetHabbo().FloodTime && Session.GetHabbo().FloodTime != 0)
+
+            user.LastBubble = session.GetHabbo().CustomBubbleId == 0 ? colour : session.GetHabbo().CustomBubbleId;
+
+            if (PlusEnvironment.GetUnixTimestamp() < session.GetHabbo().FloodTime && session.GetHabbo().FloodTime != 0)
             {
                 return;
             }
 
-            if (Session.GetHabbo().TimeMuted > 0)
+            if (session.GetHabbo().TimeMuted > 0)
             {
-                Session.SendPacket(new MutedComposer(Session.GetHabbo().TimeMuted));
+                session.SendPacket(new MutedComposer(session.GetHabbo().TimeMuted));
                 return;
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("room_ignore_mute") && Room.CheckMute(Session))
+            if (!session.GetHabbo().GetPermissions().HasRight("room_ignore_mute") && room.CheckMute(session))
             {
-                Session.SendWhisper("Oops, you're currently muted.");
+                session.SendWhisper("Oops, you're currently muted.");
                 return;
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                int MuteTime;
-                if (User.IncrementAndCheckFlood(out MuteTime))
+                int muteTime;
+                if (user.IncrementAndCheckFlood(out muteTime))
                 {
-                    Session.SendPacket(new FloodControlComposer(MuteTime));
+                    session.SendPacket(new FloodControlComposer(muteTime));
                     return;
                 }
             }
 
-            PlusEnvironment.GetGame()
-                .GetChatManager()
-                .GetLogs()
-                .StoreChatlog(new ChatlogEntry(Session.GetHabbo().Id, Room.Id, Message, UnixTimestamp.GetNow(),
-                    Session.GetHabbo(), Room));
-            if (Message.StartsWith(":", StringComparison.CurrentCulture) &&
-                PlusEnvironment.GetGame().GetChatManager().GetCommands().Parse(Session, Message))
+            PlusEnvironment.GetGame().GetChatManager().GetLogs()
+                .StoreChatlog(new ChatlogEntry(session.GetHabbo().Id, room.Id, message, UnixTimestamp.GetNow(), session.GetHabbo(), room));
+
+            if (message.StartsWith(":", StringComparison.CurrentCulture) && PlusEnvironment.GetGame().GetChatManager().GetCommands().Parse(session, message))
             {
                 return;
             }
 
-            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckBannedWords(Message))
+            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckBannedWords(message))
             {
-                Session.GetHabbo().BannedPhraseCount++;
-                if (Session.GetHabbo().BannedPhraseCount >=
-                    Convert.ToInt32(PlusEnvironment.GetSettingsManager().TryGetValue("room.chat.filter.banned_phrases.chances")))
+                session.GetHabbo().BannedPhraseCount++;
+                if (session.GetHabbo().BannedPhraseCount >= Convert.ToInt32(PlusEnvironment.GetSettingsManager().TryGetValue("room.chat.filter.banned_phrases.chances")))
                 {
-                    PlusEnvironment.GetGame()
-                        .GetModerationManager()
-                        .BanUser("System",
-                            ModerationBanType.USERNAME,
-                            Session.GetHabbo().Username,
-                            "Spamming banned phrases (" + Message + ")",
-                            PlusEnvironment.GetUnixTimestamp() + 78892200);
-                    Session.Disconnect();
+                    PlusEnvironment.GetGame().GetModerationManager().BanUser("System", ModerationBanType.Username, session.GetHabbo().Username,
+                        "Spamming banned phrases (" + message + ")", PlusEnvironment.GetUnixTimestamp() + 78892200);
+                    session.Disconnect();
                     return;
                 }
 
-                Session.SendPacket(new ShoutComposer(User.VirtualId, Message, 0, Colour));
+                session.SendPacket(new ShoutComposer(user.VirtualId, message, 0, colour));
                 return;
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("word_filter_override"))
+            if (!session.GetHabbo().GetPermissions().HasRight("word_filter_override"))
             {
-                Message = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Message);
+                message = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(message);
             }
-            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.SOCIAL_CHAT);
-            User.UnIdle();
-            User.OnChat(User.LastBubble, Message, true);
+
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.SocialChat);
+
+            user.UnIdle();
+            user.OnChat(user.LastBubble, message, true);
         }
     }
 }

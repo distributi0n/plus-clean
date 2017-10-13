@@ -2,26 +2,26 @@
 {
     public static class FriendBarStateUtility
     {
-        public static FriendBarState GetEnum(int State)
+        public static FriendBarState GetEnum(int state)
         {
-            switch (State)
+            switch (state)
             {
                 default:
                 case 0:
-                    return FriendBarState.CLOSED;
+                    return FriendBarState.Closed;
                 case 1:
-                    return FriendBarState.OPEN;
+                    return FriendBarState.Open;
             }
         }
 
-        public static int GetInt(FriendBarState State)
+        public static int GetInt(FriendBarState state)
         {
-            switch (State)
+            switch (state)
             {
                 default:
-                case FriendBarState.CLOSED:
+                case FriendBarState.Closed:
                     return 0;
-                case FriendBarState.OPEN:
+                case FriendBarState.Open:
                     return 1;
             }
         }

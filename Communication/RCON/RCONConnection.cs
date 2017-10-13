@@ -5,13 +5,13 @@
     using System.Text;
     using log4net;
 
-    public class RCONConnection
+    public class RconConnection
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.Communication.RCON.RCONConnection");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.Communication.RCON.RCONConnection");
         private byte[] _buffer = new byte[1024];
         private Socket _socket;
 
-        public RCONConnection(Socket socket)
+        public RconConnection(Socket socket)
         {
             _socket = socket;
             try
@@ -28,8 +28,7 @@
         {
             try
             {
-                var bytes = 0;
-                if (!int.TryParse(_socket.EndReceive(iAr).ToString(), out bytes))
+                if (!int.TryParse(_socket.EndReceive(iAr).ToString(), out var bytes))
                 {
                     Dispose();
                     return;
@@ -38,7 +37,7 @@
                 var data = Encoding.Default.GetString(_buffer, 0, bytes);
                 if (!PlusEnvironment.GetRCONSocket().GetCommands().Parse(data))
                 {
-                    log.Error("Failed to execute a MUS command. Raw data: " + data);
+                    Log.Error("Failed to execute a MUS command. Raw data: " + data);
                 }
             }
             catch (Exception e)

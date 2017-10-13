@@ -6,45 +6,40 @@
 
     internal class GroupInfoComposer : ServerPacket
     {
-        public GroupInfoComposer(Group Group, GameClient Session, bool NewWindow = false) : base(ServerPacketHeader
-            .GroupInfoMessageComposer)
+        public GroupInfoComposer(Group group, GameClient session, bool newWindow = false)
+            : base(ServerPacketHeader.GroupInfoMessageComposer)
         {
-            var Origin = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Group.CreateTime);
-            WriteInteger(Group.Id);
+            var origin = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(group.CreateTime);
+
+            WriteInteger(group.Id);
             WriteBoolean(true);
-            WriteInteger(Group.GroupType == GroupType.OPEN ? 0 : Group.GroupType == GroupType.LOCKED ? 1 : 2);
-            WriteString(Group.Name);
-            WriteString(Group.Description);
-            WriteString(Group.Badge);
-            WriteInteger(Group.RoomId);
-            WriteString(PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(Group.RoomId) == null
+            WriteInteger(group.GroupType == GroupType.OPEN ? 0 : group.GroupType == GroupType.LOCKED ? 1 : 2);
+            WriteString(group.Name);
+            WriteString(group.Description);
+            WriteString(group.Badge);
+            WriteInteger(group.RoomId);
+            WriteString(PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(group.RoomId) == null
                 ? "No room found.."
-                : PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(Group.RoomId).Name); // room name
-            WriteInteger(Group.CreatorId == Session.GetHabbo().Id
-                ? 3
-                : Group.HasRequest(Session.GetHabbo().Id)
-                    ? 2
-                    : Group.IsMember(Session.GetHabbo().Id)
-                        ? 1
-                        : 0);
-            WriteInteger(Group.MemberCount); // Members
+                : PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(group.RoomId).Name); // room name
+            WriteInteger(group.CreatorId == session.GetHabbo().Id ? 3 : group.HasRequest(session.GetHabbo().Id) ? 2 : group.IsMember(session.GetHabbo().Id) ? 1 : 0);
+            WriteInteger(group.MemberCount); // Members
             WriteBoolean(false); //?? CHANGED
-            WriteString(Origin.Day + "-" + Origin.Month + "-" + Origin.Year);
-            WriteBoolean(Group.CreatorId == Session.GetHabbo().Id);
-            WriteBoolean(Group.IsAdmin(Session.GetHabbo().Id)); // admin
-            WriteString(PlusEnvironment.GetUsernameById(Group.CreatorId));
-            WriteBoolean(NewWindow); // Show group info
-            WriteBoolean(Group.AdminOnlyDeco == 0); // Any user can place furni in home room
-            WriteInteger(Group.CreatorId == Session.GetHabbo().Id
-                ? Group.RequestCount
-                : Group.IsAdmin(Session.GetHabbo().Id)
-                    ? Group.RequestCount
-                    : Group.IsMember(Session.GetHabbo().Id)
+            WriteString(origin.Day + "-" + origin.Month + "-" + origin.Year);
+            WriteBoolean(group.CreatorId == session.GetHabbo().Id);
+            WriteBoolean(group.IsAdmin(session.GetHabbo().Id)); // admin
+            WriteString(PlusEnvironment.GetUsernameById(group.CreatorId));
+            WriteBoolean(newWindow); // Show group info
+            WriteBoolean(group.AdminOnlyDeco == 0); // Any user can place furni in home room
+            WriteInteger(group.CreatorId == session.GetHabbo().Id
+                ? group.RequestCount
+                : group.IsAdmin(session.GetHabbo().Id)
+                    ? group.RequestCount
+                    : group.IsMember(session.GetHabbo().Id)
                         ? 0
                         : 0); // Pending users
 
             //base.WriteInteger(0);//what the fuck
-            WriteBoolean(Group != null ? Group.ForumEnabled : true); //HabboTalk.
+            WriteBoolean(group != null ? group.ForumEnabled : true); //HabboTalk.
         }
     }
 }

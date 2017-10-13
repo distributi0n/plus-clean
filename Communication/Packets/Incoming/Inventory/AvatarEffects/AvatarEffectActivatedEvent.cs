@@ -3,20 +3,22 @@
     using HabboHotel.GameClients;
     using Outgoing.Inventory.AvatarEffects;
 
-    internal sealed class AvatarEffectActivatedEvent : IPacketEvent
+    internal class AvatarEffectActivatedEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var EffectId = Packet.PopInt();
-            var Effect = Session.GetHabbo().Effects().GetEffectNullable(EffectId, false, true);
-            if (Effect == null || Session.GetHabbo().Effects().HasEffect(EffectId, true))
+            var effectId = packet.PopInt();
+
+            var effect = session.GetHabbo().Effects().GetEffectNullable(effectId, false, true);
+
+            if (effect == null || session.GetHabbo().Effects().HasEffect(effectId, true))
             {
                 return;
             }
 
-            if (Effect.Activate())
+            if (effect.Activate())
             {
-                Session.SendPacket(new AvatarEffectActivatedComposer(Effect));
+                session.SendPacket(new AvatarEffectActivatedComposer(effect));
             }
         }
     }

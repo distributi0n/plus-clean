@@ -7,15 +7,7 @@
 
     public class Pet
     {
-        public int AnyoneCanRide;
-        public string Color;
-        public double CreationStamp;
-        public DatabaseUpdateState DBState;
-
-        public int Energy;
-        public int experience;
-
-        public int[] experienceLevels =
+        private readonly int[] _experienceLevels =
         {
             100,
             200,
@@ -39,68 +31,75 @@
             150000
         };
 
-        public string GnomeClothing;
-        public int HairDye;
-        public string Name;
-        public int Nutrition;
-        public int OwnerId;
-        public int PetHair;
-        public int PetId;
-        public bool PlacedInRoom;
-        public string Race;
-        public int Respect;
-        public int RoomId;
-        public int Saddle;
+        internal int AnyoneCanRide;
+        internal string Color;
+        internal double CreationStamp;
+        internal DatabaseUpdateState DbState;
 
-        public int Type;
-        public int VirtualId;
-        public int X;
-        public int Y;
-        public double Z;
+        internal int Energy;
+        internal int Experience;
 
-        public Pet(int PetId,
-            int OwnerId,
-            int RoomId,
-            string Name,
-            int Type,
-            string Race,
-            string Color,
-            int experience,
-            int Energy,
-            int Nutrition,
-            int Respect,
-            double CreationStamp,
-            int X,
-            int Y,
-            double Z,
-            int Saddle,
-            int Anyonecanride,
-            int Dye,
-            int PetHer,
-            string GnomeClothing)
+        internal string GnomeClothing;
+        internal int HairDye;
+        internal string Name;
+        internal int Nutrition;
+        internal int OwnerId;
+        internal int PetHair;
+        internal int PetId;
+        internal bool PlacedInRoom;
+        internal string Race;
+        internal int Respect;
+        internal int RoomId;
+        internal int Saddle;
+        internal int Type;
+        internal int VirtualId;
+        internal int X;
+        internal int Y;
+        internal double Z;
+
+        internal Pet(int petId,
+                     int ownerId,
+                     int roomId,
+                     string name,
+                     int type,
+                     string race,
+                     string color,
+                     int experience,
+                     int energy,
+                     int nutrition,
+                     int respect,
+                     double creationStamp,
+                     int x,
+                     int y,
+                     double z,
+                     int saddle,
+                     int anyonecanride,
+                     int dye,
+                     int petHer,
+                     string gnomeClothing)
         {
-            this.PetId = PetId;
-            this.OwnerId = OwnerId;
-            this.RoomId = RoomId;
-            this.Name = Name;
-            this.Type = Type;
-            this.Race = Race;
-            this.Color = Color;
-            this.experience = experience;
-            this.Energy = Energy;
-            this.Nutrition = Nutrition;
-            this.Respect = Respect;
-            this.CreationStamp = CreationStamp;
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
+            PetId = petId;
+            OwnerId = ownerId;
+            RoomId = roomId;
+            Name = name;
+            Type = type;
+            Race = race;
+            Color = color;
+            Experience = experience;
+            Energy = energy;
+            Nutrition = nutrition;
+            Respect = respect;
+            CreationStamp = creationStamp;
+            X = x;
+            Y = y;
+            Z = z;
             PlacedInRoom = false;
-            DBState = DatabaseUpdateState.Updated;
-            this.Saddle = Saddle;
-            AnyoneCanRide = Anyonecanride;
-            PetHair = PetHer;
-            HairDye = Dye;
-            this.GnomeClothing = GnomeClothing;
+            DbState = DatabaseUpdateState.Updated;
+            Saddle = saddle;
+            AnyoneCanRide = anyonecanride;
+            PetHair = petHer;
+            HairDye = dye;
+            GnomeClothing = gnomeClothing;
         }
 
         public Room Room
@@ -112,10 +111,10 @@
                     return null;
                 }
 
-                Room _room;
-                if (PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(RoomId, out _room))
+                Room room;
+                if (PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(RoomId, out room))
                 {
-                    return _room;
+                    return room;
                 }
 
                 return null;
@@ -128,21 +127,21 @@
         {
             get
             {
-                for (var level = 0; level < experienceLevels.Length; ++level)
+                for (var level = 0; level < _experienceLevels.Length; ++level)
                 {
-                    if (experience < experienceLevels[level])
+                    if (Experience < _experienceLevels[level])
                     {
                         return level + 1;
                     }
                 }
 
-                return experienceLevels.Length;
+                return _experienceLevels.Length;
             }
         }
 
         public static int MaxLevel => 20;
 
-        public int experienceGoal => experienceLevels[Level - 1];
+        public int ExperienceGoal => _experienceLevels[Level - 1];
 
         public static int MaxEnergy => 100;
 
@@ -158,47 +157,47 @@
         {
             Respect++;
             Room.SendPacket(new RespectPetNotificationMessageComposer(this));
-            if (DBState != DatabaseUpdateState.NeedsInsert)
+            if (DbState != DatabaseUpdateState.NeedsInsert)
             {
-                DBState = DatabaseUpdateState.NeedsUpdate;
+                DbState = DatabaseUpdateState.NeedsUpdate;
             }
-            if (experience <= 150000)
+            if (Experience <= 150000)
             {
                 Addexperience(10);
             }
         }
 
-        public void Addexperience(int Amount)
+        public void Addexperience(int amount)
         {
-            experience = experience + Amount;
-            if (experience > 150000)
+            Experience = Experience + amount;
+            if (Experience > 150000)
             {
-                experience = 150000;
+                Experience = 150000;
                 if (Room != null)
                 {
-                    Room.SendPacket(new AddExperiencePointsComposer(PetId, VirtualId, Amount));
+                    Room.SendPacket(new AddExperiencePointsComposer(PetId, VirtualId, amount));
                 }
                 return;
             }
 
-            if (DBState != DatabaseUpdateState.NeedsInsert)
+            if (DbState != DatabaseUpdateState.NeedsInsert)
             {
-                DBState = DatabaseUpdateState.NeedsUpdate;
+                DbState = DatabaseUpdateState.NeedsUpdate;
             }
             if (Room != null)
             {
-                Room.SendPacket(new AddExperiencePointsComposer(PetId, VirtualId, Amount));
-                if (experience >= experienceGoal)
+                Room.SendPacket(new AddExperiencePointsComposer(PetId, VirtualId, amount));
+                if (Experience >= ExperienceGoal)
                 {
                     Room.SendPacket(new ChatComposer(VirtualId, "*leveled up to level " + Level + " *", 0, 0));
                 }
             }
         }
 
-        public void PetEnergy(bool Add)
+        public void PetEnergy(bool add)
         {
-            int MaxE;
-            if (Add)
+            int maxE;
+            if (add)
             {
                 if (Energy == 100) // If Energy is 100, no point.
                 {
@@ -207,24 +206,24 @@
 
                 if (Energy > 85)
                 {
-                    MaxE = MaxEnergy - Energy;
+                    maxE = MaxEnergy - Energy;
                 }
                 else
                 {
-                    MaxE = 10;
+                    maxE = 10;
                 }
             }
             else
             {
-                MaxE = 15; // Remove Max Energy as 15
+                maxE = 15; // Remove Max Energy as 15
             }
 
-            if (MaxE <= 4)
+            if (maxE <= 4)
             {
-                MaxE = 15;
+                maxE = 15;
             }
-            var r = PlusEnvironment.GetRandomNumber(4, MaxE);
-            if (!Add)
+            var r = PlusEnvironment.GetRandomNumber(4, maxE);
+            if (!add)
             {
                 Energy = Energy - r;
                 if (Energy < 0)
@@ -237,9 +236,9 @@
             {
                 Energy = Energy + r;
             }
-            if (DBState != DatabaseUpdateState.NeedsInsert)
+            if (DbState != DatabaseUpdateState.NeedsInsert)
             {
-                DBState = DatabaseUpdateState.NeedsUpdate;
+                DbState = DatabaseUpdateState.NeedsUpdate;
             }
         }
     }

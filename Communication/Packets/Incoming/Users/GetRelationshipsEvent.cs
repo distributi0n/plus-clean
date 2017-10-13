@@ -7,21 +7,22 @@
 
     internal class GetRelationshipsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Habbo = PlusEnvironment.GetHabboById(Packet.PopInt());
-            if (Habbo == null)
+            var habbo = PlusEnvironment.GetHabboById(packet.PopInt());
+            if (habbo == null)
             {
                 return;
             }
 
             var rand = new Random();
-            Habbo.Relationships =
-                Habbo.Relationships.OrderBy(x => rand.Next()).ToDictionary(item => item.Key, item => item.Value);
-            var Loves = Habbo.Relationships.Count(x => x.Value.Type == 1);
-            var Likes = Habbo.Relationships.Count(x => x.Value.Type == 2);
-            var Hates = Habbo.Relationships.Count(x => x.Value.Type == 3);
-            Session.SendPacket(new GetRelationshipsComposer(Habbo, Loves, Likes, Hates));
+            habbo.Relationships = habbo.Relationships.OrderBy(x => rand.Next()).ToDictionary(item => item.Key, item => item.Value);
+
+            var loves = habbo.Relationships.Count(x => x.Value.Type == 1);
+            var likes = habbo.Relationships.Count(x => x.Value.Type == 2);
+            var hates = habbo.Relationships.Count(x => x.Value.Type == 3);
+
+            session.SendPacket(new GetRelationshipsComposer(habbo, loves, likes, hates));
         }
     }
 }

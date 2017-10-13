@@ -5,37 +5,37 @@
 
     public class InteractorBanzaiTimer : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (!HasRights)
+            if (!hasRights)
             {
                 return;
             }
 
             var oldValue = 0;
-            if (!int.TryParse(Item.ExtraData, out oldValue))
+            if (!int.TryParse(item.ExtraData, out oldValue))
             {
-                Item.ExtraData = "0";
+                item.ExtraData = "0";
                 oldValue = 0;
             }
-            if (Request == 0 && oldValue == 0)
+            if (request == 0 && oldValue == 0)
             {
                 oldValue = 30;
             }
-            else if (Request == 2)
+            else if (request == 2)
             {
-                if (Item.GetRoom().GetBanzai().isBanzaiActive && Item.pendingReset && oldValue > 0)
+                if (item.GetRoom().GetBanzai().isBanzaiActive && item.PendingReset && oldValue > 0)
                 {
                     oldValue = 0;
-                    Item.pendingReset = false;
+                    item.PendingReset = false;
                 }
                 else
                 {
@@ -67,52 +67,52 @@
                     {
                         oldValue = 0;
                     }
-                    Item.UpdateNeeded = false;
+                    item.UpdateNeeded = false;
                 }
             }
-            else if (Request == 1 || Request == 0)
+            else if (request == 1 || request == 0)
             {
-                if (Request == 1 && oldValue == 0)
+                if (request == 1 && oldValue == 0)
                 {
-                    Item.ExtraData = "30";
+                    item.ExtraData = "30";
                     oldValue = 30;
                 }
-                if (!Item.GetRoom().GetBanzai().isBanzaiActive)
+                if (!item.GetRoom().GetBanzai().isBanzaiActive)
                 {
-                    Item.UpdateNeeded = !Item.UpdateNeeded;
-                    if (Item.UpdateNeeded)
+                    item.UpdateNeeded = !item.UpdateNeeded;
+                    if (item.UpdateNeeded)
                     {
-                        Item.GetRoom().GetBanzai().BanzaiStart();
+                        item.GetRoom().GetBanzai().BanzaiStart();
                     }
-                    Item.pendingReset = true;
+                    item.PendingReset = true;
                 }
                 else
                 {
-                    Item.UpdateNeeded = !Item.UpdateNeeded;
-                    if (Item.UpdateNeeded)
+                    item.UpdateNeeded = !item.UpdateNeeded;
+                    if (item.UpdateNeeded)
                     {
-                        Item.GetRoom().GetBanzai().BanzaiEnd(true);
+                        item.GetRoom().GetBanzai().BanzaiEnd(true);
                     }
-                    Item.pendingReset = true;
+                    item.PendingReset = true;
                 }
             }
-            Item.ExtraData = Convert.ToString(oldValue);
-            Item.UpdateState();
+            item.ExtraData = Convert.ToString(oldValue);
+            item.UpdateState();
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
-            if (Item.GetRoom().GetBanzai().isBanzaiActive)
+            if (item.GetRoom().GetBanzai().isBanzaiActive)
             {
-                Item.GetRoom().GetBanzai().BanzaiEnd(true);
+                item.GetRoom().GetBanzai().BanzaiEnd(true);
             }
-            Item.pendingReset = true;
-            Item.UpdateNeeded = true;
-            Item.ExtraData = "30";
-            Item.UpdateState();
-            if (!Item.GetRoom().GetBanzai().isBanzaiActive)
+            item.PendingReset = true;
+            item.UpdateNeeded = true;
+            item.ExtraData = "30";
+            item.UpdateState();
+            if (!item.GetRoom().GetBanzai().isBanzaiActive)
             {
-                Item.GetRoom().GetBanzai().BanzaiStart();
+                item.GetRoom().GetBanzai().BanzaiStart();
             }
         }
     }

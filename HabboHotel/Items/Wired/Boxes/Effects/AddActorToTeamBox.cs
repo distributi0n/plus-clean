@@ -9,10 +9,10 @@
 
     internal class AddActorToTeamBox : IWiredItem
     {
-        public AddActorToTeamBox(Room Instance, Item Item)
+        public AddActorToTeamBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -24,11 +24,11 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Team = Packet.PopInt();
-            StringData = Team.ToString();
+            var unknown = packet.PopInt();
+            var team = packet.PopInt();
+            StringData = team.ToString();
         }
 
         public bool Execute(params object[] Params)
@@ -38,19 +38,19 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+            if (user == null)
             {
                 return false;
             }
 
-            var ToJoin = int.Parse(StringData) == 1
+            var toJoin = int.Parse(StringData) == 1
                 ? TEAM.RED
                 : int.Parse(StringData) == 2
                     ? TEAM.GREEN
@@ -59,20 +59,20 @@
                         : int.Parse(StringData) == 4
                             ? TEAM.YELLOW
                             : TEAM.NONE;
-            var Team = Instance.GetTeamManagerForFreeze();
-            if (Team != null)
+            var team = Instance.GetTeamManagerForFreeze();
+            if (team != null)
             {
-                if (Team.CanEnterOnTeam(ToJoin))
+                if (team.CanEnterOnTeam(toJoin))
                 {
-                    if (User.Team != TEAM.NONE)
+                    if (user.Team != TEAM.NONE)
                     {
-                        Team.OnUserLeave(User);
+                        team.OnUserLeave(user);
                     }
-                    User.Team = ToJoin;
-                    Team.AddUser(User);
-                    if (User.GetClient().GetHabbo().Effects().CurrentEffect != Convert.ToInt32(ToJoin + 39))
+                    user.Team = toJoin;
+                    team.AddUser(user);
+                    if (user.GetClient().GetHabbo().Effects().CurrentEffect != Convert.ToInt32(toJoin + 39))
                     {
-                        User.GetClient().GetHabbo().Effects().ApplyEffect(Convert.ToInt32(ToJoin + 39));
+                        user.GetClient().GetHabbo().Effects().ApplyEffect(Convert.ToInt32(toJoin + 39));
                     }
                 }
             }

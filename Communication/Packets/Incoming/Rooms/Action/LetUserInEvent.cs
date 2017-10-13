@@ -7,36 +7,39 @@
 
     internal class LetUserInEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Name = Packet.PopString();
-            var Accepted = Packet.PopBoolean();
-            var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Name);
-            if (Client == null)
+            if (!room.CheckRights(session))
             {
                 return;
             }
 
-            if (Accepted)
+            var name = packet.PopString();
+            var accepted = packet.PopBoolean();
+
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(name);
+            if (client == null)
             {
-                Client.GetHabbo().RoomAuthOk = true;
-                Client.SendPacket(new FlatAccessibleComposer(""));
-                Room.SendPacket(new FlatAccessibleComposer(Client.GetHabbo().Username), true);
+                return;
+            }
+
+            if (accepted)
+            {
+                client.GetHabbo().RoomAuthOk = true;
+                client.SendPacket(new FlatAccessibleComposer(""));
+                room.SendPacket(new FlatAccessibleComposer(client.GetHabbo().Username), true);
             }
             else
             {
-                Client.SendPacket(new FlatAccessDeniedComposer(""));
-                Room.SendPacket(new FlatAccessDeniedComposer(Client.GetHabbo().Username), true);
+                client.SendPacket(new FlatAccessDeniedComposer(""));
+                room.SendPacket(new FlatAccessDeniedComposer(client.GetHabbo().Username), true);
             }
         }
     }

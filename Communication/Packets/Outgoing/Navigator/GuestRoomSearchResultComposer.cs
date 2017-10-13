@@ -5,13 +5,14 @@
 
     internal class GuestRoomSearchResultComposer : ServerPacket
     {
-        public GuestRoomSearchResultComposer(int Mode, string UserQuery, ICollection<RoomData> Rooms) : base(ServerPacketHeader
-            .GuestRoomSearchResultMessageComposer)
+        public GuestRoomSearchResultComposer(int mode, string userQuery, ICollection<RoomData> rooms)
+            : base(ServerPacketHeader.GuestRoomSearchResultMessageComposer)
         {
-            WriteInteger(Mode);
-            WriteString(UserQuery);
-            WriteInteger(Rooms.Count);
-            foreach (var data in Rooms)
+            WriteInteger(mode);
+            WriteString(userQuery);
+
+            WriteInteger(rooms.Count);
+            foreach (var data in rooms)
             {
                 RoomAppender.WriteRoom(this, data, data.Promotion);
             }

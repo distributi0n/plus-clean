@@ -2,9 +2,9 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class LatencyTestEvent : IPacketEvent
+    internal class LatencyTestEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
             //Session.SendMessage(new LatencyTestComposer(Packet.PopInt()));
         }

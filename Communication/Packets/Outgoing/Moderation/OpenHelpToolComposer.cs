@@ -2,7 +2,8 @@
 {
     internal class OpenHelpToolComposer : ServerPacket
     {
-        public OpenHelpToolComposer() : base(ServerPacketHeader.OpenHelpToolMessageComposer)
+        public OpenHelpToolComposer()
+            : base(ServerPacketHeader.OpenHelpToolMessageComposer)
         {
             WriteInteger(0);
         }

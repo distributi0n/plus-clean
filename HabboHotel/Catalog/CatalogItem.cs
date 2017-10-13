@@ -5,20 +5,20 @@
     public class CatalogItem
     {
         public CatalogItem(int Id,
-            int ItemId,
-            ItemData Data,
-            string CatalogName,
-            int PageId,
-            int CostCredits,
-            int CostPixels,
-            int CostDiamonds,
-            int Amount,
-            int LimitedEditionSells,
-            int LimitedEditionStack,
-            bool HaveOffer,
-            string ExtraData,
-            string Badge,
-            int OfferId)
+                           int ItemId,
+                           ItemData Data,
+                           string CatalogName,
+                           int PageId,
+                           int CostCredits,
+                           int CostPixels,
+                           int CostDiamonds,
+                           int Amount,
+                           int LimitedEditionSells,
+                           int LimitedEditionStack,
+                           bool HaveOffer,
+                           string ExtraData,
+                           string Badge,
+                           int OfferId)
         {
             this.Id = Id;
             Name = CatalogName;

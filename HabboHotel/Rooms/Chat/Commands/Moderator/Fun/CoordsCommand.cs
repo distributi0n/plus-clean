@@ -10,26 +10,26 @@
 
         public string Description => "Used to get your current position within the room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (ThisUser == null)
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (thisUser == null)
             {
                 return;
             }
 
-            Session.SendNotification("X: " +
-                                     ThisUser.X +
+            session.SendNotification("X: " +
+                                     thisUser.X +
                                      "\n - Y: " +
-                                     ThisUser.Y +
+                                     thisUser.Y +
                                      "\n - Z: " +
-                                     ThisUser.Z +
+                                     thisUser.Z +
                                      "\n - Rot: " +
-                                     ThisUser.RotBody +
+                                     thisUser.RotBody +
                                      ", sqState: " +
-                                     Room.GetGameMap().GameMap[ThisUser.X, ThisUser.Y] +
+                                     room.GetGameMap().GameMap[thisUser.X, thisUser.Y] +
                                      "\n\n - RoomID: " +
-                                     Session.GetHabbo().CurrentRoomId);
+                                     session.GetHabbo().CurrentRoomId);
         }
     }
 }

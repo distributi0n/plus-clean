@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class TakeUserBadgeCommand : IRCONCommand
+    internal class TakeUserBadgeCommand : IRconCommand
     {
         public string Description => "This command is used to take a badge from a user.";
 

@@ -1,139 +1,107 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Catalog
 {
     using System;
-    using System.Collections.Generic;
     using HabboHotel.Catalog.Utilities;
     using HabboHotel.GameClients;
     using HabboHotel.Items;
-    using HabboHotel.Rooms.AI;
-    using HabboHotel.Rooms.AI.Responses;
-    using HabboHotel.Rooms.AI.Speech;
     using Outgoing.Catalog;
     using Outgoing.Inventory.Furni;
 
-    internal sealed class CheckGnomeNameEvent : IPacketEvent
+    internal class CheckGnomeNameEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var Item = Room.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null || Item.Data == null || Item.UserID != Session.GetHabbo().Id ||
-                Item.Data.InteractionType != InteractionType.GNOME_BOX)
+            var itemId = packet.PopInt();
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+
+            if (item?.Data == null || item.UserId != session.GetHabbo().Id || item.Data.InteractionType != InteractionType.GnomeBox)
             {
                 return;
             }
 
-            var PetName = Packet.PopString();
-            if (string.IsNullOrEmpty(PetName))
+            var petName = packet.PopString();
+            if (string.IsNullOrEmpty(petName))
             {
-                Session.SendPacket(new CheckGnomeNameComposer(PetName, 1));
+                session.SendPacket(new CheckGnomeNameComposer(petName, 1));
                 return;
             }
 
-            if (!PlusEnvironment.IsValidAlphaNumeric(PetName))
+            if (!PlusEnvironment.IsValidAlphaNumeric(petName))
             {
-                Session.SendPacket(new CheckGnomeNameComposer(PetName, 1));
+                session.SendPacket(new CheckGnomeNameComposer(petName, 1));
                 return;
             }
-
-            var X = Item.GetX;
-            var Y = Item.GetY;
 
             //Quickly delete it from the database.
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("DELETE FROM `items` WHERE `id` = @ItemId LIMIT 1");
-                dbClient.AddParameter("ItemId", Item.Id);
+                dbClient.AddParameter("ItemId", item.Id);
                 dbClient.RunQuery();
             }
 
             //Remove the item.
-            Room.GetRoomItemHandler().RemoveFurniture(Session, Item.Id);
+            room.GetRoomItemHandler().RemoveFurniture(session, item.Id);
 
             //Apparently we need this for success.
-            Session.SendPacket(new CheckGnomeNameComposer(PetName, 0));
+            session.SendPacket(new CheckGnomeNameComposer(petName, 0));
 
             //Create the pet here.
-            var Pet = PetUtility.CreatePet(Session.GetHabbo().Id, PetName, 26, "30", "ffffff");
-            if (Pet == null)
+            var pet = PetUtility.CreatePet(session.GetHabbo().Id, petName, 26, "30", "ffffff");
+            if (pet == null)
             {
-                Session.SendNotification("Oops, an error occoured. Please report this!");
+                session.SendNotification("Oops, an error occoured. Please report this!");
                 return;
             }
 
-            var RndSpeechList = new List<RandomSpeech>();
-            var BotResponse = new List<BotResponse>();
-            Pet.RoomId = Session.GetHabbo().CurrentRoomId;
-            Pet.GnomeClothing = RandomClothing();
+            pet.RoomId = session.GetHabbo().CurrentRoomId;
+            pet.GnomeClothing = RandomClothing();
 
-            //Update the pets gnome clothing.
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `bots_petdata` SET `gnome_clothing` = @GnomeClothing WHERE `id` = @PetId LIMIT 1");
-                dbClient.AddParameter("GnomeClothing", Pet.GnomeClothing);
-                dbClient.AddParameter("PetId", Pet.PetId);
+                dbClient.AddParameter("GnomeClothing", pet.GnomeClothing);
+                dbClient.AddParameter("PetId", pet.PetId);
                 dbClient.RunQuery();
             }
 
-            //Make a RoomUser of the pet.
-            var PetUser = Room.GetRoomUserManager()
-                .DeployBot(new RoomBot(Pet.PetId,
-                        Pet.RoomId,
-                        "pet",
-                        "freeroam",
-                        Pet.Name,
-                        "",
-                        Pet.Look,
-                        X,
-                        Y,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        ref RndSpeechList,
-                        "",
-                        0,
-                        Pet.OwnerId,
-                        false,
-                        0,
-                        false,
-                        0),
-                    Pet);
+            ItemData petFood;
 
-            //Give the food.
-            ItemData PetFood = null;
-            if (PlusEnvironment.GetGame().GetItemManager().GetItem(320, out PetFood))
+            if (!PlusEnvironment.GetGame().GetItemManager().GetItem(320, out petFood))
             {
-                var Food = ItemFactory.CreateSingleItemNullable(PetFood, Session.GetHabbo(), "", "");
-                if (Food != null)
-                {
-                    Session.GetHabbo().GetInventoryComponent().TryAddItem(Food);
-                    Session.SendPacket(new FurniListNotificationComposer(Food.Id, 1));
-                }
+                return;
             }
+
+            var food = ItemFactory.CreateSingleItemNullable(petFood, session.GetHabbo(), "");
+
+            if (food == null)
+            {
+                return;
+            }
+
+            session.GetHabbo().GetInventoryComponent().TryAddItem(food);
+            session.SendPacket(new FurniListNotificationComposer(food.Id, 1));
         }
 
         private static string RandomClothing()
         {
-            var Random = new Random();
-            var RandomNumber = Random.Next(1, 6);
-            switch (RandomNumber)
+            var random = new Random();
+
+            var randomNumber = random.Next(1, 6);
+            switch (randomNumber)
             {
                 default:
-                case 1:
                     return "5 0 -1 0 4 402 5 3 301 4 1 101 2 2 201 3";
                 case 2:
                     return "5 0 -1 0 1 102 13 3 301 4 4 401 5 2 201 3";

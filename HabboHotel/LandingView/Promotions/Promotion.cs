@@ -3,7 +3,7 @@
     public class Promotion
     {
         public Promotion(int Id, string Title, string Text, string ButtonText, int ButtonType, string ButtonLink,
-            string ImageLink)
+                         string ImageLink)
         {
             this.Id = Id;
             this.Title = Title;

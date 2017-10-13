@@ -8,10 +8,10 @@
 
     internal class TriggererOnFurniBox : IWiredItem
     {
-        public TriggererOnFurniBox(Room Instance, Item Item)
+        public TriggererOnFurniBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -23,21 +23,21 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
         }
@@ -49,26 +49,26 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
-            if (Player.CurrentRoom == null)
-            {
-                return false;
-            }
-
-            var User = Player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Player.Username);
-            if (User == null)
+            if (player.CurrentRoom == null)
             {
                 return false;
             }
 
-            var ItemsOnSquare = Instance.GetGameMap().GetAllRoomItemForSquare(User.X, User.Y);
-            foreach (var Item in ItemsOnSquare.ToList())
+            var user = player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(player.Username);
+            if (user == null)
             {
-                if (!SetItems.ContainsKey(Item.Id))
+                return false;
+            }
+
+            var itemsOnSquare = Instance.GetGameMap().GetAllRoomItemForSquare(user.X, user.Y);
+            foreach (var item in itemsOnSquare.ToList())
+            {
+                if (!SetItems.ContainsKey(item.Id))
                 {
                     continue;
                 }

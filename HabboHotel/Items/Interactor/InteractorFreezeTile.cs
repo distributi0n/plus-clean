@@ -6,42 +6,42 @@
 
     internal class InteractorFreezeTile : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Session == null || !Session.GetHabbo().InRoom || Item == null || Item.InteractingUser > 0)
+            if (session == null || !session.GetHabbo().InRoom || item == null || item.InteractingUser > 0)
             {
                 return;
             }
 
-            var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            if (User.Team != TEAM.NONE)
+            if (user.Team != TEAM.NONE)
             {
-                User.FreezeInteracting = true;
-                Item.InteractingUser = Session.GetHabbo().Id;
-                if (Item.Data.InteractionType == InteractionType.FREEZE_TILE_BLOCK)
+                user.FreezeInteracting = true;
+                item.InteractingUser = session.GetHabbo().Id;
+                if (item.Data.InteractionType == InteractionType.FreezeTileBlock)
                 {
-                    if (Gamemap.TileDistance(User.X, User.Y, Item.GetX, Item.GetY) < 2)
+                    if (Gamemap.TileDistance(user.X, user.Y, item.GetX, item.GetY) < 2)
                     {
-                        Item.GetRoom().GetFreeze().onFreezeTiles(Item, Item.freezePowerUp);
+                        item.GetRoom().GetFreeze().onFreezeTiles(item, item.FreezePowerUp);
                     }
                 }
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

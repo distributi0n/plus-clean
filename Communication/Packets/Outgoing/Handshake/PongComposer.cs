@@ -2,7 +2,8 @@
 {
     internal class PongComposer : ServerPacket
     {
-        public PongComposer() : base(ServerPacketHeader.PongMessageComposer)
+        public PongComposer()
+            : base(ServerPacketHeader.PongMessageComposer)
         {
         }
     }

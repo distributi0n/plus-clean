@@ -3,15 +3,15 @@
     public class ModerationPresetActions
     {
         public ModerationPresetActions(int id,
-            int parentId,
-            string type,
-            string caption,
-            string messageText,
-            int muteText,
-            int banTime,
-            int ipBanTime,
-            int tradeLockTime,
-            string defaultSanction)
+                                       int parentId,
+                                       string type,
+                                       string caption,
+                                       string messageText,
+                                       int muteText,
+                                       int banTime,
+                                       int ipBanTime,
+                                       int tradeLockTime,
+                                       string defaultSanction)
         {
             Id = id;
             ParentId = parentId;
@@ -20,7 +20,7 @@
             MessageText = messageText;
             MuteTime = muteText;
             BanTime = banTime;
-            IPBanTime = ipBanTime;
+            IpBanTime = ipBanTime;
             TradeLockTime = tradeLockTime;
             DefaultSanction = defaultSanction;
         }
@@ -32,7 +32,7 @@
         public string MessageText { get; set; }
         public int MuteTime { get; set; }
         public int BanTime { get; set; }
-        public int IPBanTime { get; set; }
+        public int IpBanTime { get; set; }
         public int TradeLockTime { get; set; }
         public string DefaultSanction { get; set; }
     }

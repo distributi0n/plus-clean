@@ -7,32 +7,37 @@
 
     internal class UserUpdateComposer : ServerPacket
     {
-        public UserUpdateComposer(ICollection<RoomUser> RoomUsers) : base(ServerPacketHeader.UserUpdateMessageComposer)
+        public UserUpdateComposer(ICollection<RoomUser> roomUsers)
+            : base(ServerPacketHeader.UserUpdateMessageComposer)
         {
-            WriteInteger(RoomUsers.Count);
-            foreach (var User in RoomUsers.ToList())
+            WriteInteger(roomUsers.Count);
+            foreach (var user in roomUsers.ToList())
             {
-                WriteInteger(User.VirtualId);
-                WriteInteger(User.X);
-                WriteInteger(User.Y);
-                WriteString(User.Z.ToString("0.00"));
-                WriteInteger(User.RotHead);
-                WriteInteger(User.RotBody);
-                var StatusComposer = new StringBuilder();
-                StatusComposer.Append("/");
-                foreach (var Status in User.Statusses.ToList())
+                WriteInteger(user.VirtualId);
+                WriteInteger(user.X);
+                WriteInteger(user.Y);
+                WriteString(user.Z.ToString("0.00"));
+                WriteInteger(user.RotHead);
+                WriteInteger(user.RotBody);
+
+                var statusComposer = new StringBuilder();
+                statusComposer.Append("/");
+
+                foreach (var status in user.Statusses.ToList())
                 {
-                    StatusComposer.Append(Status.Key);
-                    if (!string.IsNullOrEmpty(Status.Value))
+                    statusComposer.Append(status.Key);
+
+                    if (!string.IsNullOrEmpty(status.Value))
                     {
-                        StatusComposer.Append(" ");
-                        StatusComposer.Append(Status.Value);
+                        statusComposer.Append(" ");
+                        statusComposer.Append(status.Value);
                     }
-                    StatusComposer.Append("/");
+
+                    statusComposer.Append("/");
                 }
 
-                StatusComposer.Append("/");
-                WriteString(StatusComposer.ToString());
+                statusComposer.Append("/");
+                WriteString(statusComposer.ToString());
             }
         }
     }

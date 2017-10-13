@@ -15,17 +15,16 @@
             switch (error)
             {
                 default:
-                case MessengerMessageErrors.FRIEND_MUTED:
                     return 3;
-                case MessengerMessageErrors.YOUR_MUTED:
+                case MessengerMessageErrors.YourMuted:
                     return 4;
-                case MessengerMessageErrors.FRIEND_NOT_ONLINE:
+                case MessengerMessageErrors.FriendNotOnline:
                     return 5;
-                case MessengerMessageErrors.YOUR_NOT_FRIENDS:
+                case MessengerMessageErrors.YourNotFriends:
                     return 6;
-                case MessengerMessageErrors.FRIEND_BUSY:
+                case MessengerMessageErrors.FriendBusy:
                     return 7;
-                case MessengerMessageErrors.OFFLINE_FAILED:
+                case MessengerMessageErrors.OfflineFailed:
                     return 10;
             }
         }

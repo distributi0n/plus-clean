@@ -5,18 +5,19 @@
 
     internal class BadgeDefinitionsComposer : ServerPacket
     {
-        public BadgeDefinitionsComposer(Dictionary<string, Achievement> Achievements) : base(ServerPacketHeader
-            .BadgeDefinitionsMessageComposer)
+        public BadgeDefinitionsComposer(Dictionary<string, Achievement> achievements)
+            : base(ServerPacketHeader.BadgeDefinitionsMessageComposer)
         {
-            WriteInteger(Achievements.Count);
-            foreach (var Achievement in Achievements.Values)
+            WriteInteger(achievements.Count);
+
+            foreach (var achievement in achievements.Values)
             {
-                WriteString(Achievement.GroupName.Replace("ACH_", ""));
-                WriteInteger(Achievement.Levels.Count);
-                foreach (var Level in Achievement.Levels.Values)
+                WriteString(achievement.GroupName.Replace("ACH_", ""));
+                WriteInteger(achievement.Levels.Count);
+                foreach (var level in achievement.Levels.Values)
                 {
-                    WriteInteger(Level.Level);
-                    WriteInteger(Level.Requirement);
+                    WriteInteger(level.Level);
+                    WriteInteger(level.Requirement);
                 }
             }
         }

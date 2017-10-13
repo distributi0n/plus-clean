@@ -10,16 +10,16 @@
 
         public string Description => "Want to disable diagonal walking in your room? Type this command!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
-                Session.SendWhisper("Oops, only the owner of this room can run this command!");
+                session.SendWhisper("Oops, only the owner of this room can run this command!");
                 return;
             }
 
-            Room.GetGameMap().DiagonalEnabled = !Room.GetGameMap().DiagonalEnabled;
-            Session.SendWhisper("Successfully updated the diagonal boolean value for this room.");
+            room.GetGameMap().DiagonalEnabled = !room.GetGameMap().DiagonalEnabled;
+            session.SendWhisper("Successfully updated the diagonal boolean value for this room.");
         }
     }
 }

@@ -61,22 +61,22 @@
             }
             foreach (var item in _room.GetRoomItemHandler().GetFloor.ToList())
             {
-                if (team == TEAM.BLUE && item.Data.InteractionType == InteractionType.banzaiscoreblue)
+                if (team == TEAM.BLUE && item.Data.InteractionType == InteractionType.Banzaiscoreblue)
                 {
                     item.ExtraData = Points[Convert.ToInt32(team)].ToString();
                     item.UpdateState();
                 }
-                else if (team == TEAM.RED && item.Data.InteractionType == InteractionType.banzaiscorered)
+                else if (team == TEAM.RED && item.Data.InteractionType == InteractionType.Banzaiscorered)
                 {
                     item.ExtraData = Points[Convert.ToInt32(team)].ToString();
                     item.UpdateState();
                 }
-                else if (team == TEAM.GREEN && item.Data.InteractionType == InteractionType.banzaiscoregreen)
+                else if (team == TEAM.GREEN && item.Data.InteractionType == InteractionType.Banzaiscoregreen)
                 {
                     item.ExtraData = Points[Convert.ToInt32(team)].ToString();
                     item.UpdateState();
                 }
-                else if (team == TEAM.YELLOW && item.Data.InteractionType == InteractionType.banzaiscoreyellow)
+                else if (team == TEAM.YELLOW && item.Data.InteractionType == InteractionType.Banzaiscoreyellow)
                 {
                     item.ExtraData = Points[Convert.ToInt32(team)].ToString();
                     item.UpdateState();
@@ -111,10 +111,10 @@
             }
         }
 
-        private static bool IsFootballGoal(InteractionType type) => type == InteractionType.FOOTBALL_GOAL_BLUE ||
-                                                                    type == InteractionType.FOOTBALL_GOAL_GREEN ||
-                                                                    type == InteractionType.FOOTBALL_GOAL_RED ||
-                                                                    type == InteractionType.FOOTBALL_GOAL_YELLOW;
+        private static bool IsFootballGoal(InteractionType type) => type == InteractionType.FootballGoalBlue ||
+                                                                    type == InteractionType.FootballGoalGreen ||
+                                                                    type == InteractionType.FootballGoalRed ||
+                                                                    type == InteractionType.FootballGoalYellow;
 
         public void AddFurnitureToTeam(Item item, TEAM team)
         {
@@ -197,14 +197,14 @@
         private void LockGate(Item item)
         {
             var type = item.GetBaseItem().InteractionType;
-            if (type == InteractionType.FREEZE_BLUE_GATE ||
-                type == InteractionType.FREEZE_GREEN_GATE ||
-                type == InteractionType.FREEZE_RED_GATE ||
-                type == InteractionType.FREEZE_YELLOW_GATE ||
-                type == InteractionType.banzaigateblue ||
-                type == InteractionType.banzaigatered ||
-                type == InteractionType.banzaigategreen ||
-                type == InteractionType.banzaigateyellow)
+            if (type == InteractionType.FreezeBlueGate ||
+                type == InteractionType.FreezeGreenGate ||
+                type == InteractionType.FreezeRedGate ||
+                type == InteractionType.FreezeYellowGate ||
+                type == InteractionType.Banzaigateblue ||
+                type == InteractionType.Banzaigatered ||
+                type == InteractionType.Banzaigategreen ||
+                type == InteractionType.Banzaigateyellow)
             {
                 foreach (var user in _room.GetGameMap().GetRoomUsers(new Point(item.GetX, item.GetY)))
                 {
@@ -218,14 +218,14 @@
         private void UnlockGate(Item item)
         {
             var type = item.GetBaseItem().InteractionType;
-            if (type == InteractionType.FREEZE_BLUE_GATE ||
-                type == InteractionType.FREEZE_GREEN_GATE ||
-                type == InteractionType.FREEZE_RED_GATE ||
-                type == InteractionType.FREEZE_YELLOW_GATE ||
-                type == InteractionType.banzaigateblue ||
-                type == InteractionType.banzaigatered ||
-                type == InteractionType.banzaigategreen ||
-                type == InteractionType.banzaigateyellow)
+            if (type == InteractionType.FreezeBlueGate ||
+                type == InteractionType.FreezeGreenGate ||
+                type == InteractionType.FreezeRedGate ||
+                type == InteractionType.FreezeYellowGate ||
+                type == InteractionType.Banzaigateblue ||
+                type == InteractionType.Banzaigatered ||
+                type == InteractionType.Banzaigategreen ||
+                type == InteractionType.Banzaigateyellow)
             {
                 foreach (var user in _room.GetGameMap().GetRoomUsers(new Point(item.GetX, item.GetY)))
                 {

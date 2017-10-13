@@ -4,7 +4,7 @@
 
     internal class FriendListUpdateEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
         }
     }

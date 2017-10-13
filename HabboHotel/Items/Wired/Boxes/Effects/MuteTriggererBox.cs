@@ -8,10 +8,10 @@
 
     internal class MuteTriggererBox : IWiredItem
     {
-        public MuteTriggererBox(Room Instance, Item Item)
+        public MuteTriggererBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             if (SetItems.Count > 0)
             {
@@ -27,16 +27,16 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var Time = Packet.PopInt();
-            var Message = Packet.PopString();
-            StringData = Time + ";" + Message;
+            var unknown = packet.PopInt();
+            var time = packet.PopInt();
+            var message = packet.PopString();
+            StringData = time + ";" + message;
         }
 
         public bool Execute(params object[] Params)
@@ -46,39 +46,39 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+            if (user == null)
             {
                 return false;
             }
 
-            if (Player.GetPermissions().HasRight("mod_tool") || Instance.OwnerId == Player.Id)
+            if (player.GetPermissions().HasRight("mod_tool") || Instance.OwnerId == player.Id)
             {
-                Player.GetClient()
-                    .SendPacket(new WhisperComposer(User.VirtualId, "Wired Mute Exception: Unmutable Player", 0, 0));
+                player.GetClient()
+                    .SendPacket(new WhisperComposer(user.VirtualId, "Wired Mute Exception: Unmutable Player", 0, 0));
                 return false;
             }
 
-            var Time = StringData != null ? int.Parse(StringData.Split(';')[0]) : 0;
-            var Message = StringData != null ? StringData.Split(';')[1] : "No message!";
-            if (Time > 0)
+            var time = StringData != null ? int.Parse(StringData.Split(';')[0]) : 0;
+            var message = StringData != null ? StringData.Split(';')[1] : "No message!";
+            if (time > 0)
             {
-                Player.GetClient().SendPacket(new WhisperComposer(User.VirtualId,
-                    "Wired Mute: Muted for " + Time + "! Message: " + Message, 0, 0));
-                if (!Instance.MutedUsers.ContainsKey(Player.Id))
+                player.GetClient().SendPacket(new WhisperComposer(user.VirtualId,
+                    "Wired Mute: Muted for " + time + "! Message: " + message, 0, 0));
+                if (!Instance.MutedUsers.ContainsKey(player.Id))
                 {
-                    Instance.MutedUsers.Add(Player.Id, PlusEnvironment.GetUnixTimestamp() + Time * 60);
+                    Instance.MutedUsers.Add(player.Id, PlusEnvironment.GetUnixTimestamp() + time * 60);
                 }
                 else
                 {
-                    Instance.MutedUsers.Remove(Player.Id);
-                    Instance.MutedUsers.Add(Player.Id, PlusEnvironment.GetUnixTimestamp() + Time * 60);
+                    Instance.MutedUsers.Remove(player.Id);
+                    Instance.MutedUsers.Add(player.Id, PlusEnvironment.GetUnixTimestamp() + time * 60);
                 }
             }
             return true;

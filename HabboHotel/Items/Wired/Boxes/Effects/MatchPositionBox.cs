@@ -12,15 +12,15 @@
     {
         private int _delay;
 
-        private bool Requested;
+        private bool _requested;
 
-        public MatchPositionBox(Room Instance, Item Item)
+        public MatchPositionBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             TickCount = Delay;
-            Requested = false;
+            _requested = false;
         }
 
         public bool MatchPosition { get; set; }
@@ -43,14 +43,14 @@
 
         public bool OnCycle()
         {
-            if (!Requested || string.IsNullOrEmpty(StringData) || StringData == "0;0;0" || SetItems.Count == 0)
+            if (!_requested || string.IsNullOrEmpty(StringData) || StringData == "0;0;0" || SetItems.Count == 0)
             {
                 return false;
             }
 
-            foreach (var Item in SetItems.Values.ToList())
+            foreach (var item in SetItems.Values.ToList())
             {
-                if (Instance.GetRoomItemHandler().GetFloor == null && !Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                if (Instance.GetRoomItemHandler().GetFloor == null && !Instance.GetRoomItemHandler().GetFloor.Contains(item))
                 {
                     continue;
                 }
@@ -63,8 +63,8 @@
                     }
 
                     var itemId = Convert.ToInt32(I.Split(':')[0]);
-                    var II = Instance.GetRoomItemHandler().GetItem(Convert.ToInt32(itemId));
-                    if (II == null)
+                    var ii = Instance.GetRoomItemHandler().GetItem(Convert.ToInt32(itemId));
+                    if (ii == null)
                     {
                         continue;
                     }
@@ -89,11 +89,11 @@
                         {
                             if (part.Count() >= 4)
                             {
-                                SetState(II, part[4]);
+                                SetState(ii, part[4]);
                             }
                             else
                             {
-                                SetState(II, "1");
+                                SetState(ii, "1");
                             }
                         }
                     }
@@ -105,7 +105,7 @@
                     {
                         if (int.Parse(StringData.Split(';')[1]) == 1) //Direction
                         {
-                            SetRotation(II, Convert.ToInt32(part[3]));
+                            SetRotation(ii, Convert.ToInt32(part[3]));
                         }
                     }
                     catch (Exception e)
@@ -116,7 +116,7 @@
                     {
                         if (int.Parse(StringData.Split(';')[2]) == 1) //Position
                         {
-                            SetPosition(II, Convert.ToInt32(part[0]), Convert.ToInt32(part[1]), Convert.ToDouble(part[2]),
+                            SetPosition(ii, Convert.ToInt32(part[0]), Convert.ToInt32(part[1]), Convert.ToDouble(part[2]),
                                 Convert.ToInt32(part[3]));
                         }
                     }
@@ -127,7 +127,7 @@
                 }
             }
 
-            Requested = false;
+            _requested = false;
             return true;
         }
 
@@ -144,73 +144,73 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var State = Packet.PopInt();
-            var Direction = Packet.PopInt();
-            var Placement = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var unknown = packet.PopInt();
+            var state = packet.PopInt();
+            var direction = packet.PopInt();
+            var placement = packet.PopInt();
+            var unknown2 = packet.PopString();
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            StringData = State + ";" + Direction + ";" + Placement;
-            var Delay = Packet.PopInt();
-            this.Delay = Delay;
+            StringData = state + ";" + direction + ";" + placement;
+            var delay = packet.PopInt();
+            Delay = delay;
         }
 
         public bool Execute(params object[] Params)
         {
-            if (!Requested)
+            if (!_requested)
             {
                 TickCount = Delay;
-                Requested = true;
+                _requested = true;
             }
             return true;
         }
 
-        private void SetState(Item Item, string Extradata)
+        private void SetState(Item item, string extradata)
         {
-            if (Item.ExtraData == Extradata)
+            if (item.ExtraData == extradata)
             {
                 return;
             }
-            if (Item.GetBaseItem().InteractionType == InteractionType.DICE)
+            if (item.GetBaseItem().InteractionType == InteractionType.Dice)
             {
                 return;
             }
 
-            Item.ExtraData = Extradata;
-            Item.UpdateState(false, true);
+            item.ExtraData = extradata;
+            item.UpdateState(false, true);
         }
 
-        private void SetRotation(Item Item, int Rotation)
+        private void SetRotation(Item item, int rotation)
         {
-            if (Item.Rotation == Rotation)
+            if (item.Rotation == rotation)
             {
                 return;
             }
 
-            Item.Rotation = Rotation;
-            Item.UpdateState(false, true);
+            item.Rotation = rotation;
+            item.UpdateState(false, true);
         }
 
-        private void SetPosition(Item Item, int CoordX, int CoordY, double CoordZ, int Rotation)
+        private void SetPosition(Item item, int coordX, int coordY, double coordZ, int rotation)
         {
-            Instance.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, CoordX, CoordY, CoordZ, 0, 0,
-                Item.Id));
-            Instance.GetRoomItemHandler().SetFloorItem(Item, CoordX, CoordY, CoordZ);
+            Instance.SendPacket(new SlideObjectBundleComposer(item.GetX, item.GetY, item.GetZ, coordX, coordY, coordZ, 0, 0,
+                item.Id));
+            Instance.GetRoomItemHandler().SetFloorItem(item, coordX, coordY, coordZ);
 
             //Instance.GetGameMap().GenerateMaps();
         }

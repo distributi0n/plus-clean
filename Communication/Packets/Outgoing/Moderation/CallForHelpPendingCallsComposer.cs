@@ -5,8 +5,8 @@
 
     internal class CallForHelpPendingCallsComposer : ServerPacket
     {
-        public CallForHelpPendingCallsComposer(ModerationTicket ticket) : base(ServerPacketHeader
-            .CallForHelpPendingCallsMessageComposer)
+        public CallForHelpPendingCallsComposer(ModerationTicket ticket)
+            : base(ServerPacketHeader.CallForHelpPendingCallsMessageComposer)
         {
             WriteInteger(1); // Count for whatever reason?
             {

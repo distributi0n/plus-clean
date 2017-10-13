@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class SyncUserCurrencyCommand : IRCONCommand
+    internal class SyncUserCurrencyCommand : IRconCommand
     {
         public string Description => "This command is used to sync a users specified currency to the database.";
 
@@ -10,14 +10,13 @@
 
         public bool TryExecute(string[] parameters)
         {
-            var userId = 0;
-            if (!int.TryParse(parameters[0], out userId))
+            if (!int.TryParse(parameters[0], out var userId))
             {
                 return false;
             }
 
             var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
-            if (client == null || client.GetHabbo() == null)
+            if (client?.GetHabbo() == null)
             {
                 return false;
             }
@@ -73,7 +72,7 @@
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.SetQuery("UPDATE `users` SET `gotw_points` = @gotw WHERE `id` = @id LIMIT 1");
-                        dbClient.AddParameter("gotw", client.GetHabbo().GOTWPoints);
+                        dbClient.AddParameter("gotw", client.GetHabbo().GotwPoints);
                         dbClient.AddParameter("id", userId);
                         dbClient.RunQuery();
                     }

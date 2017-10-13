@@ -4,47 +4,46 @@
     using HabboHotel.Catalog;
     using HabboHotel.GameClients;
 
-    public class CatalogIndexComposer : ServerPacket
+    internal class CatalogIndexComposer : ServerPacket
     {
-        public CatalogIndexComposer(GameClient Session, ICollection<CatalogPage> Pages, int Sub = 0) : base(ServerPacketHeader
-            .CatalogIndexMessageComposer)
+        internal CatalogIndexComposer(GameClient session, ICollection<CatalogPage> pages, int sub = 0)
+            : base(ServerPacketHeader.CatalogIndexMessageComposer)
         {
-            WriteRootIndex(Session, Pages);
-            foreach (var Parent in Pages)
+            WriteRootIndex(session, pages);
+
+            foreach (var parent in pages)
             {
-                if (Parent.ParentId != -1 ||
-                    Parent.MinimumRank > Session.GetHabbo().Rank ||
-                    Parent.MinimumVIP > Session.GetHabbo().VIPRank && Session.GetHabbo().Rank == 1)
+                if (parent.ParentId != -1 || parent.MinimumRank > session.GetHabbo().Rank || parent.MinimumVip > session.GetHabbo().VipRank && session.GetHabbo().Rank == 1)
                 {
                     continue;
                 }
 
-                WritePage(Parent, CalcTreeSize(Session, Pages, Parent.Id));
-                foreach (var child in Pages)
+                WritePage(parent, CalcTreeSize(session, pages, parent.Id));
+
+                foreach (var child in pages)
                 {
-                    if (child.ParentId != Parent.Id ||
-                        child.MinimumRank > Session.GetHabbo().Rank ||
-                        child.MinimumVIP > Session.GetHabbo().VIPRank && Session.GetHabbo().Rank == 1)
+                    if (child.ParentId != parent.Id || child.MinimumRank > session.GetHabbo().Rank || child.MinimumVip > session.GetHabbo().VipRank && session.GetHabbo().Rank == 1)
                     {
                         continue;
                     }
 
                     if (child.Enabled)
                     {
-                        WritePage(child, CalcTreeSize(Session, Pages, child.Id));
+                        WritePage(child, CalcTreeSize(session, pages, child.Id));
                     }
                     else
                     {
-                        WriteNodeIndex(child, CalcTreeSize(Session, Pages, child.Id));
+                        WriteNodeIndex(child, CalcTreeSize(session, pages, child.Id));
                     }
-                    foreach (var SubChild in Pages)
+
+                    foreach (var subChild in pages)
                     {
-                        if (SubChild.ParentId != child.Id || SubChild.MinimumRank > Session.GetHabbo().Rank)
+                        if (subChild.ParentId != child.Id || subChild.MinimumRank > session.GetHabbo().Rank)
                         {
                             continue;
                         }
 
-                        WritePage(SubChild, 0);
+                        WritePage(subChild, 0);
                     }
                 }
             }
@@ -82,6 +81,7 @@
             WriteInteger(page.Id);
             WriteString(page.PageLink);
             WriteString(page.Caption);
+
             WriteInteger(page.ItemOffers.Count);
             foreach (var i in page.ItemOffers.Keys)
             {
@@ -91,19 +91,17 @@
             WriteInteger(treeSize);
         }
 
-        public int CalcTreeSize(GameClient Session, ICollection<CatalogPage> Pages, int ParentId)
+        public int CalcTreeSize(GameClient session, ICollection<CatalogPage> pages, int parentId)
         {
             var i = 0;
-            foreach (var Page in Pages)
+            foreach (var page in pages)
             {
-                if (Page.MinimumRank > Session.GetHabbo().Rank ||
-                    Page.MinimumVIP > Session.GetHabbo().VIPRank && Session.GetHabbo().Rank == 1 ||
-                    Page.ParentId != ParentId)
+                if (page.MinimumRank > session.GetHabbo().Rank || page.MinimumVip > session.GetHabbo().VipRank && session.GetHabbo().Rank == 1 || page.ParentId != parentId)
                 {
                     continue;
                 }
 
-                if (Page.ParentId == ParentId)
+                if (page.ParentId == parentId)
                 {
                     i++;
                 }

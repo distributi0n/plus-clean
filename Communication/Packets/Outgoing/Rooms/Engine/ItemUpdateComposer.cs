@@ -4,29 +4,31 @@
 
     internal class ItemUpdateComposer : ServerPacket
     {
-        public ItemUpdateComposer(Item Item, int UserId) : base(ServerPacketHeader.ItemUpdateMessageComposer)
+        public ItemUpdateComposer(Item item, int userId)
+            : base(ServerPacketHeader.ItemUpdateMessageComposer)
         {
-            WriteWallItem(Item, UserId);
+            WriteWallItem(item, userId);
         }
 
-        private void WriteWallItem(Item Item, int UserId)
+        private void WriteWallItem(Item item, int userId)
         {
-            WriteString(Item.Id.ToString());
-            WriteInteger(Item.GetBaseItem().SpriteId);
-            WriteString(Item.wallCoord);
-            switch (Item.GetBaseItem().InteractionType)
+            WriteString(item.Id.ToString());
+            WriteInteger(item.GetBaseItem().SpriteId);
+            WriteString(item.WallCoord);
+            switch (item.GetBaseItem().InteractionType)
             {
-                case InteractionType.POSTIT:
-                    WriteString(Item.ExtraData.Split(' ')[0]);
+                case InteractionType.Postit:
+                    WriteString(item.ExtraData.Split(' ')[0]);
                     break;
+
                 default:
-                    WriteString(Item.ExtraData);
+                    WriteString(item.ExtraData);
                     break;
             }
 
             WriteInteger(-1);
-            WriteInteger(Item.GetBaseItem().Modes > 1 ? 1 : 0);
-            WriteInteger(UserId);
+            WriteInteger(item.GetBaseItem().Modes > 1 ? 1 : 0);
+            WriteInteger(userId);
         }
     }
 }

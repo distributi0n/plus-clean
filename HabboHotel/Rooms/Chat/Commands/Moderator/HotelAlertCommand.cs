@@ -11,18 +11,18 @@
 
         public string Description => "Send a message to the entire hotel.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter a message to send.");
+                session.SendWhisper("Please enter a message to send.");
                 return;
             }
 
-            var Message = CommandManager.MergeParams(Params, 1);
+            var message = CommandManager.MergeParams(Params, 1);
             PlusEnvironment.GetGame()
                 .GetClientManager()
-                .SendPacket(new BroadcastMessageAlertComposer(Message + "\r\n" + "- " + Session.GetHabbo().Username));
+                .SendPacket(new BroadcastMessageAlertComposer(message + "\r\n" + "- " + session.GetHabbo().Username));
         }
     }
 }

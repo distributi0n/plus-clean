@@ -9,26 +9,26 @@
 
     public class RoomBot
     {
-        public BotAIType AiType;
+        internal BotAIType AiType;
 
-        public bool AutomaticChat;
-        public int BotId;
+        internal bool AutomaticChat;
+        internal int BotId;
 
-        public int DanceId;
-        public string Gender;
-        public int Id;
+        internal int DanceId;
+        internal string Gender;
+        internal int Id;
 
-        public string Look;
-        public int maxX;
-        public int maxY;
-        public int minX;
-        public int minY;
-        public bool MixSentences;
-        public string Motto;
+        internal string Look;
+        public int MaxX;
+        public int MaxY;
+        public int MinX;
+        public int MinY;
+        internal bool MixSentences;
+        internal string Motto;
         public string Name;
 
-        public int ownerID;
-        public List<RandomSpeech> RandomSpeech;
+        internal int OwnerId;
+        internal List<RandomSpeech> RandomSpeech;
         public int RoomId;
 
         public RoomUser RoomUser;
@@ -36,64 +36,62 @@
         public int SpeakingInterval;
         public int VirtualId;
 
-        public string WalkingMode;
+        internal string WalkingMode;
 
-        public int X;
-        public int Y;
-        public double Z;
+        internal int X;
+        internal int Y;
+        internal double Z;
 
-        public RoomBot(int BotId,
-            int RoomId,
-            string AiType,
-            string WalkingMode,
-            string Name,
-            string Motto,
-            string Look,
-            int X,
-            int Y,
-            double Z,
-            int Rot,
-            int minX,
-            int minY,
-            int maxX,
-            int maxY,
-            ref List<RandomSpeech> Speeches,
-            string Gender,
-            int Dance,
-            int ownerID,
-            bool AutomaticChat,
-            int SpeakingInterval,
-            bool MixSentences,
-            int ChatBubble)
+        internal RoomBot(int botId,
+                         int roomId,
+                         string aiType,
+                         string walkingMode,
+                         string name,
+                         string motto,
+                         string look,
+                         int x,
+                         int y,
+                         double z,
+                         int rot,
+                         int minX,
+                         int minY,
+                         int maxX,
+                         int maxY,
+                         ref List<RandomSpeech> speeches,
+                         string gender,
+                         int dance,
+                         int ownerId,
+                         bool automaticChat,
+                         int speakingInterval,
+                         bool mixSentences,
+                         int chatBubble)
         {
-            Id = BotId;
-            this.BotId = BotId;
-            this.RoomId = RoomId;
-            this.Name = Name;
-            this.Motto = Motto;
-            this.Look = Look;
-            this.Gender = Gender.ToUpper();
-            this.AiType = BotUtility.GetAIFromString(AiType);
-            this.WalkingMode = WalkingMode;
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
-            this.Rot = Rot;
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
+            Id = botId;
+            BotId = botId;
+            RoomId = roomId;
+            Name = name;
+            Motto = motto;
+            Look = look;
+            Gender = gender.ToUpper();
+            AiType = BotUtility.GetAIFromString(aiType);
+            WalkingMode = walkingMode;
+            X = x;
+            Y = y;
+            Z = z;
+            Rot = rot;
+            MinX = minX;
+            MinY = minY;
+            MaxX = maxX;
+            MaxY = maxY;
             VirtualId = -1;
             RoomUser = null;
-            DanceId = Dance;
-            LoadRandomSpeech(Speeches);
-
-            //this.LoadResponses(Responses);
-            this.ownerID = ownerID;
-            this.AutomaticChat = AutomaticChat;
-            this.SpeakingInterval = SpeakingInterval;
-            this.MixSentences = MixSentences;
-            this.ChatBubble = ChatBubble;
+            DanceId = dance;
+            LoadRandomSpeech(speeches);
+            OwnerId = ownerId;
+            AutomaticChat = automaticChat;
+            SpeakingInterval = speakingInterval;
+            MixSentences = mixSentences;
+            ChatBubble = chatBubble;
             ForcedMovement = false;
             TargetCoordinate = new Point();
             TargetUser = 0;
@@ -109,14 +107,14 @@
 
         public int ChatBubble { get; set; }
 
-        public void LoadRandomSpeech(List<RandomSpeech> Speeches)
+        public void LoadRandomSpeech(List<RandomSpeech> speeches)
         {
             RandomSpeech = new List<RandomSpeech>();
-            foreach (var Speech in Speeches)
+            foreach (var speech in speeches)
             {
-                if (Speech.BotID == BotId)
+                if (speech.BotID == BotId)
                 {
-                    RandomSpeech.Add(Speech);
+                    RandomSpeech.Add(speech);
                 }
             }
         }
@@ -132,18 +130,18 @@
             return RandomSpeech[rand.Next(0, RandomSpeech.Count - 1)];
         }
 
-        public BotAI GenerateBotAI(int VirtualId)
+        public BotAI GenerateBotAi(int virtualId)
         {
             switch (AiType)
             {
                 case BotAIType.PET:
-                    return new PetBot(VirtualId);
+                    return new PetBot(virtualId);
                 case BotAIType.GENERIC:
-                    return new GenericBot(VirtualId);
+                    return new GenericBot(virtualId);
                 case BotAIType.BARTENDER:
-                    return new BartenderBot(VirtualId);
+                    return new BartenderBot(virtualId);
                 default:
-                    return new GenericBot(VirtualId);
+                    return new GenericBot(virtualId);
             }
         }
     }

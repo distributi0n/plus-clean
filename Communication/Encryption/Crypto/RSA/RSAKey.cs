@@ -3,13 +3,10 @@
     using System;
     using Utilities;
 
-    public sealed class RSAKey
+    public sealed class RsaKey
     {
-        protected bool CanDecrypt;
-        protected bool CanEncrypt;
-
-        public RSAKey(BigInteger n, int e, BigInteger d, BigInteger p, BigInteger q, BigInteger dmp1, BigInteger dmq1,
-            BigInteger coeff)
+        private RsaKey(BigInteger n, int e, BigInteger d, BigInteger p, BigInteger q, BigInteger dmp1, BigInteger dmq1,
+                       BigInteger coeff)
         {
             E = e;
             this.e = e;
@@ -19,88 +16,34 @@
             Q = q;
             Dmp1 = dmp1;
             Dmq1 = dmq1;
-            Coeff = coeff;
-            CanEncrypt = N != 0 && E != 0;
-            CanDecrypt = CanEncrypt && D != 0;
 
             //this.GeneratePair(1024, this.e);
         }
 
-        public int E { get; }
-        public BigInteger e { get; private set; }
-        public BigInteger N { get; private set; }
-        public BigInteger D { get; private set; }
-        public BigInteger P { get; private set; }
-        public BigInteger Q { get; private set; }
-        public BigInteger Dmp1 { get; private set; }
-        public BigInteger Dmq1 { get; private set; }
-        public BigInteger Coeff { get; private set; }
+        private int E { get; }
+        private BigInteger e { get; }
+        private BigInteger N { get; }
+        private BigInteger D { get; }
+        private BigInteger P { get; }
+        private BigInteger Q { get; }
+        private BigInteger Dmp1 { get; }
+        private BigInteger Dmq1 { get; }
 
-        public void GeneratePair(int b, BigInteger e)
-        {
-            this.e = e;
-            var qs = b >> 1;
-            while (true)
-            {
-                while (true)
-                {
-                    P = BigInteger.genPseudoPrime(b - qs, 1, new Random());
-                    if ((P - 1).gcd(this.e) == 1 && P.isProbablePrime(10))
-                    {
-                        break;
-                    }
-                }
-                while (true)
-                {
-                    Q = BigInteger.genPseudoPrime(qs, 1, new Random());
-                    if ((Q - 1).gcd(this.e) == 1 && P.isProbablePrime(10))
-                    {
-                        break;
-                    }
-                }
-
-                if (P < Q)
-                {
-                    var t = P;
-                    P = Q;
-                    Q = t;
-                }
-                var phi = (P - 1) * (Q - 1);
-                if (phi.gcd(this.e) == 1)
-                {
-                    N = P * Q;
-                    D = this.e.modInverse(phi);
-                    Dmp1 = D % (P - 1);
-                    Dmq1 = D % (Q - 1);
-                    Coeff = Q.modInverse(P);
-                    break;
-                }
-            }
-
-            CanEncrypt = N != 0 && this.e != 0;
-            CanDecrypt = CanEncrypt && D != 0;
-            Console.WriteLine(N.ToString(16));
-            Console.WriteLine(D.ToString(16));
-        }
-
-        public static RSAKey ParsePublicKey(string n, string e) =>
-            new RSAKey(new BigInteger(n, 16), Convert.ToInt32(e, 16), 0, 0, 0, 0, 0, 0);
-
-        public static RSAKey ParsePrivateKey(string n,
-            string e,
-            string d,
-            string p = null,
-            string q = null,
-            string dmp1 = null,
-            string dmq1 = null,
-            string coeff = null)
+        public static RsaKey ParsePrivateKey(string n,
+                                             string e,
+                                             string d,
+                                             string p = null,
+                                             string q = null,
+                                             string dmp1 = null,
+                                             string dmq1 = null,
+                                             string coeff = null)
         {
             if (p == null)
             {
-                return new RSAKey(new BigInteger(n, 16), Convert.ToInt32(e, 16), new BigInteger(d, 16), 0, 0, 0, 0, 0);
+                return new RsaKey(new BigInteger(n, 16), Convert.ToInt32(e, 16), new BigInteger(d, 16), 0, 0, 0, 0, 0);
             }
 
-            return new RSAKey(new BigInteger(n, 16),
+            return new RsaKey(new BigInteger(n, 16),
                 Convert.ToInt32(e, 16),
                 new BigInteger(d, 16),
                 new BigInteger(p, 16),
@@ -110,11 +53,7 @@
                 new BigInteger(coeff, 16));
         }
 
-        public int GetBlockSize() => (N.bitCount() + 7) / 8;
-
-        public byte[] Encrypt(byte[] src) => DoEncrypt(DoPublic, src, Pkcs1PadType.FullByte);
-
-        public byte[] Decrypt(byte[] src) => DoDecrypt(DoPublic, src, Pkcs1PadType.FullByte);
+        private int GetBlockSize() => (N.bitCount() + 7) / 8;
 
         public byte[] Sign(byte[] src) => DoEncrypt(DoPrivate, src, Pkcs1PadType.FullByte);
 
@@ -158,7 +97,7 @@
                 }
 
                 var bl = GetBlockSize();
-                var bytes = pkcs1unpad(m.getBytes(), bl, type);
+                var bytes = pkcs1unpad(m.getBytes(), bl);
                 return bytes;
             }
             catch
@@ -198,7 +137,7 @@
             return bytes;
         }
 
-        private byte[] pkcs1unpad(byte[] src, int n, Pkcs1PadType type)
+        private byte[] pkcs1unpad(byte[] src, int n)
         {
             var i = 0;
             while (i < src.Length && src[i] == 0)
@@ -230,9 +169,7 @@
             return bytes;
         }
 
-        protected BigInteger DoPublic(BigInteger m) => m.modPow(E, N);
-
-        protected BigInteger DoPrivate(BigInteger m)
+        private BigInteger DoPrivate(BigInteger m)
         {
             if (P == 0 && Q == 0)
             {
@@ -243,9 +180,9 @@
         }
     }
 
-    public delegate BigInteger DoCalculateionDelegate(BigInteger m);
+    internal delegate BigInteger DoCalculateionDelegate(BigInteger m);
 
-    public enum Pkcs1PadType
+    internal enum Pkcs1PadType
     {
         FullByte = 1,
         RandomByte = 2

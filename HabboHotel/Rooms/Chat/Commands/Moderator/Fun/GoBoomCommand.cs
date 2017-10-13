@@ -11,19 +11,19 @@
 
         public string Description => "Make the entire room go boom! (Applys effect 108)";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var Users = Room.GetRoomUserManager().GetRoomUsers();
-            if (Users.Count > 0)
+            var users = room.GetRoomUserManager().GetRoomUsers();
+            if (users.Count > 0)
             {
-                foreach (var U in Users.ToList())
+                foreach (var u in users.ToList())
                 {
-                    if (U == null)
+                    if (u == null)
                     {
                         continue;
                     }
 
-                    U.ApplyEffect(108);
+                    u.ApplyEffect(108);
                 }
             }
         }

@@ -2,7 +2,8 @@
 {
     internal class HideWiredConfigComposer : ServerPacket
     {
-        public HideWiredConfigComposer() : base(ServerPacketHeader.HideWiredConfigMessageComposer)
+        public HideWiredConfigComposer()
+            : base(ServerPacketHeader.HideWiredConfigMessageComposer)
         {
         }
     }

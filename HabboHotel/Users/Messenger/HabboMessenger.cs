@@ -18,9 +18,9 @@
         private Dictionary<int, MessengerRequest> _requests;
         public bool AppearOffline;
 
-        public HabboMessenger(int UserId)
+        public HabboMessenger(int userId)
         {
-            _userId = UserId;
+            _userId = userId;
             _requests = new Dictionary<int, MessengerRequest>();
             _friends = new Dictionary<int, MessengerBuddy>();
         }
@@ -31,31 +31,31 @@
             _friends = new Dictionary<int, MessengerBuddy>(friends);
         }
 
-        public bool TryGetRequest(int senderID, out MessengerRequest Request) => _requests.TryGetValue(senderID, out Request);
+        public bool TryGetRequest(int senderId, out MessengerRequest request) => _requests.TryGetValue(senderId, out request);
 
-        public bool TryGetFriend(int UserId, out MessengerBuddy Buddy) => _friends.TryGetValue(UserId, out Buddy);
+        public bool TryGetFriend(int userId, out MessengerBuddy buddy) => _friends.TryGetValue(userId, out buddy);
 
         public void ProcessOfflineMessages()
         {
-            DataTable GetMessages = null;
+            DataTable getMessages;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `messenger_offline_messages` WHERE `to_id` = @id;");
                 dbClient.AddParameter("id", _userId);
-                GetMessages = dbClient.GetTable();
-                if (GetMessages != null)
+                getMessages = dbClient.GetTable();
+                if (getMessages != null)
                 {
-                    var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(_userId);
-                    if (Client == null)
+                    var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(_userId);
+                    if (client == null)
                     {
                         return;
                     }
 
-                    foreach (DataRow Row in GetMessages.Rows)
+                    foreach (DataRow row in getMessages.Rows)
                     {
-                        Client.SendPacket(new NewConsoleMessageComposer(Convert.ToInt32(Row["from_id"]),
-                            Convert.ToString(Row["message"]),
-                            (int) (UnixTimestamp.GetNow() - Convert.ToInt32(Row["timestamp"]))));
+                        client.SendPacket(new NewConsoleMessageComposer(Convert.ToInt32(row["from_id"]),
+                            Convert.ToString(row["message"]),
+                            (int) (UnixTimestamp.GetNow() - Convert.ToInt32(row["timestamp"]))));
                     }
 
                     dbClient.SetQuery("DELETE FROM `messenger_offline_messages` WHERE `to_id` = @id");
@@ -91,7 +91,7 @@
             }
 
             var onlineUsers = PlusEnvironment.GetGame().GetClientManager().GetClientsById(_friends.Keys);
-            if (onlineUsers.Count() == 0)
+            if (!onlineUsers.Any())
             {
                 return;
             }
@@ -126,10 +126,10 @@
                 _friends[userid].UpdateUser(client);
                 if (notification)
                 {
-                    var Userclient = GetClient();
-                    if (Userclient != null)
+                    var userclient = GetClient();
+                    if (userclient != null)
                     {
-                        Userclient.SendPacket(SerializeUpdate(_friends[userid]));
+                        userclient.SendPacket(SerializeUpdate(_friends[userid]));
                     }
                 }
             }
@@ -161,22 +161,22 @@
             _requests.Remove(sender);
         }
 
-        public void CreateFriendship(int friendID)
+        public void CreateFriendship(int friendId)
         {
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery("REPLACE INTO messenger_friendships (user_one_id,user_two_id) VALUES (" + _userId + "," +
-                                  friendID + ")");
+                                  friendId + ")");
             }
-            OnNewFriendship(friendID);
-            var User = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendID);
-            if (User != null && User.GetHabbo().GetMessenger() != null)
+            OnNewFriendship(friendId);
+            var user = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendId);
+            if (user != null && user.GetHabbo().GetMessenger() != null)
             {
-                User.GetHabbo().GetMessenger().OnNewFriendship(_userId);
+                user.GetHabbo().GetMessenger().OnNewFriendship(_userId);
             }
-            if (User != null)
+            if (user != null)
             {
-                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(User, "ACH_FriendListSize", 1);
+                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(user, "ACH_FriendListSize", 1);
             }
             var thisUser = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(_userId);
             if (thisUser != null)
@@ -185,31 +185,31 @@
             }
         }
 
-        public void DestroyFriendship(int friendID)
+        public void DestroyFriendship(int friendId)
         {
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery("DELETE FROM messenger_friendships WHERE (user_one_id = " +
                                   _userId +
                                   " AND user_two_id = " +
-                                  friendID +
+                                  friendId +
                                   ") OR (user_two_id = " +
                                   _userId +
                                   " AND user_one_id = " +
-                                  friendID +
+                                  friendId +
                                   ")");
             }
-            OnDestroyFriendship(friendID);
-            var User = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendID);
-            if (User != null && User.GetHabbo().GetMessenger() != null)
+            OnDestroyFriendship(friendId);
+            var user = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendId);
+            if (user != null && user.GetHabbo().GetMessenger() != null)
             {
-                User.GetHabbo().GetMessenger().OnDestroyFriendship(_userId);
+                user.GetHabbo().GetMessenger().OnDestroyFriendship(_userId);
             }
         }
 
-        public void OnNewFriendship(int friendID)
+        public void OnNewFriendship(int friendId)
         {
-            var friend = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendID);
+            var friend = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friendId);
             MessengerBuddy newFriend;
             if (friend == null || friend.GetHabbo() == null)
             {
@@ -218,10 +218,10 @@
                 {
                     dbClient.SetQuery(
                         "SELECT id,username,motto,look,last_online,hide_inroom,hide_online FROM users WHERE `id` = @friendid LIMIT 1");
-                    dbClient.AddParameter("friendid", friendID);
+                    dbClient.AddParameter("friendid", friendId);
                     dRow = dbClient.GetRow();
                 }
-                newFriend = new MessengerBuddy(friendID,
+                newFriend = new MessengerBuddy(friendId,
                     Convert.ToString(dRow["username"]),
                     Convert.ToString(dRow["look"]),
                     Convert.ToString(dRow["motto"]),
@@ -232,20 +232,20 @@
             else
             {
                 var user = friend.GetHabbo();
-                newFriend = new MessengerBuddy(friendID, user.Username, user.Look, user.Motto, 0, user.AppearOffline,
+                newFriend = new MessengerBuddy(friendId, user.Username, user.Look, user.Motto, 0, user.AppearOffline,
                     user.AllowPublicRoomStatus);
                 newFriend.UpdateUser(friend);
             }
-            if (!_friends.ContainsKey(friendID))
+            if (!_friends.ContainsKey(friendId))
             {
-                _friends.Add(friendID, newFriend);
+                _friends.Add(friendId, newFriend);
             }
             GetClient().SendPacket(SerializeUpdate(newFriend));
         }
 
-        public bool RequestExists(int requestID)
+        public bool RequestExists(int requestId)
         {
-            if (_requests.ContainsKey(requestID))
+            if (_requests.ContainsKey(requestId))
             {
                 return true;
             }
@@ -255,97 +255,97 @@
                 dbClient.SetQuery(
                     "SELECT user_one_id FROM messenger_friendships WHERE user_one_id = @myID AND user_two_id = @friendID");
                 dbClient.AddParameter("myID", Convert.ToInt32(_userId));
-                dbClient.AddParameter("friendID", Convert.ToInt32(requestID));
+                dbClient.AddParameter("friendID", Convert.ToInt32(requestId));
                 return dbClient.FindsResult();
             }
         }
 
-        public bool FriendshipExists(int friendID) => _friends.ContainsKey(friendID);
+        public bool FriendshipExists(int friendId) => _friends.ContainsKey(friendId);
 
-        public void OnDestroyFriendship(int Friend)
+        public void OnDestroyFriendship(int friend)
         {
-            if (_friends.ContainsKey(Friend))
+            if (_friends.ContainsKey(friend))
             {
-                _friends.Remove(Friend);
+                _friends.Remove(friend);
             }
-            GetClient().SendPacket(new FriendListUpdateComposer(Friend));
+            GetClient().SendPacket(new FriendListUpdateComposer(friend));
         }
 
-        public bool RequestBuddy(string UserQuery)
+        public bool RequestBuddy(string userQuery)
         {
-            int userID;
-            bool hasFQDisabled;
-            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(UserQuery);
+            int userId;
+            bool hasFqDisabled;
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(userQuery);
             if (client == null)
             {
-                DataRow Row = null;
+                DataRow row = null;
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.SetQuery("SELECT `id`,`block_newfriends` FROM `users` WHERE `username` = @query LIMIT 1");
-                    dbClient.AddParameter("query", UserQuery.ToLower());
-                    Row = dbClient.GetRow();
+                    dbClient.AddParameter("query", userQuery.ToLower());
+                    row = dbClient.GetRow();
                 }
-                if (Row == null)
+                if (row == null)
                 {
                     return false;
                 }
 
-                userID = Convert.ToInt32(Row["id"]);
-                hasFQDisabled = PlusEnvironment.EnumToBool(Row["block_newfriends"].ToString());
+                userId = Convert.ToInt32(row["id"]);
+                hasFqDisabled = PlusEnvironment.EnumToBool(row["block_newfriends"].ToString());
             }
             else
             {
-                userID = client.GetHabbo().Id;
-                hasFQDisabled = client.GetHabbo().AllowFriendRequests;
+                userId = client.GetHabbo().Id;
+                hasFqDisabled = client.GetHabbo().AllowFriendRequests;
             }
 
-            if (hasFQDisabled)
+            if (hasFqDisabled)
             {
                 GetClient().SendPacket(new MessengerErrorComposer(39, 3));
                 return false;
             }
 
-            var ToId = userID;
-            if (RequestExists(ToId))
+            var toId = userId;
+            if (RequestExists(toId))
             {
                 return true;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("REPLACE INTO `messenger_requests` (`from_id`,`to_id`) VALUES ('" + _userId + "','" + ToId +
+                dbClient.RunQuery("REPLACE INTO `messenger_requests` (`from_id`,`to_id`) VALUES ('" + _userId + "','" + toId +
                                   "')");
             }
-            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(GetClient(), QuestType.ADD_FRIENDS);
-            var ToUser = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(ToId);
-            if (ToUser == null || ToUser.GetHabbo() == null)
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(GetClient(), QuestType.AddFriends);
+            var toUser = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(toId);
+            if (toUser == null || toUser.GetHabbo() == null)
             {
                 return true;
             }
 
-            var Request = new MessengerRequest(ToId, _userId, PlusEnvironment.GetGame().GetClientManager().GetNameById(_userId));
-            ToUser.GetHabbo().GetMessenger().OnNewRequest(_userId);
-            var ThisUser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(_userId);
-            if (ThisUser != null)
+            var request = new MessengerRequest(toId, _userId, PlusEnvironment.GetGame().GetClientManager().GetNameById(_userId));
+            toUser.GetHabbo().GetMessenger().OnNewRequest(_userId);
+            var thisUser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(_userId);
+            if (thisUser != null)
             {
-                ToUser.SendPacket(new NewBuddyRequestComposer(ThisUser));
+                toUser.SendPacket(new NewBuddyRequestComposer(thisUser));
             }
-            _requests.Add(ToId, Request);
+            _requests.Add(toId, request);
             return true;
         }
 
-        public void OnNewRequest(int friendID)
+        public void OnNewRequest(int friendId)
         {
-            if (!_requests.ContainsKey(friendID))
+            if (!_requests.ContainsKey(friendId))
             {
-                _requests.Add(friendID,
-                    new MessengerRequest(_userId, friendID, PlusEnvironment.GetGame().GetClientManager().GetNameById(friendID)));
+                _requests.Add(friendId,
+                    new MessengerRequest(_userId, friendId, PlusEnvironment.GetGame().GetClientManager().GetNameById(friendId)));
             }
         }
 
-        public void SendInstantMessage(int ToId, string Message)
+        public void SendInstantMessage(int toId, string message)
         {
-            if (ToId == 0)
+            if (toId == 0)
             {
                 return;
             }
@@ -358,9 +358,9 @@
                 return;
             }
 
-            if (!FriendshipExists(ToId))
+            if (!FriendshipExists(toId))
             {
-                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.YOUR_NOT_FRIENDS, ToId));
+                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.YourNotFriends, toId));
                 return;
             }
 
@@ -375,85 +375,85 @@
 
             if (GetClient().GetHabbo().MessengerSpamTime > PlusEnvironment.GetUnixTimestamp())
             {
-                var Time = GetClient().GetHabbo().MessengerSpamTime - PlusEnvironment.GetUnixTimestamp();
+                var time = GetClient().GetHabbo().MessengerSpamTime - PlusEnvironment.GetUnixTimestamp();
                 GetClient()
                     .SendNotification("You cannot send a message, you have flooded the console.\n\nYou can send a message in " +
-                                      Time + " seconds.");
+                                      time + " seconds.");
                 return;
             }
 
             GetClient().GetHabbo().MessengerSpamCount++;
-            var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(ToId);
-            if (Client == null || Client.GetHabbo() == null || Client.GetHabbo().GetMessenger() == null)
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(toId);
+            if (client == null || client.GetHabbo() == null || client.GetHabbo().GetMessenger() == null)
             {
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.SetQuery(
                         "INSERT INTO `messenger_offline_messages` (`to_id`, `from_id`, `message`, `timestamp`) VALUES (@tid, @fid, @msg, UNIX_TIMESTAMP())");
-                    dbClient.AddParameter("tid", ToId);
+                    dbClient.AddParameter("tid", toId);
                     dbClient.AddParameter("fid", GetClient().GetHabbo().Id);
-                    dbClient.AddParameter("msg", Message);
+                    dbClient.AddParameter("msg", message);
                     dbClient.RunQuery();
                 }
                 return;
             }
 
-            if (!Client.GetHabbo().AllowConsoleMessages ||
-                Client.GetHabbo().GetIgnores().IgnoredUserIds().Contains(GetClient().GetHabbo().Id))
+            if (!client.GetHabbo().AllowConsoleMessages ||
+                client.GetHabbo().GetIgnores().IgnoredUserIds().Contains(GetClient().GetHabbo().Id))
             {
-                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.FRIEND_BUSY, ToId));
+                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.FriendBusy, toId));
                 return;
             }
 
             if (GetClient().GetHabbo().TimeMuted > 0)
             {
-                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.YOUR_MUTED, ToId));
+                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.YourMuted, toId));
                 return;
             }
 
-            if (Client.GetHabbo().TimeMuted > 0)
+            if (client.GetHabbo().TimeMuted > 0)
             {
-                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.FRIEND_MUTED, ToId));
+                GetClient().SendPacket(new InstantMessageErrorComposer(MessengerMessageErrors.FriendMuted, toId));
             }
-            if (string.IsNullOrEmpty(Message))
+            if (string.IsNullOrEmpty(message))
             {
                 return;
             }
 
-            Client.SendPacket(new NewConsoleMessageComposer(_userId, Message));
-            LogPM(_userId, ToId, Message);
+            client.SendPacket(new NewConsoleMessageComposer(_userId, message));
+            LogPm(_userId, toId, message);
         }
 
-        public void LogPM(int From_Id, int ToId, string Message)
+        public void LogPm(int fromId, int toId, string message)
         {
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("INSERT INTO chatlogs_console VALUES (NULL, " + From_Id + ", " + ToId +
+                dbClient.SetQuery("INSERT INTO chatlogs_console VALUES (NULL, " + fromId + ", " + toId +
                                   ", @message, UNIX_TIMESTAMP())");
-                dbClient.AddParameter("message", Message);
+                dbClient.AddParameter("message", message);
                 dbClient.RunQuery();
             }
         }
 
         public ServerPacket SerializeUpdate(MessengerBuddy friend)
         {
-            var Packet = new ServerPacket(ServerPacketHeader.FriendListUpdateMessageComposer);
-            Packet.WriteInteger(0); // category count
-            Packet.WriteInteger(1); // number of updates
-            Packet.WriteInteger(0); // don't know
-            friend.Serialize(Packet, GetClient());
-            return Packet;
+            var packet = new ServerPacket(ServerPacketHeader.FriendListUpdateMessageComposer);
+            packet.WriteInteger(0); // category count
+            packet.WriteInteger(1); // number of updates
+            packet.WriteInteger(0); // don't know
+            friend.Serialize(packet, GetClient());
+            return packet;
         }
 
-        public void BroadcastAchievement(int UserId, MessengerEventTypes Type, string Data)
+        public void BroadcastAchievement(int userId, MessengerEventTypes type, string data)
         {
-            var MyFriends = PlusEnvironment.GetGame().GetClientManager().GetClientsById(_friends.Keys);
-            foreach (var Client in MyFriends.ToList())
+            var myFriends = PlusEnvironment.GetGame().GetClientManager().GetClientsById(_friends.Keys);
+            foreach (var client in myFriends.ToList())
             {
-                if (Client.GetHabbo() != null && Client.GetHabbo().GetMessenger() != null)
+                if (client.GetHabbo() != null && client.GetHabbo().GetMessenger() != null)
                 {
-                    Client.SendPacket(new FriendNotificationComposer(UserId, Type, Data));
-                    Client.GetHabbo().GetMessenger().OnStatusChanged(true);
+                    client.SendPacket(new FriendNotificationComposer(userId, type, data));
+                    client.GetHabbo().GetMessenger().OnStatusChanged(true);
                 }
             }
         }

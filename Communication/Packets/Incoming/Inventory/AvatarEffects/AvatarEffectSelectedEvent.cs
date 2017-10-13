@@ -2,35 +2,32 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class AvatarEffectSelectedEvent : IPacketEvent
+    internal class AvatarEffectSelectedEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var EffectId = Packet.PopInt();
-            if (EffectId < 0)
+            var effectId = packet.PopInt();
+            if (effectId < 0)
             {
-                EffectId = 0;
+                effectId = 0;
             }
-            if (!Session.GetHabbo().InRoom)
+
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+
+            var user = room?.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            if (effectId != 0 && session.GetHabbo().Effects().HasEffect(effectId, true))
             {
-                return;
-            }
-
-            if (EffectId != 0 && Session.GetHabbo().Effects().HasEffect(EffectId, true))
-            {
-                User.ApplyEffect(EffectId);
+                user.ApplyEffect(effectId);
             }
         }
     }

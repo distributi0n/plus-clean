@@ -6,14 +6,14 @@
 
     internal class FloorPlanFloorMapComposer : ServerPacket
     {
-        public FloorPlanFloorMapComposer(ICollection<Item> Items) : base(ServerPacketHeader.FloorPlanFloorMapMessageComposer)
+        public FloorPlanFloorMapComposer(ICollection<Item> items)
+            : base(ServerPacketHeader.FloorPlanFloorMapMessageComposer)
         {
-            WriteInteger(Items
-                .Count); //TODO: Figure this out, it pushes the room coords, but it iterates them, x,y|x,y|x,y|and so on.
-            foreach (var Item in Items.ToList())
+            WriteInteger(items.Count); //TODO: Figure this out, it pushes the room coords, but it iterates them, x,y|x,y|x,y|and so on.
+            foreach (var item in items.ToList())
             {
-                WriteInteger(Item.GetX);
-                WriteInteger(Item.GetY);
+                WriteInteger(item.GetX);
+                WriteInteger(item.GetY);
             }
         }
     }

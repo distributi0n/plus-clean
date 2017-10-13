@@ -2,9 +2,10 @@
 {
     internal class RefreshFavouriteGroupComposer : ServerPacket
     {
-        public RefreshFavouriteGroupComposer(int Id) : base(ServerPacketHeader.RefreshFavouriteGroupMessageComposer)
+        public RefreshFavouriteGroupComposer(int id)
+            : base(ServerPacketHeader.RefreshFavouriteGroupMessageComposer)
         {
-            WriteInteger(Id);
+            WriteInteger(id);
         }
     }
 }

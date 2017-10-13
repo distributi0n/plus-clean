@@ -10,29 +10,29 @@
 
         public string Description => "Unmute a currently muted user.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you would like to unmute.");
+                session.SendWhisper("Please enter the username of the user you would like to unmute.");
                 return;
             }
 
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
-            if (TargetClient == null || TargetClient.GetHabbo() == null)
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            if (targetClient == null || targetClient.GetHabbo() == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `users` SET `time_muted` = '0' WHERE `id` = '" + TargetClient.GetHabbo().Id +
+                dbClient.RunQuery("UPDATE `users` SET `time_muted` = '0' WHERE `id` = '" + targetClient.GetHabbo().Id +
                                   "' LIMIT 1");
             }
-            TargetClient.GetHabbo().TimeMuted = 0;
-            TargetClient.SendNotification("You have been un-muted by " + Session.GetHabbo().Username + "!");
-            Session.SendWhisper("You have successfully un-muted " + TargetClient.GetHabbo().Username + "!");
+            targetClient.GetHabbo().TimeMuted = 0;
+            targetClient.SendNotification("You have been un-muted by " + session.GetHabbo().Username + "!");
+            session.SendWhisper("You have successfully un-muted " + targetClient.GetHabbo().Username + "!");
         }
     }
 }

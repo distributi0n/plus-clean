@@ -5,13 +5,14 @@
 
     internal class InitializeNewNavigatorEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var TopLevelItems = PlusEnvironment.GetGame().GetNavigator().GetTopLevelItems();
-            Session.SendPacket(new NavigatorMetaDataParserComposer(TopLevelItems));
-            Session.SendPacket(new NavigatorLiftedRoomsComposer());
-            Session.SendPacket(new NavigatorCollapsedCategoriesComposer());
-            Session.SendPacket(new NavigatorPreferencesComposer());
+            var topLevelItems = PlusEnvironment.GetGame().GetNavigator().GetTopLevelItems();
+
+            session.SendPacket(new NavigatorMetaDataParserComposer(topLevelItems));
+            session.SendPacket(new NavigatorLiftedRoomsComposer());
+            session.SendPacket(new NavigatorCollapsedCategoriesComposer());
+            session.SendPacket(new NavigatorPreferencesComposer());
         }
     }
 }

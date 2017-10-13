@@ -15,16 +15,16 @@
         public readonly int TimeUnlock;
 
         public Quest(int Id,
-            string Category,
-            int Number,
-            QuestType GoalType,
-            int GoalData,
-            string Name,
-            int Reward,
-            string DataBit,
-            int RewardType,
-            int TimeUnlock,
-            int TimeLock)
+                     string Category,
+                     int Number,
+                     QuestType GoalType,
+                     int GoalData,
+                     string Name,
+                     int Reward,
+                     string DataBit,
+                     int RewardType,
+                     int TimeUnlock,
+                     int TimeLock)
         {
             this.Id = Id;
             this.Category = Category;
@@ -47,7 +47,7 @@
             {
                 default:
                     return UserProgress >= GoalData;
-                case QuestType.EXPLORE_FIND_ITEM:
+                case QuestType.ExploreFindItem:
                     return UserProgress >= 1;
             }
         }

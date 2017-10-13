@@ -11,34 +11,34 @@
 
         public string Description => "Give a badge to the entire room!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the name of the badge you'd like to give to the room.");
+                session.SendWhisper("Please enter the name of the badge you'd like to give to the room.");
                 return;
             }
 
-            foreach (var User in Room.GetRoomUserManager().GetUserList().ToList())
+            foreach (var user in room.GetRoomUserManager().GetUserList().ToList())
             {
-                if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null)
+                if (user == null || user.GetClient() == null || user.GetClient().GetHabbo() == null)
                 {
                     continue;
                 }
 
-                if (!User.GetClient().GetHabbo().GetBadgeComponent().HasBadge(Params[1]))
+                if (!user.GetClient().GetHabbo().GetBadgeComponent().HasBadge(Params[1]))
                 {
-                    User.GetClient().GetHabbo().GetBadgeComponent().GiveBadge(Params[1], true, User.GetClient());
-                    User.GetClient().SendNotification("You have just been given a badge!");
+                    user.GetClient().GetHabbo().GetBadgeComponent().GiveBadge(Params[1], true, user.GetClient());
+                    user.GetClient().SendNotification("You have just been given a badge!");
                 }
                 else
                 {
-                    User.GetClient()
-                        .SendWhisper(Session.GetHabbo().Username + " tried to give you a badge, but you already have it!");
+                    user.GetClient()
+                        .SendWhisper(session.GetHabbo().Username + " tried to give you a badge, but you already have it!");
                 }
             }
 
-            Session.SendWhisper("You have successfully given every user in this room the " + Params[2] + " badge!");
+            session.SendWhisper("You have successfully given every user in this room the " + Params[2] + " badge!");
         }
     }
 }

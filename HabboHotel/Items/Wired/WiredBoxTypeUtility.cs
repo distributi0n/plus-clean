@@ -5,9 +5,9 @@
 
     internal static class WiredBoxTypeUtility
     {
-        public static WiredBoxType FromWiredId(int Id)
+        public static WiredBoxType FromWiredId(int id)
         {
-            switch (Id)
+            switch (id)
             {
                 default:
                     return WiredBoxType.None;
@@ -50,11 +50,11 @@
                 case 25:
                     return WiredBoxType.ConditionIsWearingBadge;
                 case 26:
-                    return WiredBoxType.ConditionIsWearingFX;
+                    return WiredBoxType.ConditionIsWearingFx;
                 case 27:
                     return WiredBoxType.ConditionIsNotWearingBadge;
                 case 28:
-                    return WiredBoxType.ConditionIsNotWearingFX;
+                    return WiredBoxType.ConditionIsNotWearingFx;
                 case 29:
                     return WiredBoxType.ConditionMatchStateAndPosition;
                 case 30:
@@ -124,9 +124,9 @@
             }
         }
 
-        public static int GetWiredId(WiredBoxType Type)
+        public static int GetWiredId(WiredBoxType type)
         {
-            switch (Type)
+            switch (type)
             {
                 case WiredBoxType.TriggerUserSays:
                 case WiredBoxType.TriggerUserSaysCommand:
@@ -171,7 +171,7 @@
                 case WiredBoxType.ConditionIsWearingBadge:
                 case WiredBoxType.EffectMoveFurniToNearestUser:
                     return 11;
-                case WiredBoxType.ConditionIsWearingFX:
+                case WiredBoxType.ConditionIsWearingFx:
                 case WiredBoxType.EffectMoveFurniFromNearestUser:
                     return 12;
                 case WiredBoxType.ConditionFurniHasNoUsers:
@@ -195,7 +195,7 @@
                 case WiredBoxType.ConditionIsNotWearingBadge:
                 case WiredBoxType.EffectBotMovesToFurniBox:
                     return 22;
-                case WiredBoxType.ConditionIsNotWearingFX:
+                case WiredBoxType.ConditionIsNotWearingFx:
                 case WiredBoxType.EffectBotCommunicatesToAllBox:
                     return 23;
                 case WiredBoxType.EffectBotGivesHanditemBox:
@@ -212,66 +212,69 @@
             return 0;
         }
 
-        public static List<int> ContainsBlockedTrigger(IWiredItem Box, ICollection<IWiredItem> Triggers)
+        public static List<int> ContainsBlockedTrigger(IWiredItem box, ICollection<IWiredItem> triggers)
         {
-            var BlockedItems = new List<int>();
-            if (Box.Type != WiredBoxType.EffectShowMessage &&
-                Box.Type != WiredBoxType.EffectMuteTriggerer &&
-                Box.Type != WiredBoxType.EffectTeleportToFurni &&
-                Box.Type != WiredBoxType.EffectKickUser &&
-                Box.Type != WiredBoxType.ConditionTriggererOnFurni)
+            var blockedItems = new List<int>();
+            if (box.Type != WiredBoxType.EffectShowMessage &&
+                box.Type != WiredBoxType.EffectMuteTriggerer &&
+                box.Type != WiredBoxType.EffectTeleportToFurni &&
+                box.Type != WiredBoxType.EffectKickUser &&
+                box.Type != WiredBoxType.ConditionTriggererOnFurni)
             {
-                return BlockedItems;
+                return blockedItems;
             }
 
-            foreach (var Item in Triggers)
+            foreach (var item in triggers)
             {
-                if (Item.Type == WiredBoxType.TriggerRepeat)
+                if (item.Type != WiredBoxType.TriggerRepeat)
                 {
-                    if (!BlockedItems.Contains(Item.Item.GetBaseItem().SpriteId))
-                    {
-                        BlockedItems.Add(Item.Item.GetBaseItem().SpriteId);
-                    }
+                    continue;
+                }
+
+                if (!blockedItems.Contains(item.Item.GetBaseItem().SpriteId))
+                {
+                    blockedItems.Add(item.Item.GetBaseItem().SpriteId);
                 }
             }
 
-            return BlockedItems;
+            return blockedItems;
         }
 
-        public static List<int> ContainsBlockedEffect(IWiredItem Box, ICollection<IWiredItem> Effects)
+        public static List<int> ContainsBlockedEffect(IWiredItem box, ICollection<IWiredItem> effects)
         {
-            var BlockedItems = new List<int>();
-            if (Box.Type != WiredBoxType.TriggerRepeat)
+            var blockedItems = new List<int>();
+
+            if (box.Type != WiredBoxType.TriggerRepeat)
             {
-                return BlockedItems;
+                return blockedItems;
             }
 
-            var HasMoveRotate = Effects.Where(x => x.Type == WiredBoxType.EffectMoveAndRotate).ToList().Count > 0;
-            var HasMoveNear = Effects.Where(x => x.Type == WiredBoxType.EffectMoveFurniToNearestUser).ToList().Count > 0;
-            foreach (var Item in Effects)
+            var hasMoveRotate = effects.Where(x => x.Type == WiredBoxType.EffectMoveAndRotate).ToList().Count > 0;
+            var hasMoveNear = effects.Where(x => x.Type == WiredBoxType.EffectMoveFurniToNearestUser).ToList().Count > 0;
+            foreach (var item in effects)
             {
-                if (Item.Type == WiredBoxType.EffectKickUser ||
-                    Item.Type == WiredBoxType.EffectMuteTriggerer ||
-                    Item.Type == WiredBoxType.EffectShowMessage ||
-                    Item.Type == WiredBoxType.EffectTeleportToFurni ||
-                    Item.Type == WiredBoxType.EffectBotFollowsUserBox)
+                if (item.Type == WiredBoxType.EffectKickUser ||
+                    item.Type == WiredBoxType.EffectMuteTriggerer ||
+                    item.Type == WiredBoxType.EffectShowMessage ||
+                    item.Type == WiredBoxType.EffectTeleportToFurni ||
+                    item.Type == WiredBoxType.EffectBotFollowsUserBox)
                 {
-                    if (!BlockedItems.Contains(Item.Item.GetBaseItem().SpriteId))
+                    if (!blockedItems.Contains(item.Item.GetBaseItem().SpriteId))
                     {
-                        BlockedItems.Add(Item.Item.GetBaseItem().SpriteId);
+                        blockedItems.Add(item.Item.GetBaseItem().SpriteId);
                     }
                 }
-                else if (Item.Type == WiredBoxType.EffectMoveFurniToNearestUser && HasMoveRotate ||
-                         Item.Type == WiredBoxType.EffectMoveAndRotate && HasMoveNear)
+                else if (item.Type == WiredBoxType.EffectMoveFurniToNearestUser && hasMoveRotate ||
+                         item.Type == WiredBoxType.EffectMoveAndRotate && hasMoveNear)
                 {
-                    if (!BlockedItems.Contains(Item.Item.GetBaseItem().SpriteId))
+                    if (!blockedItems.Contains(item.Item.GetBaseItem().SpriteId))
                     {
-                        BlockedItems.Add(Item.Item.GetBaseItem().SpriteId);
+                        blockedItems.Add(item.Item.GetBaseItem().SpriteId);
                     }
                 }
             }
 
-            return BlockedItems;
+            return blockedItems;
         }
     }
 }

@@ -2,11 +2,11 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class DisconnectEvent : IPacketEvent
+    internal class DisconnectEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.Disconnect();
+            session.Disconnect();
         }
     }
 }

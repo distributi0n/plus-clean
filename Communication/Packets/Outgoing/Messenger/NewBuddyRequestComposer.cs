@@ -4,11 +4,12 @@
 
     internal class NewBuddyRequestComposer : ServerPacket
     {
-        public NewBuddyRequestComposer(UserCache Habbo) : base(ServerPacketHeader.NewBuddyRequestMessageComposer)
+        public NewBuddyRequestComposer(UserCache habbo)
+            : base(ServerPacketHeader.NewBuddyRequestMessageComposer)
         {
-            WriteInteger(Habbo.Id);
-            WriteString(Habbo.Username);
-            WriteString(Habbo.Look);
+            WriteInteger(habbo.Id);
+            WriteString(habbo.Username);
+            WriteString(habbo.Look);
         }
     }
 }

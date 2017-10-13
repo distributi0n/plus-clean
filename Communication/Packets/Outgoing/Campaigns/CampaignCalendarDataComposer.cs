@@ -5,8 +5,8 @@
 
     internal class CampaignCalendarDataComposer : ServerPacket
     {
-        public CampaignCalendarDataComposer(List<int> OpenedBoxes, List<int> LateBoxes) : base(ServerPacketHeader
-            .CampaignCalendarDataMessageComposer)
+        public CampaignCalendarDataComposer(List<int> openedBoxes, List<int> lateBoxes)
+            : base(ServerPacketHeader.CampaignCalendarDataMessageComposer)
         {
             WriteString("xmas15"); //Set the campaign.
             WriteString(""); //No idea.
@@ -14,17 +14,17 @@
             WriteInteger(25); //End?
 
             //Opened boxes
-            WriteInteger(OpenedBoxes.Count);
-            foreach (var Day in OpenedBoxes)
+            WriteInteger(openedBoxes.Count);
+            foreach (var day in openedBoxes)
             {
-                WriteInteger(Day);
+                WriteInteger(day);
             }
 
             //Late boxes?
-            WriteInteger(LateBoxes.Count);
-            foreach (var Day in LateBoxes)
+            WriteInteger(lateBoxes.Count);
+            foreach (var day in lateBoxes)
             {
-                WriteInteger(Day);
+                WriteInteger(day);
             }
         }
     }

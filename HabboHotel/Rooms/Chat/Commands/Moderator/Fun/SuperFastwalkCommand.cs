@@ -10,20 +10,20 @@
 
         public string Description => "Gives you the ability to walk very very fast.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.SuperFastWalking = !User.SuperFastWalking;
-            if (User.FastWalking)
+            user.SuperFastWalking = !user.SuperFastWalking;
+            if (user.FastWalking)
             {
-                User.FastWalking = false;
+                user.FastWalking = false;
             }
-            Session.SendWhisper("Walking mode updated.");
+            session.SendWhisper("Walking mode updated.");
         }
     }
 }

@@ -12,65 +12,65 @@
 
         public string Description => "Remove a toxic player from the hotel for a fixed amount of time.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you'd like to IP ban & account ban.");
+                session.SendWhisper("Please enter the username of the user you'd like to IP ban & account ban.");
                 return;
             }
 
-            var Habbo = PlusEnvironment.GetHabboByUsername(Params[1]);
-            if (Habbo == null)
+            var habbo = PlusEnvironment.GetHabboByUsername(Params[1]);
+            if (habbo == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user in the database.");
+                session.SendWhisper("An error occoured whilst finding that user in the database.");
                 return;
             }
 
-            if (Habbo.GetPermissions().HasRight("mod_soft_ban") && !Session.GetHabbo().GetPermissions().HasRight("mod_ban_any"))
+            if (habbo.GetPermissions().HasRight("mod_soft_ban") && !session.GetHabbo().GetPermissions().HasRight("mod_ban_any"))
             {
-                Session.SendWhisper("Oops, you cannot ban that user.");
+                session.SendWhisper("Oops, you cannot ban that user.");
                 return;
             }
 
-            double Expire = 0;
-            var Hours = Params[2];
-            if (string.IsNullOrEmpty(Hours) || Hours == "perm")
+            double expire = 0;
+            var hours = Params[2];
+            if (string.IsNullOrEmpty(hours) || hours == "perm")
             {
-                Expire = PlusEnvironment.GetUnixTimestamp() + 78892200;
+                expire = PlusEnvironment.GetUnixTimestamp() + 78892200;
             }
             else
             {
-                Expire = PlusEnvironment.GetUnixTimestamp() + Convert.ToDouble(Hours) * 3600;
+                expire = PlusEnvironment.GetUnixTimestamp() + Convert.ToDouble(hours) * 3600;
             }
-            string Reason = null;
+            string reason = null;
             if (Params.Length >= 4)
             {
-                Reason = CommandManager.MergeParams(Params, 3);
+                reason = CommandManager.MergeParams(Params, 3);
             }
             else
             {
-                Reason = "No reason specified.";
+                reason = "No reason specified.";
             }
-            var Username = Habbo.Username;
+            var username = habbo.Username;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `user_info` SET `bans` = `bans` + '1' WHERE `user_id` = '" + Habbo.Id + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `user_info` SET `bans` = `bans` + '1' WHERE `user_id` = '" + habbo.Id + "' LIMIT 1");
             }
             PlusEnvironment.GetGame()
                 .GetModerationManager()
-                .BanUser(Session.GetHabbo().Username, ModerationBanType.USERNAME, Habbo.Username, Reason, Expire);
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Username);
-            if (TargetClient != null)
+                .BanUser(session.GetHabbo().Username, ModerationBanType.Username, habbo.Username, reason, expire);
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(username);
+            if (targetClient != null)
             {
-                TargetClient.Disconnect();
+                targetClient.Disconnect();
             }
-            Session.SendWhisper("Success, you have account banned the user '" +
-                                Username +
+            session.SendWhisper("Success, you have account banned the user '" +
+                                username +
                                 "' for " +
-                                Hours +
+                                hours +
                                 " hour(s) with the reason '" +
-                                Reason +
+                                reason +
                                 "'!");
         }
     }

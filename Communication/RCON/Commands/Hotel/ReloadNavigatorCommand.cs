@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.Hotel
 {
-    internal class ReloadNavigatorCommand : IRCONCommand
+    internal class ReloadNavigatorCommand : IRconCommand
     {
         public string Description => "This command is used to reload the navigator.";
 

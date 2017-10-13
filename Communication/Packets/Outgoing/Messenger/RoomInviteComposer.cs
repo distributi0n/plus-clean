@@ -2,10 +2,11 @@
 {
     internal class RoomInviteComposer : ServerPacket
     {
-        public RoomInviteComposer(int SenderId, string Text) : base(ServerPacketHeader.RoomInviteMessageComposer)
+        public RoomInviteComposer(int senderId, string text)
+            : base(ServerPacketHeader.RoomInviteMessageComposer)
         {
-            WriteInteger(SenderId);
-            WriteString(Text);
+            WriteInteger(senderId);
+            WriteString(text);
         }
     }
 }

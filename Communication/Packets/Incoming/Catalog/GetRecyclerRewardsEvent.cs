@@ -5,9 +5,9 @@
 
     public class GetRecyclerRewardsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new RecyclerRewardsComposer());
+            session.SendPacket(new RecyclerRewardsComposer());
         }
     }
 }

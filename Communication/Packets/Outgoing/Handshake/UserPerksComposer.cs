@@ -4,7 +4,8 @@
 
     public class UserPerksComposer : ServerPacket
     {
-        public UserPerksComposer(Habbo Habbo) : base(ServerPacketHeader.UserPerksMessageComposer)
+        public UserPerksComposer(Habbo habbo)
+            : base(ServerPacketHeader.UserPerksMessageComposer)
         {
             WriteInteger(15); // Count
             WriteString("USE_GUIDE_TOOL");

@@ -2,12 +2,12 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class ClientVariablesEvent : IPacketEvent
+    internal class ClientVariablesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GordanPath = Packet.PopString();
-            var ExternalVariables = Packet.PopString();
+            var gordanPath = packet.PopString();
+            var externalVariables = packet.PopString();
         }
     }
 }

@@ -4,97 +4,97 @@
 
     public class InteractorOneWayGate : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
-            Item.ExtraData = "0";
-            if (Item.InteractingUser != 0)
+            item.ExtraData = "0";
+            if (item.InteractingUser != 0)
             {
-                var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Item.InteractingUser);
-                if (User != null)
+                var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(item.InteractingUser);
+                if (user != null)
                 {
-                    User.ClearMovement(true);
-                    User.UnlockWalking();
+                    user.ClearMovement(true);
+                    user.UnlockWalking();
                 }
-                Item.InteractingUser = 0;
+                item.InteractingUser = 0;
             }
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
-            Item.ExtraData = "0";
-            if (Item.InteractingUser != 0)
+            item.ExtraData = "0";
+            if (item.InteractingUser != 0)
             {
-                var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Item.InteractingUser);
-                if (User != null)
+                var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(item.InteractingUser);
+                if (user != null)
                 {
-                    User.ClearMovement(true);
-                    User.UnlockWalking();
+                    user.ClearMovement(true);
+                    user.UnlockWalking();
                 }
-                Item.InteractingUser = 0;
+                item.InteractingUser = 0;
             }
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Session == null)
+            if (session == null)
             {
                 return;
             }
 
-            var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (Item.InteractingUser2 != User.UserId)
+            var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (item.InteractingUser2 != user.UserId)
             {
-                Item.InteractingUser2 = User.UserId;
+                item.InteractingUser2 = user.UserId;
             }
-            if (User == null)
+            if (user == null)
             {
                 return;
             }
 
-            if (Item.GetBaseItem().InteractionType == InteractionType.ONE_WAY_GATE)
+            if (item.GetBaseItem().InteractionType == InteractionType.OneWayGate)
             {
-                if (User.Coordinate != Item.SquareInFront && User.CanWalk)
+                if (user.Coordinate != item.SquareInFront && user.CanWalk)
                 {
-                    User.MoveTo(Item.SquareInFront);
+                    user.MoveTo(item.SquareInFront);
                     return;
                 }
 
-                if (!Item.GetRoom().GetGameMap().ValidTile(Item.SquareBehind.X, Item.SquareBehind.Y) ||
-                    !Item.GetRoom().GetGameMap().CanWalk(Item.SquareBehind.X, Item.SquareBehind.Y, false) ||
-                    !Item.GetRoom().GetGameMap().SquareIsOpen(Item.SquareBehind.X, Item.SquareBehind.Y, false))
-                {
-                    return;
-                }
-
-                if (User.LastInteraction - PlusEnvironment.GetUnixTimestamp() < 0 && User.InteractingGate &&
-                    User.GateId == Item.Id)
-                {
-                    User.InteractingGate = false;
-                    User.GateId = 0;
-                }
-                if (!Item.GetRoom().GetGameMap().CanWalk(Item.SquareBehind.X, Item.SquareBehind.Y, User.AllowOverride))
+                if (!item.GetRoom().GetGameMap().ValidTile(item.SquareBehind.X, item.SquareBehind.Y) ||
+                    !item.GetRoom().GetGameMap().CanWalk(item.SquareBehind.X, item.SquareBehind.Y, false) ||
+                    !item.GetRoom().GetGameMap().SquareIsOpen(item.SquareBehind.X, item.SquareBehind.Y, false))
                 {
                     return;
                 }
 
-                if (Item.InteractingUser == 0)
+                if (user.LastInteraction - PlusEnvironment.GetUnixTimestamp() < 0 && user.InteractingGate &&
+                    user.GateId == item.Id)
                 {
-                    User.InteractingGate = true;
-                    User.GateId = Item.Id;
-                    Item.InteractingUser = User.HabboId;
-                    User.CanWalk = false;
-                    if (User.IsWalking && (User.GoalX != Item.SquareInFront.X || User.GoalY != Item.SquareInFront.Y))
+                    user.InteractingGate = false;
+                    user.GateId = 0;
+                }
+                if (!item.GetRoom().GetGameMap().CanWalk(item.SquareBehind.X, item.SquareBehind.Y, user.AllowOverride))
+                {
+                    return;
+                }
+
+                if (item.InteractingUser == 0)
+                {
+                    user.InteractingGate = true;
+                    user.GateId = item.Id;
+                    item.InteractingUser = user.HabboId;
+                    user.CanWalk = false;
+                    if (user.IsWalking && (user.GoalX != item.SquareInFront.X || user.GoalY != item.SquareInFront.Y))
                     {
-                        User.ClearMovement(true);
+                        user.ClearMovement(true);
                     }
-                    User.AllowOverride = true;
-                    User.MoveTo(Item.Coordinate);
-                    Item.RequestUpdate(4, true);
+                    user.AllowOverride = true;
+                    user.MoveTo(item.Coordinate);
+                    item.RequestUpdate(4, true);
                 }
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

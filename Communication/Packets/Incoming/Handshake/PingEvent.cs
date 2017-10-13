@@ -2,11 +2,11 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class PingEvent : IPacketEvent
+    internal class PingEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.PingCount = 0;
+            session.PingCount = 0;
         }
     }
 }

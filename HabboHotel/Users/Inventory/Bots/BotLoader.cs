@@ -6,21 +6,21 @@
 
     internal class BotLoader
     {
-        public static List<Bot> GetBotsForUser(int UserId)
+        public static List<Bot> GetBotsForUser(int userId)
         {
-            var B = new List<Bot>();
+            var b = new List<Bot>();
             DataTable dBots = null;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT `id`,`user_id`,`name`,`motto`,`look`,`gender`FROM `bots` WHERE `user_id` = '" +
-                                  UserId +
+                                  userId +
                                   "' AND `room_id` = '0' AND `ai_type` != 'pet'");
                 dBots = dbClient.GetTable();
                 if (dBots != null)
                 {
                     foreach (DataRow dRow in dBots.Rows)
                     {
-                        B.Add(new Bot(Convert.ToInt32(dRow["id"]),
+                        b.Add(new Bot(Convert.ToInt32(dRow["id"]),
                             Convert.ToInt32(dRow["user_id"]),
                             Convert.ToString(dRow["name"]),
                             Convert.ToString(dRow["motto"]),
@@ -30,7 +30,7 @@
                 }
             }
 
-            return B;
+            return b;
         }
     }
 }

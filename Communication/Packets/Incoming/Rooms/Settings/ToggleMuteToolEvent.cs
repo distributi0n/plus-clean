@@ -6,39 +6,33 @@
 
     internal class ToggleMuteToolEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null || !Room.CheckRights(Session, true))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null || !room.CheckRights(session, true))
             {
                 return;
             }
 
-            Room.RoomMuted = !Room.RoomMuted;
-            var roomUsers = Room.GetRoomUserManager().GetRoomUsers();
+            room.RoomMuted = !room.RoomMuted;
+
+            var roomUsers = room.GetRoomUserManager().GetRoomUsers();
             foreach (var roomUser in roomUsers.ToList())
             {
-                if (roomUser == null || roomUser.GetClient() == null)
+                if (roomUser?.GetClient() == null)
                 {
                     continue;
                 }
 
-                if (Room.RoomMuted)
-                {
-                    roomUser.GetClient().SendWhisper("This room has been muted");
-                }
-                else
-                {
-                    roomUser.GetClient().SendWhisper("This room has been unmuted");
-                }
+                roomUser.GetClient().SendWhisper(room.RoomMuted ? "This room has been muted" : "This room has been unmuted");
             }
 
-            Room.SendPacket(new RoomMuteSettingsComposer(Room.RoomMuted));
+            room.SendPacket(new RoomMuteSettingsComposer(room.RoomMuted));
         }
     }
 }

@@ -8,74 +8,79 @@
 
     internal class MoveObjectEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            if (ItemId == 0)
+            var itemId = packet.PopInt();
+            if (itemId == 0)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            Item Item;
-            if (Room.Group != null)
+            Item item;
+            if (room.Group != null)
             {
-                if (!Room.CheckRights(Session, false, true))
+                if (!room.CheckRights(session, false, true))
                 {
-                    Item = Room.GetRoomItemHandler().GetItem(ItemId);
-                    if (Item == null)
+                    item = room.GetRoomItemHandler().GetItem(itemId);
+                    if (item == null)
                     {
                         return;
                     }
 
-                    Session.SendPacket(new ObjectUpdateComposer(Item, Room.OwnerId));
+                    session.SendPacket(new ObjectUpdateComposer(item, room.OwnerId));
                     return;
                 }
             }
             else
             {
-                if (!Room.CheckRights(Session))
+                if (!room.CheckRights(session))
                 {
                     return;
                 }
             }
 
-            Item = Room.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null)
+            item = room.GetRoomItemHandler().GetItem(itemId);
+
+            if (item == null)
             {
                 return;
             }
 
-            var x = Packet.PopInt();
-            var y = Packet.PopInt();
-            var Rotation = Packet.PopInt();
-            if (x != Item.GetX || y != Item.GetY)
+            var x = packet.PopInt();
+            var y = packet.PopInt();
+            var rotation = packet.PopInt();
+
+            if (x != item.GetX || y != item.GetY)
             {
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_MOVE);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniMove);
             }
-            if (Rotation != Item.Rotation)
+
+            if (rotation != item.Rotation)
             {
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_ROTATE);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniRotate);
             }
-            if (!Room.GetRoomItemHandler().SetFloorItem(Session, Item, x, y, Rotation, false, false, true))
+
+            if (!room.GetRoomItemHandler().SetFloorItem(session, item, x, y, rotation, false, false, true))
             {
-                Room.SendPacket(new ObjectUpdateComposer(Item, Room.OwnerId));
+                room.SendPacket(new ObjectUpdateComposer(item, room.OwnerId));
                 return;
             }
 
-            if (Item.GetZ >= 0.1)
+            if (item.GetZ >= 0.1)
             {
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_STACK);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniStack);
             }
         }
     }

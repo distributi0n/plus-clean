@@ -2,7 +2,8 @@
 {
     internal class NavigatorLiftedRoomsComposer : ServerPacket
     {
-        public NavigatorLiftedRoomsComposer() : base(ServerPacketHeader.NavigatorLiftedRoomsMessageComposer)
+        public NavigatorLiftedRoomsComposer()
+            : base(ServerPacketHeader.NavigatorLiftedRoomsMessageComposer)
         {
             WriteInteger(0); //Count
             {

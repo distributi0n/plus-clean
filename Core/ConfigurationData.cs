@@ -6,11 +6,11 @@
 
     public class ConfigurationData
     {
-        public Dictionary<string, string> data;
+        internal readonly Dictionary<string, string> Data;
 
-        public ConfigurationData(string filePath, bool maynotexist = false)
+        internal ConfigurationData(string filePath, bool maynotexist = false)
         {
-            data = new Dictionary<string, string>();
+            Data = new Dictionary<string, string>();
             if (!File.Exists(filePath))
             {
                 if (!maynotexist)
@@ -25,7 +25,8 @@
             {
                 using (var stream = new StreamReader(filePath))
                 {
-                    var line = "";
+                    string  line;
+                    
                     while ((line = stream.ReadLine()) != null)
                     {
                         if (line.Length < 1 || line.StartsWith("#"))
@@ -34,12 +35,15 @@
                         }
 
                         var delimiterIndex = line.IndexOf('=');
-                        if (delimiterIndex != -1)
+
+                        if (delimiterIndex == -1)
                         {
-                            var key = line.Substring(0, delimiterIndex);
-                            var val = line.Substring(delimiterIndex + 1);
-                            data.Add(key, val);
+                            continue;
                         }
+
+                        var key = line.Substring(0, delimiterIndex);
+                        var val = line.Substring(delimiterIndex + 1);
+                        Data.Add(key, val);
                     }
                 }
             }

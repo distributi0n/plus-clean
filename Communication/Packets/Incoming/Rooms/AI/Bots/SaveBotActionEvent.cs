@@ -12,192 +12,235 @@
 
     internal class SaveBotActionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var BotId = Packet.PopInt();
-            var ActionId = Packet.PopInt();
-            var DataString = Packet.PopString();
-            if (ActionId < 1 || ActionId > 5)
+            var botId = packet.PopInt();
+            var actionId = packet.PopInt();
+            var dataString = packet.PopString();
+
+            if (actionId < 1 || actionId > 5)
             {
                 return;
             }
 
-            RoomUser Bot = null;
-            if (!Room.GetRoomUserManager().TryGetBot(BotId, out Bot))
-            {
-                return;
-            }
-            if (Bot.BotData.ownerID != Session.GetHabbo().Id &&
-                !Session.GetHabbo().GetPermissions().HasRight("bot_edit_any_override"))
+            RoomUser bot;
+            if (!room.GetRoomUserManager().TryGetBot(botId, out bot))
             {
                 return;
             }
 
-            var RoomBot = Bot.BotData;
-            if (RoomBot == null)
+            if (bot.BotData.OwnerId != session.GetHabbo().Id && !session.GetHabbo().GetPermissions().HasRight("bot_edit_any_override"))
             {
                 return;
             }
+
+            var roomBot = bot.BotData;
+            if (roomBot == null)
+            {
+                return;
+            }
+
             /* 1 = Copy looks
              * 2 = Setup Speech
              * 3 = Relax
              * 4 = Dance
              * 5 = Change Name
              */
-            switch (ActionId)
+
+            switch (actionId)
             {
+                #region Copy Looks (1)
+
                 case 1:
                 {
-                    var UserChangeComposer = new ServerPacket(ServerPacketHeader.UserChangeMessageComposer);
-                    UserChangeComposer.WriteInteger(Bot.VirtualId);
-                    UserChangeComposer.WriteString(Session.GetHabbo().Look);
-                    UserChangeComposer.WriteString(Session.GetHabbo().Gender);
-                    UserChangeComposer.WriteString(Bot.BotData.Motto);
-                    UserChangeComposer.WriteInteger(0);
-                    Room.SendPacket(UserChangeComposer);
+                    var userChangeComposer = new ServerPacket(ServerPacketHeader.UserChangeMessageComposer);
+                    userChangeComposer.WriteInteger(bot.VirtualId);
+                    userChangeComposer.WriteString(session.GetHabbo().Look);
+                    userChangeComposer.WriteString(session.GetHabbo().Gender);
+                    userChangeComposer.WriteString(bot.BotData.Motto);
+                    userChangeComposer.WriteInteger(0);
+                    room.SendPacket(userChangeComposer);
 
                     //Change the defaults
-                    Bot.BotData.Look = Session.GetHabbo().Look;
-                    Bot.BotData.Gender = Session.GetHabbo().Gender;
+                    bot.BotData.Look = session.GetHabbo().Look;
+                    bot.BotData.Gender = session.GetHabbo().Gender;
+
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `bots` SET `look` = @look, `gender` = '" +
-                                          Session.GetHabbo().Gender +
-                                          "' WHERE `id` = '" +
-                                          Bot.BotData.Id +
-                                          "' LIMIT 1");
-                        dbClient.AddParameter("look", Session.GetHabbo().Look);
+                        dbClient.SetQuery("UPDATE `bots` SET `look` = @look, `gender` = '" + session.GetHabbo().Gender + "' WHERE `id` = '" + bot.BotData.Id + "' LIMIT 1");
+                        dbClient.AddParameter("look", session.GetHabbo().Look);
                         dbClient.RunQuery();
                     }
 
                     //Room.SendMessage(new UserChangeComposer(BotUser.GetClient(), true));
                     break;
                 }
+
+                #endregion
+
+                #region Setup Speech (2)
+
                 case 2:
                 {
-                    var ConfigData = DataString.Split(new[] {";#;"}, StringSplitOptions.None);
-                    var SpeechData = ConfigData[0].Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
-                    var AutomaticChat = Convert.ToString(ConfigData[1]);
-                    var SpeakingInterval = Convert.ToString(ConfigData[2]);
-                    var MixChat = Convert.ToString(ConfigData[3]);
-                    if (string.IsNullOrEmpty(SpeakingInterval) || Convert.ToInt32(SpeakingInterval) <= 0 ||
-                        Convert.ToInt32(SpeakingInterval) < 7)
+                    var configData = dataString.Split(new[]
                     {
-                        SpeakingInterval = "7";
+                        ";#;"
+                    }, StringSplitOptions.None);
+
+                    var speechData = configData[0].Split(new[]
+                    {
+                        '\r',
+                        '\n'
+                    }, StringSplitOptions.RemoveEmptyEntries);
+
+                    var automaticChat = Convert.ToString(configData[1]);
+                    var speakingInterval = Convert.ToString(configData[2]);
+                    var mixChat = Convert.ToString(configData[3]);
+
+                    if (string.IsNullOrEmpty(speakingInterval) || Convert.ToInt32(speakingInterval) <= 0 || Convert.ToInt32(speakingInterval) < 7)
+                    {
+                        speakingInterval = "7";
                     }
-                    RoomBot.AutomaticChat = Convert.ToBoolean(AutomaticChat);
-                    RoomBot.SpeakingInterval = Convert.ToInt32(SpeakingInterval);
-                    RoomBot.MixSentences = Convert.ToBoolean(MixChat);
+
+                    roomBot.AutomaticChat = Convert.ToBoolean(automaticChat);
+                    roomBot.SpeakingInterval = Convert.ToInt32(speakingInterval);
+                    roomBot.MixSentences = Convert.ToBoolean(mixChat);
+
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.RunQuery("DELETE FROM `bots_speech` WHERE `bot_id` = '" + Bot.BotData.Id + "'");
-                        for (var i = 0; i <= SpeechData.Length - 1; i++)
+                        dbClient.RunQuery("DELETE FROM `bots_speech` WHERE `bot_id` = '" + bot.BotData.Id + "'");
+
+                        #region Save Data - TODO: MAKE METHODS FOR THIS.  
+
+                        for (var i = 0; i <= speechData.Length - 1; i++)
                         {
                             dbClient.SetQuery("INSERT INTO `bots_speech` (`bot_id`, `text`) VALUES (@id, @data)");
-                            dbClient.AddParameter("id", BotId);
-                            dbClient.AddParameter("data", SpeechData[i]);
+                            dbClient.AddParameter("id", botId);
+                            dbClient.AddParameter("data", speechData[i]);
                             dbClient.RunQuery();
+
                             dbClient.SetQuery(
                                 "UPDATE `bots` SET `automatic_chat` = @AutomaticChat, `speaking_interval` = @SpeakingInterval, `mix_sentences` = @MixChat WHERE `id` = @id LIMIT 1");
-                            dbClient.AddParameter("id", BotId);
-                            dbClient.AddParameter("AutomaticChat", AutomaticChat.ToLower());
-                            dbClient.AddParameter("SpeakingInterval", Convert.ToInt32(SpeakingInterval));
-                            dbClient.AddParameter("MixChat", PlusEnvironment.BoolToEnum(Convert.ToBoolean(MixChat)));
+                            dbClient.AddParameter("id", botId);
+                            dbClient.AddParameter("AutomaticChat", automaticChat.ToLower());
+                            dbClient.AddParameter("SpeakingInterval", Convert.ToInt32(speakingInterval));
+                            dbClient.AddParameter("MixChat", PlusEnvironment.BoolToEnum(Convert.ToBoolean(mixChat)));
                             dbClient.RunQuery();
                         }
 
-                        RoomBot.RandomSpeech.Clear();
+                        #endregion
+
+                        #region Handle Speech
+
+                        roomBot.RandomSpeech.Clear();
+
                         dbClient.SetQuery("SELECT `text` FROM `bots_speech` WHERE `bot_id` = @id");
-                        dbClient.AddParameter("id", BotId);
-                        var BotSpeech = dbClient.GetTable();
-                        var Speeches = new List<RandomSpeech>();
-                        foreach (DataRow Speech in BotSpeech.Rows)
+                        dbClient.AddParameter("id", botId);
+
+                        var botSpeech = dbClient.GetTable();
+
+                        var speeches = new List<RandomSpeech>();
+                        foreach (DataRow speech in botSpeech.Rows)
                         {
-                            RoomBot.RandomSpeech.Add(new RandomSpeech(Convert.ToString(Speech["text"]), BotId));
+                            roomBot.RandomSpeech.Add(new RandomSpeech(Convert.ToString(speech["text"]), botId));
                         }
+
+                        #endregion
                     }
 
                     break;
                 }
+
+                #endregion
+
+                #region Relax (3)
+
                 case 3:
                 {
-                    if (Bot.BotData.WalkingMode == "stand")
+                    if (bot.BotData.WalkingMode == "stand")
                     {
-                        Bot.BotData.WalkingMode = "freeroam";
+                        bot.BotData.WalkingMode = "freeroam";
                     }
                     else
                     {
-                        Bot.BotData.WalkingMode = "stand";
+                        bot.BotData.WalkingMode = "stand";
                     }
+
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.RunQuery("UPDATE `bots` SET `walk_mode` = '" +
-                                          Bot.BotData.WalkingMode +
-                                          "' WHERE `id` = '" +
-                                          Bot.BotData.Id +
-                                          "' LIMIT 1");
+                        dbClient.RunQuery("UPDATE `bots` SET `walk_mode` = '" + bot.BotData.WalkingMode + "' WHERE `id` = '" + bot.BotData.Id + "' LIMIT 1");
                     }
                     break;
                 }
+
+                #endregion
+
+                #region Dance (4)
+
                 case 4:
                 {
-                    if (Bot.BotData.DanceId > 0)
+                    if (bot.BotData.DanceId > 0)
                     {
-                        Bot.BotData.DanceId = 0;
+                        bot.BotData.DanceId = 0;
                     }
                     else
                     {
-                        var RandomDance = new Random();
-                        Bot.BotData.DanceId = RandomDance.Next(1, 4);
+                        var randomDance = new Random();
+                        bot.BotData.DanceId = randomDance.Next(1, 4);
                     }
-                    Room.SendPacket(new DanceComposer(Bot, Bot.BotData.DanceId));
+
+                    room.SendPacket(new DanceComposer(bot, bot.BotData.DanceId));
                     break;
                 }
+
+                #endregion
+
+                #region Change Name (5)
+
                 case 5:
                 {
-                    if (DataString.Length == 0)
+                    if (dataString.Length == 0)
                     {
-                        Session.SendWhisper("Come on, atleast give the bot a name!");
+                        session.SendWhisper("Come on, atleast give the bot a name!");
                         return;
                     }
 
-                    if (DataString.Length >= 16)
+                    if (dataString.Length >= 16)
                     {
-                        Session.SendWhisper("Come on, the bot doesn't need a name that long!");
+                        session.SendWhisper("Come on, the bot doesn't need a name that long!");
                         return;
                     }
 
-                    if (DataString.Contains("<img src") ||
-                        DataString.Contains("<font ") ||
-                        DataString.Contains("</font>") ||
-                        DataString.Contains("</a>") ||
-                        DataString.Contains("<i>"))
+                    if (dataString.Contains("<img src") || dataString.Contains("<font ") || dataString.Contains("</font>") || dataString.Contains("</a>") ||
+                        dataString.Contains("<i>"))
                     {
-                        Session.SendWhisper("No HTML, please :<");
+                        session.SendWhisper("No HTML, please :<");
                         return;
                     }
 
-                    Bot.BotData.Name = DataString;
+                    bot.BotData.Name = dataString;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `bots` SET `name` = @name WHERE `id` = '" + Bot.BotData.Id + "' LIMIT 1");
-                        dbClient.AddParameter("name", DataString);
+                        dbClient.SetQuery("UPDATE `bots` SET `name` = @name WHERE `id` = '" + bot.BotData.Id + "' LIMIT 1");
+                        dbClient.AddParameter("name", dataString);
                         dbClient.RunQuery();
                     }
-                    Room.SendPacket(new UsersComposer(Bot));
+                    room.SendPacket(new UsersComposer(bot));
                     break;
                 }
+
+                #endregion
             }
         }
     }

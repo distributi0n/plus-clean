@@ -8,10 +8,10 @@
 
     internal class UserFurniCollision : IWiredItem
     {
-        public UserFurniCollision(Room Instance, Item Item)
+        public UserFurniCollision(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             StringData = "";
             SetItems = new ConcurrentDictionary<int, Item>();
         }
@@ -26,56 +26,56 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
         }
 
         public bool Execute(params object[] Params)
         {
-            Instance.GetWired().OnEvent(this.Item);
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            Instance.GetWired().OnEvent(Item);
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var Item = (Item) Params[1];
-            if (Item == null)
+            var item = (Item) Params[1];
+            if (item == null)
             {
                 return false;
             }
 
-            var Effects = Instance.GetWired().GetEffects(this);
-            var Conditions = Instance.GetWired().GetConditions(this);
-            foreach (var Condition in Conditions.ToList())
+            var effects = Instance.GetWired().GetEffects(this);
+            var conditions = Instance.GetWired().GetConditions(this);
+            foreach (var condition in conditions.ToList())
             {
-                if (!Condition.Execute(Player))
+                if (!condition.Execute(player))
                 {
                     return false;
                 }
 
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(Condition.Item);
+                    Instance.GetWired().OnEvent(condition.Item);
                 }
             }
 
             //Check the ICollection to find the random addon effect.
-            var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
-            if (HasRandomEffectAddon)
+            var hasRandomEffectAddon = effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+            if (hasRandomEffectAddon)
             {
                 //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
-                if (!RandomBox.Execute())
+                var randomBox = effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                if (!randomBox.Execute())
                 {
                     return false;
                 }
 
                 //Success! Let's get our selected box and continue.
-                var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
-                if (!SelectedBox.Execute())
+                var selectedBox = Instance.GetWired().GetRandomEffect(effects.ToList());
+                if (!selectedBox.Execute())
                 {
                     return false;
                 }
@@ -83,22 +83,22 @@
                 //Woo! Almost there captain, now lets broadcast the update to the room instance.
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(RandomBox.Item);
-                    Instance.GetWired().OnEvent(SelectedBox.Item);
+                    Instance.GetWired().OnEvent(randomBox.Item);
+                    Instance.GetWired().OnEvent(selectedBox.Item);
                 }
             }
             else
             {
-                foreach (var Effect in Effects.ToList())
+                foreach (var effect in effects.ToList())
                 {
-                    if (!Effect.Execute(Player))
+                    if (!effect.Execute(player))
                     {
                         return false;
                     }
 
                     if (Instance != null)
                     {
-                        Instance.GetWired().OnEvent(Effect.Item);
+                        Instance.GetWired().OnEvent(effect.Item);
                     }
                 }
             }

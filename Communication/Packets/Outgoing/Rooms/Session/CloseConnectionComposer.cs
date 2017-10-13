@@ -2,7 +2,8 @@
 {
     internal class CloseConnectionComposer : ServerPacket
     {
-        public CloseConnectionComposer() : base(ServerPacketHeader.CloseConnectionMessageComposer)
+        public CloseConnectionComposer()
+            : base(ServerPacketHeader.CloseConnectionMessageComposer)
         {
         }
     }

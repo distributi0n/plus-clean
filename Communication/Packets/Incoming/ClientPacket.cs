@@ -5,65 +5,60 @@
 
     public class ClientPacket
     {
-        private byte[] Body;
-        private int Pointer;
+        private byte[] _body;
+        private int _pointer;
 
-        public ClientPacket(int messageID, byte[] body)
+        internal ClientPacket(int messageId, byte[] body)
         {
-            Init(messageID, body);
+            Init(messageId, body);
         }
 
-        public int Id { get; private set; }
+        internal int Id { get; private set; }
 
-        public int RemainingLength => Body.Length - Pointer;
+        private int RemainingLength => _body.Length - _pointer;
 
-        public int Header => Id;
+        private int Header => Id;
 
-        public void Init(int messageID, byte[] body)
+        private void Init(int messageId, byte[] body)
         {
             if (body == null)
             {
                 body = new byte[0];
             }
-            Id = messageID;
-            Body = body;
-            Pointer = 0;
+            Id = messageId;
+            _body = body;
+            _pointer = 0;
         }
 
         public override string ToString() => "[" + Header + "] BODY: " +
-                                             PlusEnvironment.GetDefaultEncoding().GetString(Body)
+                                             PlusEnvironment.GetDefaultEncoding().GetString(_body)
                                                  .Replace(Convert.ToChar(0).ToString(), "[0]");
 
-        public void AdvancePointer(int i)
+        private byte[] ReadBytes(int bytes)
         {
-            Pointer += i * 4;
-        }
-
-        public byte[] ReadBytes(int Bytes)
-        {
-            if (Bytes > RemainingLength)
+            if (bytes > RemainingLength)
             {
-                Bytes = RemainingLength;
+                bytes = RemainingLength;
             }
-            var data = new byte[Bytes];
-            for (var i = 0; i < Bytes; i++)
+            var data = new byte[bytes];
+            for (var i = 0; i < bytes; i++)
             {
-                data[i] = Body[Pointer++];
+                data[i] = _body[_pointer++];
             }
 
             return data;
         }
 
-        public byte[] PlainReadBytes(int Bytes)
+        private byte[] PlainReadBytes(int bytes)
         {
-            if (Bytes > RemainingLength)
+            if (bytes > RemainingLength)
             {
-                Bytes = RemainingLength;
+                bytes = RemainingLength;
             }
-            var data = new byte[Bytes];
-            for (int x = 0, y = Pointer; x < Bytes; x++, y++)
+            var data = new byte[bytes];
+            for (int x = 0, y = _pointer; x < bytes; x++, y++)
             {
-                data[x] = Body[y];
+                data[x] = _body[y];
             }
 
             return data;
@@ -77,15 +72,7 @@
 
         public string PopString() => PlusEnvironment.GetDefaultEncoding().GetString(ReadFixedValue());
 
-        public bool PopBoolean()
-        {
-            if (RemainingLength > 0 && Body[Pointer++] == Convert.ToChar(1))
-            {
-                return true;
-            }
-
-            return false;
-        }
+        public bool PopBoolean() => RemainingLength > 0 && _body[_pointer++] == Convert.ToChar(1);
 
         public int PopInt()
         {
@@ -94,9 +81,9 @@
                 return 0;
             }
 
-            var Data = PlainReadBytes(4);
-            var i = HabboEncoding.DecodeInt32(Data);
-            Pointer += 4;
+            var data = PlainReadBytes(4);
+            var i = HabboEncoding.DecodeInt32(data);
+            _pointer += 4;
             return i;
         }
     }

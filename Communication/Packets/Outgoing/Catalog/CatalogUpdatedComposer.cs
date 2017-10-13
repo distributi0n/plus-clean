@@ -2,7 +2,8 @@
 {
     internal class CatalogUpdatedComposer : ServerPacket
     {
-        public CatalogUpdatedComposer() : base(ServerPacketHeader.CatalogUpdatedMessageComposer)
+        public CatalogUpdatedComposer()
+            : base(ServerPacketHeader.CatalogUpdatedMessageComposer)
         {
             WriteBoolean(false);
         }

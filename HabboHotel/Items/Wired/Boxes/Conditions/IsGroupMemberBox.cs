@@ -7,10 +7,10 @@
 
     internal class IsGroupMemberBox : IWiredItem
     {
-        public IsGroupMemberBox(Room Instance, Item Item)
+        public IsGroupMemberBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -22,10 +22,10 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
         }
 
         public bool Execute(params object[] Params)
@@ -35,8 +35,8 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
@@ -44,7 +44,7 @@
             {
                 return false;
             }
-            if (!Instance.RoomData.Group.IsMember(Player.Id))
+            if (!Instance.RoomData.Group.IsMember(player.Id))
             {
                 return false;
             }

@@ -5,52 +5,57 @@
 
     internal class BanUserEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
-            {
-                return;
-            }
-            if (Room.WhoCanBan == 0 && !Room.CheckRights(Session, true) && Room.Group == null ||
-                Room.WhoCanBan == 1 && !Room.CheckRights(Session) && Room.Group == null ||
-                Room.Group != null && !Room.CheckRights(Session, false, true))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var RoomId = Packet.PopInt();
-            var R = Packet.PopString();
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Convert.ToInt32(UserId));
-            if (User == null || User.IsBot)
-            {
-                return;
-            }
-            if (Room.OwnerId == UserId)
-            {
-                return;
-            }
-            if (User.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (room.WhoCanBan == 0 && !room.CheckRights(session, true) && room.Group == null || room.WhoCanBan == 1 && !room.CheckRights(session) && room.Group == null ||
+                room.Group != null && !room.CheckRights(session, false, true))
             {
                 return;
             }
 
-            long Time = 0;
-            if (R.ToLower().Contains("hour"))
+            var userId = packet.PopInt();
+            packet.PopInt();
+            var r = packet.PopString();
+
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(Convert.ToInt32(userId));
+            if (user == null || user.IsBot)
             {
-                Time = 3600;
+                return;
             }
-            else if (R.ToLower().Contains("day"))
+
+            if (room.OwnerId == userId)
             {
-                Time = 86400;
+                return;
             }
-            else if (R.ToLower().Contains("perm"))
+
+            if (user.GetClient().GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                Time = 78892200;
+                return;
             }
-            Room.GetBans().Ban(User, Time);
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_SelfModBanSeen", 1);
+
+            long time = 0;
+            if (r.ToLower().Contains("hour"))
+            {
+                time = 3600;
+            }
+            else if (r.ToLower().Contains("day"))
+            {
+                time = 86400;
+            }
+            else if (r.ToLower().Contains("perm"))
+            {
+                time = 78892200;
+            }
+
+            room.GetBans().Ban(user, time);
+
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_SelfModBanSeen", 1);
         }
     }
 }

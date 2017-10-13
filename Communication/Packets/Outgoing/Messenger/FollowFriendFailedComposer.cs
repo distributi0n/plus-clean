@@ -2,9 +2,10 @@
 {
     internal class FollowFriendFailedComposer : ServerPacket
     {
-        public FollowFriendFailedComposer(int ErrorCode) : base(ServerPacketHeader.FollowFriendFailedMessageComposer)
+        public FollowFriendFailedComposer(int errorCode)
+            : base(ServerPacketHeader.FollowFriendFailedMessageComposer)
         {
-            WriteInteger(ErrorCode);
+            WriteInteger(errorCode);
         }
     }
 }

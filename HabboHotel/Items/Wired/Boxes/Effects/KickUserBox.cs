@@ -11,10 +11,10 @@
     {
         private readonly Queue _toKick;
 
-        public KickUserBox(Room Instance, Item Item)
+        public KickUserBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             TickCount = Delay;
             _toKick = new Queue();
@@ -44,13 +44,13 @@
             {
                 while (_toKick.Count > 0)
                 {
-                    var Player = (Habbo) _toKick.Dequeue();
-                    if (Player == null || !Player.InRoom || Player.CurrentRoom != Instance)
+                    var player = (Habbo) _toKick.Dequeue();
+                    if (player == null || !player.InRoom || player.CurrentRoom != Instance)
                     {
                         continue;
                     }
 
-                    Instance.GetRoomUserManager().RemoveUserFromRoom(Player.GetClient(), true, false);
+                    Instance.GetRoomUserManager().RemoveUserFromRoom(player.GetClient(), true);
                 }
             }
 
@@ -66,15 +66,15 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var Message = Packet.PopString();
-            StringData = Message;
+            var unknown = packet.PopInt();
+            var message = packet.PopString();
+            StringData = message;
         }
 
         public bool Execute(params object[] Params)
@@ -84,8 +84,8 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
@@ -94,23 +94,23 @@
             {
                 TickCount = 3;
             }
-            if (!_toKick.Contains(Player))
+            if (!_toKick.Contains(player))
             {
-                var User = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-                if (User == null)
+                var user = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+                if (user == null)
                 {
                     return false;
                 }
 
-                if (Player.GetPermissions().HasRight("mod_tool") || Instance.OwnerId == Player.Id)
+                if (player.GetPermissions().HasRight("mod_tool") || Instance.OwnerId == player.Id)
                 {
-                    Player.GetClient()
-                        .SendPacket(new WhisperComposer(User.VirtualId, "Wired Kick Exception: Unkickable Player", 0, 0));
+                    player.GetClient()
+                        .SendPacket(new WhisperComposer(user.VirtualId, "Wired Kick Exception: Unkickable Player", 0, 0));
                     return false;
                 }
 
-                _toKick.Enqueue(Player);
-                Player.GetClient().SendPacket(new WhisperComposer(User.VirtualId, StringData, 0, 0));
+                _toKick.Enqueue(player);
+                player.GetClient().SendPacket(new WhisperComposer(user.VirtualId, StringData, 0, 0));
             }
 
             return true;

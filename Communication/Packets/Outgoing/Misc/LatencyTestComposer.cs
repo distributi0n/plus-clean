@@ -2,7 +2,8 @@
 {
     internal class LatencyTestComposer : ServerPacket
     {
-        public LatencyTestComposer(int testResponce) : base(ServerPacketHeader.LatencyResponseMessageComposer)
+        public LatencyTestComposer(int testResponce)
+            : base(ServerPacketHeader.LatencyResponseMessageComposer)
         {
             WriteInteger(testResponce);
         }

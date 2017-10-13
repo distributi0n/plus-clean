@@ -4,9 +4,10 @@
 
     internal class MutedComposer : ServerPacket
     {
-        public MutedComposer(double TimeMuted) : base(ServerPacketHeader.MutedMessageComposer)
+        public MutedComposer(double timeMuted)
+            : base(ServerPacketHeader.MutedMessageComposer)
         {
-            WriteInteger(Convert.ToInt32(TimeMuted));
+            WriteInteger(Convert.ToInt32(timeMuted));
         }
     }
 }

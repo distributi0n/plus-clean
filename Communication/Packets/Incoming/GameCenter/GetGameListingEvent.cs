@@ -5,10 +5,11 @@
 
     internal class GetGameListingEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Games = PlusEnvironment.GetGame().GetGameDataManager().GameData;
-            Session.SendPacket(new GameListComposer(Games));
+            var games = PlusEnvironment.GetGame().GetGameDataManager().GameData;
+
+            session.SendPacket(new GameListComposer(games));
         }
     }
 }

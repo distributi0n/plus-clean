@@ -20,7 +20,6 @@
         private readonly ConcurrentDictionary<int, Room> _rooms;
 
         private DateTime _cycleLastExecution;
-        private DateTime _purgeLastExecution;
 
         public RoomManager()
         {
@@ -28,7 +27,6 @@
             _rooms = new ConcurrentDictionary<int, Room>();
             _loadedRoomData = new ConcurrentDictionary<int, RoomData>();
             LoadModels();
-            _purgeLastExecution = DateTime.Now.AddHours(3);
             log.Info("Room Manager -> LOADED");
         }
 
@@ -302,21 +300,12 @@
             }
 
             var SortedTags = new List<KeyValuePair<string, int>>(TagValues);
-            SortedTags.Sort((FirstPair, NextPair) => { return FirstPair.Value.CompareTo(NextPair.Value); });
+            SortedTags.Sort((firstPair, nextPair) => firstPair.Value.CompareTo(nextPair.Value));
             SortedTags.Reverse();
             return SortedTags;
         }
 
-        public List<RoomData> GetGroupRooms(int Amount = 50)
-        {
-            var rooms = (from RoomInstance in _loadedRoomData
-                where RoomInstance.Value.Group != null && RoomInstance.Value.Access != RoomAccess.INVISIBLE
-                orderby RoomInstance.Value.Score descending
-                select RoomInstance.Value).Take(Amount);
-            return rooms.ToList();
-        }
-
-        public Room TryGetRandomLoadedRoom()
+        internal Room TryGetRandomLoadedRoom()
         {
             var room = (from RoomInstance in _rooms
                 where RoomInstance.Value.RoomData.UsersNow > 0 &&
@@ -324,7 +313,7 @@
                       RoomInstance.Value.RoomData.UsersNow < RoomInstance.Value.RoomData.UsersMax
                 orderby RoomInstance.Value.RoomData.UsersNow descending
                 select RoomInstance.Value).Take(1);
-            if (room.Count() > 0)
+            if (room.Any())
             {
                 return room.First();
             }
@@ -416,17 +405,17 @@
         public bool TryGetRoom(int RoomId, out Room Room) => _rooms.TryGetValue(RoomId, out Room);
 
         public RoomData CreateRoom(GameClient Session,
-            string Name,
-            string Description,
-            string Model,
-            int Category,
-            int MaxVisitors,
-            int TradeSettings,
-            string wallpaper = "0.0",
-            string floor = "0.0",
-            string landscape = "0.0",
-            int wallthick = 0,
-            int floorthick = 0)
+                                   string Name,
+                                   string Description,
+                                   string Model,
+                                   int Category,
+                                   int MaxVisitors,
+                                   int TradeSettings,
+                                   string wallpaper = "0.0",
+                                   string floor = "0.0",
+                                   string landscape = "0.0",
+                                   int wallthick = 0,
+                                   int floorthick = 0)
         {
             if (!_roomModels.ContainsKey(Model))
             {
@@ -479,7 +468,7 @@
 
                 PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(Room);
                 Console.Clear();
-                log.Info("<<- SERVER SHUTDOWN ->> ROOM ITEM SAVE: " + string.Format("{0:0.##}", (double) i / length * 100) + "%");
+                log.Info("<<- SERVER SHUTDOWN ->> ROOM ITEM SAVE: " + $"{(double) i / length * 100:0.##}" + "%");
                 i++;
             }
 

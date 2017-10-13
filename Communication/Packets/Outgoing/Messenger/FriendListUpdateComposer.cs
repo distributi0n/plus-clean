@@ -7,45 +7,49 @@
 
     internal class FriendListUpdateComposer : ServerPacket
     {
-        public FriendListUpdateComposer(int FriendId) : base(ServerPacketHeader.FriendListUpdateMessageComposer)
+        public FriendListUpdateComposer(int friendId)
+            : base(ServerPacketHeader.FriendListUpdateMessageComposer)
         {
             WriteInteger(0); //Category Count
             WriteInteger(1); //Updates Count
             WriteInteger(-1); //Update
-            WriteInteger(FriendId);
+            WriteInteger(friendId);
         }
 
-        public FriendListUpdateComposer(GameClient Session, MessengerBuddy Buddy) : base(ServerPacketHeader
-            .FriendListUpdateMessageComposer)
+        public FriendListUpdateComposer(GameClient session, MessengerBuddy buddy)
+            : base(ServerPacketHeader.FriendListUpdateMessageComposer)
         {
             WriteInteger(0); //Category Count
             WriteInteger(1); //Updates Count
             WriteInteger(0); //Update
-            var Relationship = Session.GetHabbo().Relationships
-                .FirstOrDefault(x => x.Value.UserId == Convert.ToInt32(Buddy.UserId)).Value;
-            var y = Relationship == null ? 0 : Relationship.Type;
-            WriteInteger(Buddy.UserId);
-            WriteString(Buddy.mUsername);
+
+            var relationship = session.GetHabbo().Relationships.FirstOrDefault(x => x.Value.UserId == Convert.ToInt32(buddy.UserId)).Value;
+            var y = relationship?.Type ?? 0;
+
+            WriteInteger(buddy.UserId);
+            WriteString(buddy.mUsername);
             WriteInteger(1);
-            if (!Buddy.mAppearOffline || Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!buddy.mAppearOffline || session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                WriteBoolean(Buddy.IsOnline);
+                WriteBoolean(buddy.IsOnline);
             }
             else
             {
                 WriteBoolean(false);
             }
-            if (!Buddy.mHideInroom || Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+
+            if (!buddy.mHideInroom || session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                WriteBoolean(Buddy.InRoom);
+                WriteBoolean(buddy.InRoom);
             }
             else
             {
                 WriteBoolean(false);
             }
+
             WriteString(""); //Habbo.IsOnline ? Habbo.Look : "");
             WriteInteger(0); // categoryid
-            WriteString(Buddy.mMotto);
+            WriteString(buddy.mMotto);
             WriteString(string.Empty); // Facebook username
             WriteString(string.Empty);
             WriteBoolean(true); // Allows offline messaging

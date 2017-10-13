@@ -6,58 +6,58 @@
 
     public class ItemData
     {
-        public ItemData(int Id,
-            int Sprite,
-            string Name,
-            string PublicName,
-            string Type,
-            int Width,
-            int Length,
-            double Height,
-            bool Stackable,
-            bool Walkable,
-            bool IsSeat,
-            bool AllowRecycle,
-            bool AllowTrade,
-            bool AllowMarketplaceSell,
-            bool AllowGift,
-            bool AllowInventoryStack,
-            InteractionType InteractionType,
-            int behaviourData,
-            int Modes,
-            string VendingIds,
-            string AdjustableHeights,
-            int EffectId,
-            bool IsRare,
-            bool ExtraRot)
+        public ItemData(int id,
+                        int sprite,
+                        string name,
+                        string publicName,
+                        string type,
+                        int width,
+                        int length,
+                        double height,
+                        bool stackable,
+                        bool walkable,
+                        bool isSeat,
+                        bool allowRecycle,
+                        bool allowTrade,
+                        bool allowMarketplaceSell,
+                        bool allowGift,
+                        bool allowInventoryStack,
+                        InteractionType interactionType,
+                        int behaviourData,
+                        int modes,
+                        string vendingIds,
+                        string adjustableHeights,
+                        int effectId,
+                        bool isRare,
+                        bool extraRot)
         {
-            this.Id = Id;
-            SpriteId = Sprite;
-            ItemName = Name;
-            this.PublicName = PublicName;
-            this.Type = char.Parse(Type);
-            this.Width = Width;
-            this.Length = Length;
-            this.Height = Height;
-            this.Stackable = Stackable;
-            this.Walkable = Walkable;
-            this.IsSeat = IsSeat;
-            AllowEcotronRecycle = AllowRecycle;
-            this.AllowTrade = AllowTrade;
-            this.AllowMarketplaceSell = AllowMarketplaceSell;
-            this.AllowGift = AllowGift;
-            this.AllowInventoryStack = AllowInventoryStack;
-            this.InteractionType = InteractionType;
+            Id = id;
+            SpriteId = sprite;
+            ItemName = name;
+            PublicName = publicName;
+            Type = char.Parse(type);
+            Width = width;
+            Length = length;
+            Height = height;
+            Stackable = stackable;
+            Walkable = walkable;
+            IsSeat = isSeat;
+            AllowEcotronRecycle = allowRecycle;
+            AllowTrade = allowTrade;
+            AllowMarketplaceSell = allowMarketplaceSell;
+            AllowGift = allowGift;
+            AllowInventoryStack = allowInventoryStack;
+            InteractionType = interactionType;
             BehaviourData = behaviourData;
-            this.Modes = Modes;
-            this.VendingIds = new List<int>();
-            if (VendingIds.Contains(","))
+            Modes = modes;
+            VendingIds = new List<int>();
+            if (vendingIds.Contains(","))
             {
-                foreach (var VendingId in VendingIds.Split(','))
+                foreach (var vendingId in vendingIds.Split(','))
                 {
                     try
                     {
-                        this.VendingIds.Add(int.Parse(VendingId));
+                        VendingIds.Add(int.Parse(vendingId));
                     }
                     catch
                     {
@@ -65,35 +65,35 @@
                     }
                 }
             }
-            else if (!string.IsNullOrEmpty(VendingIds) && int.Parse(VendingIds) > 0)
+            else if (!string.IsNullOrEmpty(vendingIds) && int.Parse(vendingIds) > 0)
             {
-                this.VendingIds.Add(int.Parse(VendingIds));
+                VendingIds.Add(int.Parse(vendingIds));
             }
 
-            this.AdjustableHeights = new List<double>();
-            if (AdjustableHeights.Contains(","))
+            AdjustableHeights = new List<double>();
+            if (adjustableHeights.Contains(","))
             {
-                foreach (var H in AdjustableHeights.Split(','))
+                foreach (var h in adjustableHeights.Split(','))
                 {
-                    this.AdjustableHeights.Add(double.Parse(H));
+                    AdjustableHeights.Add(double.Parse(h));
                 }
             }
-            else if (!string.IsNullOrEmpty(AdjustableHeights) && double.Parse(AdjustableHeights) > 0)
+            else if (!string.IsNullOrEmpty(adjustableHeights) && double.Parse(adjustableHeights) > 0)
             {
-                this.AdjustableHeights.Add(double.Parse(AdjustableHeights));
+                AdjustableHeights.Add(double.Parse(adjustableHeights));
             }
 
-            this.EffectId = EffectId;
+            EffectId = effectId;
             var wiredId = 0;
-            if (this.InteractionType == InteractionType.WIRED_CONDITION ||
-                this.InteractionType == InteractionType.WIRED_TRIGGER ||
-                this.InteractionType == InteractionType.WIRED_EFFECT)
+            if (InteractionType == InteractionType.WiredCondition ||
+                InteractionType == InteractionType.WiredTrigger ||
+                InteractionType == InteractionType.WiredEffect)
             {
                 wiredId = BehaviourData;
             }
             WiredType = WiredBoxTypeUtility.FromWiredId(wiredId);
-            this.IsRare = IsRare;
-            this.ExtraRot = ExtraRot;
+            IsRare = isRare;
+            ExtraRot = extraRot;
         }
 
         public int Id { get; set; }

@@ -9,19 +9,19 @@
     {
         private readonly string _connectionStr;
 
-        public DatabaseManager(string ConnectionStr) => _connectionStr = ConnectionStr;
+        public DatabaseManager(string connectionStr) => _connectionStr = connectionStr;
 
         public bool IsConnected()
         {
             try
             {
-                var Con = new MySqlConnection(_connectionStr);
-                Con.Open();
-                var CMD = Con.CreateCommand();
-                CMD.CommandText = "SELECT 1+1";
-                CMD.ExecuteNonQuery();
-                CMD.Dispose();
-                Con.Close();
+                var con = new MySqlConnection(_connectionStr);
+                con.Open();
+                var cmd = con.CreateCommand();
+                cmd.CommandText = "SELECT 1+1";
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
+                con.Close();
             }
             catch (MySqlException)
             {
@@ -35,9 +35,9 @@
         {
             try
             {
-                IDatabaseClient DbConnection = new DatabaseConnection(_connectionStr);
-                DbConnection.connect();
-                return DbConnection.GetQueryReactor();
+                IDatabaseClient dbConnection = new DatabaseConnection(_connectionStr);
+                dbConnection.Connect();
+                return dbConnection.GetQueryReactor();
             }
             catch (Exception e)
             {

@@ -1,16 +1,16 @@
 ﻿namespace Plus.Utilities.Enclosure.Algorithm
 {
-    public class GametileUpdate
+    internal class GametileUpdate
     {
-        public GametileUpdate(int x, int y, byte value)
+        internal GametileUpdate(int x, int y, byte value)
         {
-            this.x = x;
-            this.y = y;
-            this.value = value;
+            X = x;
+            Y = y;
+            Value = value;
         }
 
-        public byte value { get; }
-        public int y { get; }
-        public int x { get; }
+        internal byte Value { get; }
+        internal int Y { get; }
+        internal int X { get; }
     }
 }

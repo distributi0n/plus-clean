@@ -5,15 +5,15 @@
 
     internal class GetBotInventoryEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session.GetHabbo().GetInventoryComponent() == null)
+            if (session.GetHabbo().GetInventoryComponent() == null)
             {
                 return;
             }
 
-            var Bots = Session.GetHabbo().GetInventoryComponent().GetBots();
-            Session.SendPacket(new BotInventoryComposer(Bots));
+            var bots = session.GetHabbo().GetInventoryComponent().GetBots();
+            session.SendPacket(new BotInventoryComposer(bots));
         }
     }
 }

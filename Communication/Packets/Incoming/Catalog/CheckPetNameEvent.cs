@@ -3,36 +3,37 @@
     using HabboHotel.GameClients;
     using Outgoing.Catalog;
 
-    public sealed class CheckPetNameEvent : IPacketEvent
+    public class CheckPetNameEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var PetName = Packet.PopString();
-            if (PetName.Length < 2)
+            var petName = packet.PopString();
+
+            if (petName.Length < 2)
             {
-                Session.SendPacket(new CheckPetNameComposer(2, "2"));
+                session.SendPacket(new CheckPetNameComposer(2, "2"));
                 return;
             }
 
-            if (PetName.Length > 15)
+            if (petName.Length > 15)
             {
-                Session.SendPacket(new CheckPetNameComposer(1, "15"));
+                session.SendPacket(new CheckPetNameComposer(1, "15"));
                 return;
             }
 
-            if (!PlusEnvironment.IsValidAlphaNumeric(PetName))
+            if (!PlusEnvironment.IsValidAlphaNumeric(petName))
             {
-                Session.SendPacket(new CheckPetNameComposer(3, ""));
+                session.SendPacket(new CheckPetNameComposer(3, ""));
                 return;
             }
 
-            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().IsFiltered(PetName))
+            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().IsFiltered(petName))
             {
-                Session.SendPacket(new CheckPetNameComposer(4, ""));
+                session.SendPacket(new CheckPetNameComposer(4, ""));
                 return;
             }
 
-            Session.SendPacket(new CheckPetNameComposer(0, ""));
+            session.SendPacket(new CheckPetNameComposer(0, ""));
         }
     }
 }

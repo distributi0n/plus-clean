@@ -2,11 +2,11 @@
 {
     internal class ModerationPreset
     {
-        public ModerationPreset(int Id, string Type, string Message)
+        public ModerationPreset(int id, string type, string message)
         {
-            this.Id = Id;
-            this.Type = Type;
-            this.Message = Message;
+            Id = id;
+            Type = type;
+            Message = message;
         }
 
         public int Id { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.Hotel
 {
-    internal class ReloadQuestsCommand : IRCONCommand
+    internal class ReloadQuestsCommand : IRconCommand
     {
         public string Description => "This command is used to reload the quests manager.";
 

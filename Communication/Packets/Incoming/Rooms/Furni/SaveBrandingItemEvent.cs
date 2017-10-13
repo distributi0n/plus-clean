@@ -6,43 +6,44 @@
 
     internal class SaveBrandingItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session == null || session.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true) ||
-                !Session.GetHabbo().GetPermissions().HasRight("room_item_save_branding_items"))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var Item = Room.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null)
+            if (!room.CheckRights(session, true) || !session.GetHabbo().GetPermissions().HasRight("room_item_save_branding_items"))
             {
                 return;
             }
 
-            if (Item.Data.InteractionType == InteractionType.BACKGROUND)
+            var itemId = packet.PopInt();
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
             {
-                var Data = Packet.PopInt();
-                var BrandData = "state" + Convert.ToChar(9) + "0";
-                for (var i = 1; i <= Data; i++)
+                return;
+            }
+
+            if (item.Data.InteractionType == InteractionType.Background)
+            {
+                var data = packet.PopInt();
+                var brandData = "state" + Convert.ToChar(9) + "0";
+
+                for (var i = 1; i <= data; i++)
                 {
-                    BrandData = BrandData + Convert.ToChar(9) + Packet.PopString();
+                    brandData = brandData + Convert.ToChar(9) + packet.PopString();
                 }
 
-                Item.ExtraData = BrandData;
+                item.ExtraData = brandData;
             }
-            else if (Item.Data.InteractionType == InteractionType.FX_PROVIDER)
+            else if (item.Data.InteractionType == InteractionType.FxProvider)
             {
                 /*int Unknown = Packet.PopInt();
                 string Data = Packet.PopString();
@@ -51,7 +52,7 @@
                 Item.ExtraData = Convert.ToString(EffectId);*/
             }
 
-            Room.GetRoomItemHandler().SetFloorItem(Session, Item, Item.GetX, Item.GetY, Item.Rotation, false, false, true);
+            room.GetRoomItemHandler().SetFloorItem(session, item, item.GetX, item.GetY, item.Rotation, false, false, true);
         }
     }
 }

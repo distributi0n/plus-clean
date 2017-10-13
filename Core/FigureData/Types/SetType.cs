@@ -2,18 +2,18 @@
 {
     public enum SetType
     {
-        HR,
-        HD,
-        CH,
-        LG,
-        SH,
-        HA,
-        HE,
-        EA,
-        FA,
-        CA,
-        WA,
-        CC,
-        CP
+        Hr,
+        Hd,
+        Ch,
+        Lg,
+        Sh,
+        Ha,
+        He,
+        Ea,
+        Fa,
+        Ca,
+        Wa,
+        Cc,
+        Cp
     }
 }

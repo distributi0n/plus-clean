@@ -2,9 +2,10 @@
 {
     internal class FlatAccessDeniedComposer : ServerPacket
     {
-        public FlatAccessDeniedComposer(string Username) : base(ServerPacketHeader.FlatAccessDeniedMessageComposer)
+        public FlatAccessDeniedComposer(string username)
+            : base(ServerPacketHeader.FlatAccessDeniedMessageComposer)
         {
-            WriteString(Username);
+            WriteString(username);
         }
     }
 }

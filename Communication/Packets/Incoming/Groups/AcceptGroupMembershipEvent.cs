@@ -4,37 +4,39 @@
     using HabboHotel.Groups;
     using Outgoing.Groups;
 
-    internal sealed class AcceptGroupMembershipEvent : IPacketEvent
+    internal class AcceptGroupMembershipEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            var UserId = Packet.PopInt();
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
-            {
-                return;
-            }
-            if (Session.GetHabbo().Id != Group.CreatorId &&
-                !Group.IsAdmin(Session.GetHabbo().Id) &&
-                !Session.GetHabbo().GetPermissions().HasRight("fuse_group_accept_any"))
-            {
-                return;
-            }
-            if (!Group.HasRequest(UserId))
+            var groupId = packet.PopInt();
+            var userId = packet.PopInt();
+
+            Group group;
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out group))
             {
                 return;
             }
 
-            var Habbo = PlusEnvironment.GetHabboById(UserId);
-            if (Habbo == null)
+            if (session.GetHabbo().Id != group.CreatorId && !group.IsAdmin(session.GetHabbo().Id) && !session.GetHabbo().GetPermissions().HasRight("fuse_group_accept_any"))
             {
-                Session.SendNotification("Oops, an error occurred whilst finding this user.");
                 return;
             }
 
-            Group.HandleRequest(UserId, true);
-            Session.SendPacket(new GroupMemberUpdatedComposer(GroupId, Habbo, 4));
+            if (!group.HasRequest(userId))
+            {
+                return;
+            }
+
+            var habbo = PlusEnvironment.GetHabboById(userId);
+            if (habbo == null)
+            {
+                session.SendNotification("Oops, an error occurred whilst finding this user.");
+                return;
+            }
+
+            group.HandleRequest(userId, true);
+
+            session.SendPacket(new GroupMemberUpdatedComposer(groupId, habbo, 4));
         }
     }
 }

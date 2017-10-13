@@ -7,23 +7,23 @@
 
     public class TelevisionManager
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Items.Televisions.TelevisionManager");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.HabboHotel.Items.Televisions.TelevisionManager");
 
-        public Dictionary<int, TelevisionItem> _televisions;
+        public Dictionary<int, TelevisionItem> Televisions;
 
         public TelevisionManager()
         {
-            _televisions = new Dictionary<int, TelevisionItem>();
+            Televisions = new Dictionary<int, TelevisionItem>();
             Init();
         }
 
-        public ICollection<TelevisionItem> TelevisionList => _televisions.Values;
+        public ICollection<TelevisionItem> TelevisionList => Televisions.Values;
 
         public void Init()
         {
-            if (_televisions.Count > 0)
+            if (Televisions.Count > 0)
             {
-                _televisions.Clear();
+                Televisions.Clear();
             }
             DataTable getData = null;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
@@ -32,24 +32,24 @@
                 getData = dbClient.GetTable();
                 if (getData != null)
                 {
-                    foreach (DataRow Row in getData.Rows)
+                    foreach (DataRow row in getData.Rows)
                     {
-                        _televisions.Add(Convert.ToInt32(Row["id"]),
-                            new TelevisionItem(Convert.ToInt32(Row["id"]),
-                                Row["youtube_id"].ToString(),
-                                Row["title"].ToString(),
-                                Row["description"].ToString(),
-                                PlusEnvironment.EnumToBool(Row["enabled"].ToString())));
+                        Televisions.Add(Convert.ToInt32(row["id"]),
+                            new TelevisionItem(Convert.ToInt32(row["id"]),
+                                row["youtube_id"].ToString(),
+                                row["title"].ToString(),
+                                row["description"].ToString(),
+                                PlusEnvironment.EnumToBool(row["enabled"].ToString())));
                     }
                 }
             }
 
-            log.Info("Television Items -> LOADED");
+            Log.Info("Television Items -> LOADED");
         }
 
-        public bool TryGet(int ItemId, out TelevisionItem TelevisionItem)
+        public bool TryGet(int itemId, out TelevisionItem televisionItem)
         {
-            if (_televisions.TryGetValue(ItemId, out TelevisionItem))
+            if (Televisions.TryGetValue(itemId, out televisionItem))
             {
                 return true;
             }

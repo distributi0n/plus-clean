@@ -4,16 +4,16 @@
 
     internal class OpenGiftComposer : ServerPacket
     {
-        public OpenGiftComposer(ItemData Data, string Text, Item Item, bool ItemIsInRoom) : base(ServerPacketHeader
-            .OpenGiftMessageComposer)
+        public OpenGiftComposer(ItemData data, string text, Item item, bool itemIsInRoom)
+            : base(ServerPacketHeader.OpenGiftMessageComposer)
         {
-            WriteString(Data.Type.ToString());
-            WriteInteger(Data.SpriteId);
-            WriteString(Data.ItemName);
-            WriteInteger(Item.Id);
-            WriteString(Data.Type.ToString());
-            WriteBoolean(ItemIsInRoom); //Is it in the room?
-            WriteString(Text);
+            WriteString(data.Type.ToString());
+            WriteInteger(data.SpriteId);
+            WriteString(data.ItemName);
+            WriteInteger(item.Id);
+            WriteString(data.Type.ToString());
+            WriteBoolean(itemIsInRoom); //Is it in the room?
+            WriteString(text);
         }
     }
 }

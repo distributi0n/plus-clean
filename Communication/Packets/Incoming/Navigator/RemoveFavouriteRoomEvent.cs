@@ -5,15 +5,16 @@
 
     public class RemoveFavouriteRoomEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Id = Packet.PopInt();
-            Session.GetHabbo().FavoriteRooms.Remove(Id);
-            Session.SendPacket(new UpdateFavouriteRoomComposer(Id, false));
+            var id = packet.PopInt();
+
+            session.GetHabbo().FavoriteRooms.Remove(id);
+            session.SendPacket(new UpdateFavouriteRoomComposer(id, false));
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("DELETE FROM user_favorites WHERE user_id = " + Session.GetHabbo().Id + " AND room_id = " + Id +
-                                  " LIMIT 1");
+                dbClient.RunQuery("DELETE FROM user_favorites WHERE user_id = " + session.GetHabbo().Id + " AND room_id = " + id + " LIMIT 1");
             }
         }
     }

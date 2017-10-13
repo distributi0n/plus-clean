@@ -2,7 +2,8 @@
 {
     internal class TraxSongInfoComposer : ServerPacket
     {
-        public TraxSongInfoComposer() : base(ServerPacketHeader.TraxSongInfoMessageComposer)
+        public TraxSongInfoComposer()
+            : base(ServerPacketHeader.TraxSongInfoMessageComposer)
         {
             WriteInteger(0); //Count
             {

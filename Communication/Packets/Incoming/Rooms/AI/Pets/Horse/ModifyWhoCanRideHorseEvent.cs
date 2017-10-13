@@ -1,45 +1,37 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Rooms.AI.Pets.Horse
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Rooms;
     using Outgoing.Rooms.AI.Pets;
 
     internal class ModifyWhoCanRideHorseEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out var room))
             {
                 return;
             }
 
-            var PetId = Packet.PopInt();
-            RoomUser Pet = null;
-            if (!Room.GetRoomUserManager().TryGetPet(PetId, out Pet))
+            var petId = packet.PopInt();
+
+            if (!room.GetRoomUserManager().TryGetPet(petId, out var pet))
             {
                 return;
             }
 
-            if (Pet.PetData.AnyoneCanRide == 1)
-            {
-                Pet.PetData.AnyoneCanRide = 0;
-            }
-            else
-            {
-                Pet.PetData.AnyoneCanRide = 1;
-            }
+            pet.PetData.AnyoneCanRide = pet.PetData.AnyoneCanRide == 1 ? 0 : 1;
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `bots_petdata` SET `anyone_ride` = '" + Pet.PetData.AnyoneCanRide + "' WHERE `id` = '" +
-                                  PetId + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `bots_petdata` SET `anyone_ride` = '" + pet.PetData.AnyoneCanRide + "' WHERE `id` = '" + petId + "' LIMIT 1");
             }
-            Room.SendPacket(new PetInformationComposer(Pet.PetData));
+
+            room.SendPacket(new PetInformationComposer(pet.PetData));
         }
     }
 }

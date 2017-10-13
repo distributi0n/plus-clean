@@ -5,9 +5,9 @@
 
     internal class PollStartEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new PollContentsComposer());
+            session.SendPacket(new PollContentsComposer());
         }
     }
 }

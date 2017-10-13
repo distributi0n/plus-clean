@@ -4,12 +4,13 @@
 
     public class IgnoredUsersComposer : ServerPacket
     {
-        public IgnoredUsersComposer(List<string> ignoredUsers) : base(ServerPacketHeader.IgnoredUsersMessageComposer)
+        public IgnoredUsersComposer(List<string> ignoredUsers)
+            : base(ServerPacketHeader.IgnoredUsersMessageComposer)
         {
             WriteInteger(ignoredUsers.Count);
-            foreach (var Username in ignoredUsers)
+            foreach (var username in ignoredUsers)
             {
-                WriteString(Username);
+                WriteString(username);
             }
         }
     }

@@ -8,10 +8,10 @@
 
     internal class ShowMessageBox : IWiredItem
     {
-        public ShowMessageBox(Room Instance, Item Item)
+        public ShowMessageBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -29,11 +29,11 @@
 
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Message = Packet.PopString();
-            StringData = Message;
+            var unknown = packet.PopInt();
+            var message = packet.PopString();
+            StringData = message;
         }
 
         public bool Execute(params object[] Params)
@@ -43,36 +43,36 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null || Player.GetClient() == null || string.IsNullOrWhiteSpace(StringData))
+            var player = (Habbo) Params[0];
+            if (player == null || player.GetClient() == null || string.IsNullOrWhiteSpace(StringData))
             {
                 return false;
             }
 
-            var User = Player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Player.Username);
-            if (User == null)
+            var user = player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(player.Username);
+            if (user == null)
             {
                 return false;
             }
 
-            var Message = StringData;
+            var message = StringData;
             if (StringData.Contains("%USERNAME%"))
             {
-                Message = Message.Replace("%USERNAME%", Player.Username);
+                message = message.Replace("%USERNAME%", player.Username);
             }
             if (StringData.Contains("%ROOMNAME%"))
             {
-                Message = Message.Replace("%ROOMNAME%", Player.CurrentRoom.Name);
+                message = message.Replace("%ROOMNAME%", player.CurrentRoom.Name);
             }
             if (StringData.Contains("%USERCOUNT%"))
             {
-                Message = Message.Replace("%USERCOUNT%", Player.CurrentRoom.UserCount.ToString());
+                message = message.Replace("%USERCOUNT%", player.CurrentRoom.UserCount.ToString());
             }
             if (StringData.Contains("%USERSONLINE%"))
             {
-                Message = Message.Replace("%USERSONLINE%", PlusEnvironment.GetGame().GetClientManager().Count.ToString());
+                message = message.Replace("%USERSONLINE%", PlusEnvironment.GetGame().GetClientManager().Count.ToString());
             }
-            Player.GetClient().SendPacket(new WhisperComposer(User.VirtualId, Message, 0, 34));
+            player.GetClient().SendPacket(new WhisperComposer(user.VirtualId, message, 0, 34));
             return true;
         }
     }

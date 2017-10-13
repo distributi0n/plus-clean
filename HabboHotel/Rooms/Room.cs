@@ -637,7 +637,7 @@
                         .SendNotification("Sorry, it appears that room has crashed!"); //Unhandled exception in room: " + e);
                     try
                     {
-                        GetRoomUserManager().RemoveUserFromRoom(user.GetClient(), true, false);
+                        GetRoomUserManager().RemoveUserFromRoom(user.GetClient(), true);
                     }
                     catch (Exception e2)
                     {

@@ -4,23 +4,24 @@
     using HabboHotel.Groups;
     using Outgoing.Groups;
 
-    internal sealed class ManageGroupEvent : IPacketEvent
+    internal class ManageGroupEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
-            {
-                return;
-            }
-            if (Group.CreatorId != Session.GetHabbo().Id &&
-                !Session.GetHabbo().GetPermissions().HasRight("group_management_override"))
+            var groupId = packet.PopInt();
+
+            Group group;
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out group))
             {
                 return;
             }
 
-            Session.SendPacket(new ManageGroupComposer(Group, Group.Badge.Replace("b", "").Split('s')));
+            if (group.CreatorId != session.GetHabbo().Id && !session.GetHabbo().GetPermissions().HasRight("group_management_override"))
+            {
+                return;
+            }
+
+            session.SendPacket(new ManageGroupComposer(group, group.Badge.Replace("b", "").Split('s')));
         }
     }
 }

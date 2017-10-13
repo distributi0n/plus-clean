@@ -8,13 +8,13 @@
 
     public static class HabboEncryptionV2
     {
-        private static RSAKey Rsa;
-        private static DiffieHellman DiffieHellman;
+        private static RsaKey _rsa;
+        private static DiffieHellman _diffieHellman;
 
-        public static void Initialize(RSAKeys keys)
+        public static void Initialize(RsaKeys keys)
         {
-            Rsa = RSAKey.ParsePrivateKey(keys.N, keys.E, keys.D);
-            DiffieHellman = new DiffieHellman();
+            _rsa = RsaKey.ParsePrivateKey(keys.N, keys.E, keys.D);
+            _diffieHellman = new DiffieHellman();
         }
 
         private static string GetRsaStringEncrypted(string message)
@@ -22,7 +22,7 @@
             try
             {
                 var m = Encoding.Default.GetBytes(message);
-                var c = Rsa.Sign(m);
+                var c = _rsa.Sign(m);
                 return Converter.BytesToHexString(c);
             }
             catch
@@ -33,19 +33,19 @@
 
         public static string GetRsaDiffieHellmanPrimeKey()
         {
-            var key = DiffieHellman.Prime.ToString(10);
+            var key = _diffieHellman.Prime.ToString(10);
             return GetRsaStringEncrypted(key);
         }
 
         public static string GetRsaDiffieHellmanGeneratorKey()
         {
-            var key = DiffieHellman.Generator.ToString(10);
+            var key = _diffieHellman.Generator.ToString(10);
             return GetRsaStringEncrypted(key);
         }
 
         public static string GetRsaDiffieHellmanPublicKey()
         {
-            var key = DiffieHellman.PublicKey.ToString(10);
+            var key = _diffieHellman.PublicKey.ToString(10);
             return GetRsaStringEncrypted(key);
         }
 
@@ -54,9 +54,9 @@
             try
             {
                 var cbytes = Converter.HexStringToBytes(publicKey);
-                var publicKeyBytes = Rsa.Verify(cbytes);
+                var publicKeyBytes = _rsa.Verify(cbytes);
                 var publicKeyString = Encoding.Default.GetString(publicKeyBytes);
-                return DiffieHellman.CalculateSharedKey(new BigInteger(publicKeyString, 10));
+                return _diffieHellman.CalculateSharedKey(new BigInteger(publicKeyString, 10));
             }
             catch
             {

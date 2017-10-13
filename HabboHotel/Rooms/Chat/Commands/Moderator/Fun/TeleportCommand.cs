@@ -10,16 +10,16 @@
 
         public string Description => "The ability to teleport anywhere within the room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.TeleportEnabled = !User.TeleportEnabled;
-            Room.GetGameMap().GenerateMaps();
+            user.TeleportEnabled = !user.TeleportEnabled;
+            room.GetGameMap().GenerateMaps();
         }
     }
 }

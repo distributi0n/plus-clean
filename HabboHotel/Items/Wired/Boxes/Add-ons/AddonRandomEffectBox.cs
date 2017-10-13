@@ -6,10 +6,10 @@
 
     internal class AddonRandomEffectBox : IWiredItem
     {
-        public AddonRandomEffectBox(Room Instance, Item Item)
+        public AddonRandomEffectBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             if (SetItems.Count > 0)
             {
@@ -25,7 +25,7 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
         }
 

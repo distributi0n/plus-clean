@@ -10,89 +10,91 @@
 
     internal class UseFurnitureEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var itemID = Packet.PopInt();
-            var Item = Room.GetRoomItemHandler().GetItem(itemID);
-            if (Item == null)
+            var itemId = packet.PopInt();
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            var hasRights = false;
-            if (Room.CheckRights(Session, false, true))
-            {
-                hasRights = true;
-            }
-            if (Item.GetBaseItem().InteractionType == InteractionType.banzaitele)
+            var hasRights = room.CheckRights(session, false, true);
+
+            if (item.GetBaseItem().InteractionType == InteractionType.Banzaitele)
             {
                 return;
             }
 
-            if (Item.GetBaseItem().InteractionType == InteractionType.TONER)
+            if (item.GetBaseItem().InteractionType == InteractionType.Toner)
             {
-                if (!Room.CheckRights(Session, true))
+                if (!room.CheckRights(session, true))
                 {
                     return;
                 }
 
-                if (Room.TonerData.Enabled == 0)
+                if (room.TonerData.Enabled == 0)
                 {
-                    Room.TonerData.Enabled = 1;
+                    room.TonerData.Enabled = 1;
                 }
                 else
                 {
-                    Room.TonerData.Enabled = 0;
+                    room.TonerData.Enabled = 0;
                 }
-                Room.SendPacket(new ObjectUpdateComposer(Item, Room.OwnerId));
-                Item.UpdateState();
+
+                room.SendPacket(new ObjectUpdateComposer(item, room.OwnerId));
+
+                item.UpdateState();
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `room_items_toner` SET `enabled` = '" + Room.TonerData.Enabled + "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `room_items_toner` SET `enabled` = '" + room.TonerData.Enabled + "' LIMIT 1");
                 }
                 return;
             }
 
-            if (Item.Data.InteractionType == InteractionType.GNOME_BOX && Item.UserID == Session.GetHabbo().Id)
+            if (item.Data.InteractionType == InteractionType.GnomeBox && item.UserId == session.GetHabbo().Id)
             {
-                Session.SendPacket(new GnomeBoxComposer(Item.Id));
+                session.SendPacket(new GnomeBoxComposer(item.Id));
             }
-            var Toggle = true;
-            if (Item.GetBaseItem().InteractionType == InteractionType.WF_FLOOR_SWITCH_1 ||
-                Item.GetBaseItem().InteractionType == InteractionType.WF_FLOOR_SWITCH_2)
+
+            var toggle = true;
+            if (item.GetBaseItem().InteractionType == InteractionType.WfFloorSwitch1 || item.GetBaseItem().InteractionType == InteractionType.WfFloorSwitch2)
             {
-                var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-                if (User == null)
+                var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+                if (user == null)
                 {
                     return;
                 }
 
-                if (!Gamemap.TilesTouching(Item.GetX, Item.GetY, User.X, User.Y))
+                if (!Gamemap.TilesTouching(item.GetX, item.GetY, user.X, user.Y))
                 {
-                    Toggle = false;
+                    toggle = false;
                 }
             }
+            
+            var request = packet.PopInt();
 
-            var oldData = Item.ExtraData;
-            var request = Packet.PopInt();
-            Item.Interactor.OnTrigger(Session, Item, request, hasRights);
-            if (Toggle)
+            item.Interactor.OnTrigger(session, item, request, hasRights);
+
+            if (toggle)
             {
-                Item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, Session.GetHabbo(), Item);
+                item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, session.GetHabbo(), item);
             }
-            PlusEnvironment.GetGame().GetQuestManager()
-                .ProgressUserQuest(Session, QuestType.EXPLORE_FIND_ITEM, Item.GetBaseItem().Id);
+
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.ExploreFindItem, item.GetBaseItem().Id);
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     using Packets.Outgoing.Rooms.Engine;
 
-    internal class ReloadUserMottoCommand : IRCONCommand
+    internal class ReloadUserMottoCommand : IRconCommand
     {
         public string Description => "This command is used to reload the users motto from the database.";
 
@@ -10,14 +10,14 @@
 
         public bool TryExecute(string[] parameters)
         {
-            var userId = 0;
-            if (!int.TryParse(parameters[0], out userId))
+            if (!int.TryParse(parameters[0], out var userId))
             {
                 return false;
             }
 
             var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
-            if (client == null || client.GetHabbo() == null)
+
+            if (client?.GetHabbo() == null)
             {
                 return false;
             }
@@ -35,19 +35,17 @@
                 return true;
             }
 
-            //We are in a room, let's try to run the packets.
-            var Room = client.GetHabbo().CurrentRoom;
-            if (Room != null)
+            var room = client.GetHabbo().CurrentRoom;
+
+            var user = room?.GetRoomUserManager().GetRoomUserByHabbo(client.GetHabbo().Id);
+
+            if (user == null)
             {
-                var User = Room.GetRoomUserManager().GetRoomUserByHabbo(client.GetHabbo().Id);
-                if (User != null)
-                {
-                    Room.SendPacket(new UserChangeComposer(User, false));
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            room.SendPacket(new UserChangeComposer(user, false));
+            return true;
         }
     }
 }

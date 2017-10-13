@@ -15,7 +15,7 @@
 
         private readonly Dictionary<int, TopLevelItem> _topLevelItems;
 
-        public NavigatorManager()
+        internal NavigatorManager()
         {
             _topLevelItems = new Dictionary<int, TopLevelItem>();
             _searchResultLists = new Dictionary<int, SearchResultList>();
@@ -29,7 +29,7 @@
             Init();
         }
 
-        public void Init()
+        internal void Init()
         {
             if (_searchResultLists.Count > 0)
             {

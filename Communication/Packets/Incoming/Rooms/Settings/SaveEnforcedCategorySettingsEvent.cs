@@ -6,33 +6,36 @@
 
     internal class SaveEnforcedCategorySettingsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Packet.PopInt(), out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true))
+            Room room = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(packet.PopInt(), out room))
             {
                 return;
             }
 
-            var CategoryId = Packet.PopInt();
-            var TradeSettings = Packet.PopInt();
-            if (TradeSettings < 0 || TradeSettings > 2)
+            if (!room.CheckRights(session, true))
             {
-                TradeSettings = 0;
+                return;
             }
-            SearchResultList SearchResultList = null;
-            if (!PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(CategoryId, out SearchResultList))
+
+            var categoryId = packet.PopInt();
+            var tradeSettings = packet.PopInt();
+
+            if (tradeSettings < 0 || tradeSettings > 2)
             {
-                CategoryId = 36;
+                tradeSettings = 0;
             }
-            if (SearchResultList.CategoryType != NavigatorCategoryType.CATEGORY ||
-                SearchResultList.RequiredRank > Session.GetHabbo().Rank)
+
+            SearchResultList searchResultList = null;
+            if (!PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(categoryId, out searchResultList))
             {
-                CategoryId = 36;
+                categoryId = 36;
+            }
+
+            if (searchResultList.CategoryType != NavigatorCategoryType.CATEGORY || searchResultList.RequiredRank > session.GetHabbo().Rank)
+            {
+                categoryId = 36;
             }
         }
     }

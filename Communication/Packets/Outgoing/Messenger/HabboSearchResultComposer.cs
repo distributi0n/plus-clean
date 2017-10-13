@@ -6,37 +6,39 @@
 
     internal class HabboSearchResultComposer : ServerPacket
     {
-        public HabboSearchResultComposer(List<SearchResult> Friends, List<SearchResult> OtherUsers) : base(ServerPacketHeader
-            .HabboSearchResultMessageComposer)
+        public HabboSearchResultComposer(List<SearchResult> friends, List<SearchResult> otherUsers)
+            : base(ServerPacketHeader.HabboSearchResultMessageComposer)
         {
-            WriteInteger(Friends.Count);
-            foreach (var Friend in Friends.ToList())
+            WriteInteger(friends.Count);
+            foreach (var friend in friends.ToList())
             {
-                var Online = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Friend.UserId) != null;
-                WriteInteger(Friend.UserId);
-                WriteString(Friend.Username);
-                WriteString(Friend.Motto);
-                WriteBoolean(Online);
+                var online = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(friend.UserId) != null;
+
+                WriteInteger(friend.UserId);
+                WriteString(friend.Username);
+                WriteString(friend.Motto);
+                WriteBoolean(online);
                 WriteBoolean(false);
                 WriteString(string.Empty);
                 WriteInteger(0);
-                WriteString(Online ? Friend.Figure : "");
-                WriteString(Friend.LastOnline);
+                WriteString(online ? friend.Figure : "");
+                WriteString(friend.LastOnline);
             }
 
-            WriteInteger(OtherUsers.Count);
-            foreach (var OtherUser in OtherUsers.ToList())
+            WriteInteger(otherUsers.Count);
+            foreach (var otherUser in otherUsers.ToList())
             {
-                var Online = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(OtherUser.UserId) != null;
-                WriteInteger(OtherUser.UserId);
-                WriteString(OtherUser.Username);
-                WriteString(OtherUser.Motto);
-                WriteBoolean(Online);
+                var online = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(otherUser.UserId) != null;
+
+                WriteInteger(otherUser.UserId);
+                WriteString(otherUser.Username);
+                WriteString(otherUser.Motto);
+                WriteBoolean(online);
                 WriteBoolean(false);
                 WriteString(string.Empty);
                 WriteInteger(0);
-                WriteString(Online ? OtherUser.Figure : "");
-                WriteString(OtherUser.LastOnline);
+                WriteString(online ? otherUser.Figure : "");
+                WriteString(otherUser.LastOnline);
             }
         }
     }

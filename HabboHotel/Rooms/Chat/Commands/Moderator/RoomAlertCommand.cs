@@ -10,34 +10,34 @@
 
         public string Description => "Send a message to the users in this room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter a message you'd like to send to the room.");
+                session.SendWhisper("Please enter a message you'd like to send to the room.");
                 return;
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_alert") && Room.OwnerId != Session.GetHabbo().Id)
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_alert") && room.OwnerId != session.GetHabbo().Id)
             {
-                Session.SendWhisper("You can only Room Alert in your own room!");
+                session.SendWhisper("You can only Room Alert in your own room!");
                 return;
             }
 
-            var Message = CommandManager.MergeParams(Params, 1);
-            foreach (var RoomUser in Room.GetRoomUserManager().GetRoomUsers())
+            var message = CommandManager.MergeParams(Params, 1);
+            foreach (var roomUser in room.GetRoomUserManager().GetRoomUsers())
             {
-                if (RoomUser == null || RoomUser.GetClient() == null || Session.GetHabbo().Id == RoomUser.UserId)
+                if (roomUser == null || roomUser.GetClient() == null || session.GetHabbo().Id == roomUser.UserId)
                 {
                     continue;
                 }
 
-                RoomUser.GetClient()
-                    .SendNotification(Session.GetHabbo().Username + " alerted the room with the following message:\n\n" +
-                                      Message);
+                roomUser.GetClient()
+                    .SendNotification(session.GetHabbo().Username + " alerted the room with the following message:\n\n" +
+                                      message);
             }
 
-            Session.SendWhisper("Message successfully sent to the room.");
+            session.SendWhisper("Message successfully sent to the room.");
         }
     }
 }

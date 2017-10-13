@@ -7,25 +7,21 @@
 
     internal sealed class ProcessComponent
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Users.Process.ProcessComponent");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.HabboHotel.Users.Process.ProcessComponent");
 
-        private static readonly int _runtimeInSec = 60;
+        private static readonly int RuntimeInSec = 60;
 
         private readonly AutoResetEvent _resetEvent = new AutoResetEvent(true);
 
         private bool _disabled;
-
         private Habbo _player;
-
         private Timer _timer;
-
         private bool _timerLagging;
-
         private bool _timerRunning;
 
-        public bool Init(Habbo Player)
+        public bool Init(Habbo player)
         {
-            if (Player == null)
+            if (player == null)
             {
                 return false;
             }
@@ -34,12 +30,12 @@
                 return false;
             }
 
-            _player = Player;
-            _timer = new Timer(Run, null, _runtimeInSec * 1000, _runtimeInSec * 1000);
+            _player = player;
+            _timer = new Timer(Run, null, RuntimeInSec * 1000, RuntimeInSec * 1000);
             return true;
         }
 
-        public void Run(object State)
+        public void Run(object state)
         {
             try
             {
@@ -51,13 +47,12 @@
                 if (_timerRunning)
                 {
                     _timerLagging = true;
-                    log.Warn("<Player " + _player.Id + "> Server can't keep up, Player timer is lagging behind.");
+                    Log.Warn("<Player " + _player.Id + "> Server can't keep up, Player timer is lagging behind.");
                     return;
                 }
 
                 _resetEvent.Reset();
 
-                // BEGIN CODE
                 if (_player.TimeMuted > 0)
                 {
                     _player.TimeMuted -= 60;
@@ -70,16 +65,16 @@
                 {
                     _player.MessengerSpamCount = 0;
                 }
-                _player.TimeAFK += 1;
+                _player.TimeAfk += 1;
                 if (_player.GetStats().RespectsTimestamp != DateTime.Today.ToString("MM/dd"))
                 {
                     _player.GetStats().RespectsTimestamp = DateTime.Today.ToString("MM/dd");
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.RunQuery("UPDATE `user_stats` SET `dailyRespectPoints` = '" +
-                                          (_player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20) +
+                                          (_player.Rank == 1 && _player.VipRank == 0 ? 10 : _player.VipRank == 1 ? 15 : 20) +
                                           "', `dailyPetRespectPoints` = '" +
-                                          (_player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20) +
+                                          (_player.Rank == 1 && _player.VipRank == 0 ? 10 : _player.VipRank == 1 ? 15 : 20) +
                                           "', `respectsTimestamp` = '" +
                                           DateTime.Today.ToString("MM/dd") +
                                           "' WHERE `id` = '" +
@@ -87,9 +82,9 @@
                                           "' LIMIT 1");
                     }
                     _player.GetStats().DailyRespectPoints =
-                        _player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20;
+                        _player.Rank == 1 && _player.VipRank == 0 ? 10 : _player.VipRank == 1 ? 15 : 20;
                     _player.GetStats().DailyPetRespectPoints =
-                        _player.Rank == 1 && _player.VIPRank == 0 ? 10 : _player.VIPRank == 1 ? 15 : 20;
+                        _player.Rank == 1 && _player.VipRank == 0 ? 10 : _player.VipRank == 1 ? 15 : 20;
                     if (_player.GetClient() != null)
                     {
                         _player.GetClient().SendPacket(new UserObjectComposer(_player));

@@ -7,10 +7,10 @@
 
     internal class FurniHasUsersBox : IWiredItem
     {
-        public FurniHasUsersBox(Room Instance, Item Item)
+        public FurniHasUsersBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -27,48 +27,48 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
         }
 
         public bool Execute(params object[] Params)
         {
-            foreach (var Item in SetItems.Values.ToList())
+            foreach (var item in SetItems.Values.ToList())
             {
-                if (Item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                if (item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(item))
                 {
                     continue;
                 }
 
-                var HasUsers = false;
-                foreach (var Tile in Item.GetAffectedTiles.Values)
+                var hasUsers = false;
+                foreach (var tile in item.GetAffectedTiles.Values)
                 {
-                    if (Instance.GetGameMap().SquareHasUsers(Tile.X, Tile.Y))
+                    if (Instance.GetGameMap().SquareHasUsers(tile.X, tile.Y))
                     {
-                        HasUsers = true;
+                        hasUsers = true;
                     }
                 }
 
-                if (Instance.GetGameMap().SquareHasUsers(Item.GetX, Item.GetY))
+                if (Instance.GetGameMap().SquareHasUsers(item.GetX, item.GetY))
                 {
-                    HasUsers = true;
+                    hasUsers = true;
                 }
-                if (!HasUsers)
+                if (!hasUsers)
                 {
                     return false;
                 }

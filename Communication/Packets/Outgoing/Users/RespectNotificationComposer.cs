@@ -2,10 +2,11 @@
 {
     internal class RespectNotificationComposer : ServerPacket
     {
-        public RespectNotificationComposer(int userID, int Respect) : base(ServerPacketHeader.RespectNotificationMessageComposer)
+        public RespectNotificationComposer(int userId, int respect)
+            : base(ServerPacketHeader.RespectNotificationMessageComposer)
         {
-            WriteInteger(userID);
-            WriteInteger(Respect);
+            WriteInteger(userId);
+            WriteInteger(respect);
         }
     }
 }

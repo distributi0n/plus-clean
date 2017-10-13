@@ -7,43 +7,42 @@
 
     internal class GiveHandItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session == null || session.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            var TargetUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Packet.PopInt());
-            if (TargetUser == null)
+            var targetUser = room.GetRoomUserManager().GetRoomUserByHabbo(packet.PopInt());
+            if (targetUser == null)
             {
                 return;
             }
 
-            if (!(Math.Abs(User.X - TargetUser.X) >= 3 || Math.Abs(User.Y - TargetUser.Y) >= 3) ||
-                Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!(Math.Abs(user.X - targetUser.X) >= 3 || Math.Abs(user.Y - targetUser.Y) >= 3) || session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
-                if (User.CarryItemID > 0 && User.CarryTimer > 0)
+                if (user.CarryItemID > 0 && user.CarryTimer > 0)
                 {
-                    if (User.CarryItemID == 8)
+                    if (user.CarryItemID == 8)
                     {
-                        PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.GIVE_COFFEE);
+                        PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.GiveCoffee);
                     }
-                    TargetUser.CarryItem(User.CarryItemID);
-                    User.CarryItem(0);
-                    TargetUser.DanceId = 0;
+                    targetUser.CarryItem(user.CarryItemID);
+                    user.CarryItem(0);
+                    targetUser.DanceId = 0;
                 }
             }
         }

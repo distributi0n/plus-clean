@@ -6,57 +6,57 @@
 
     public class InteractorScoreCounter : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
-            if (Item.team == TEAM.NONE)
+            if (item.Team == TEAM.NONE)
             {
                 return;
             }
 
-            Item.ExtraData = Item.GetRoom().GetGameManager().Points[Convert.ToInt32(Item.team)].ToString();
-            Item.UpdateState(false, true);
+            item.ExtraData = item.GetRoom().GetGameManager().Points[Convert.ToInt32(item.Team)].ToString();
+            item.UpdateState(false, true);
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (!HasRights)
+            if (!hasRights)
             {
                 return;
             }
 
-            var OldValue = 0;
-            if (!int.TryParse(Item.ExtraData, out OldValue))
+            var oldValue = 0;
+            if (!int.TryParse(item.ExtraData, out oldValue))
             {
             }
-            if (Request == 1)
+            if (request == 1)
             {
-                OldValue++;
+                oldValue++;
             }
-            else if (Request == 2)
+            else if (request == 2)
             {
-                OldValue--;
+                oldValue--;
             }
-            else if (Request == 3)
+            else if (request == 3)
             {
-                OldValue = 0;
+                oldValue = 0;
             }
-            Item.ExtraData = OldValue.ToString();
-            Item.UpdateState(false, true);
+            item.ExtraData = oldValue.ToString();
+            item.UpdateState(false, true);
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
-            var OldValue = 0;
-            if (!int.TryParse(Item.ExtraData, out OldValue))
+            var oldValue = 0;
+            if (!int.TryParse(item.ExtraData, out oldValue))
             {
             }
-            OldValue++;
-            Item.ExtraData = OldValue.ToString();
-            Item.UpdateState(false, true);
+            oldValue++;
+            item.ExtraData = oldValue.ToString();
+            item.UpdateState(false, true);
         }
     }
 }

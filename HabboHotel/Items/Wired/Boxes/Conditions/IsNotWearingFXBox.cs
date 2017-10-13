@@ -5,28 +5,28 @@
     using Rooms;
     using Users;
 
-    internal class IsNotWearingFXBox : IWiredItem
+    internal class IsNotWearingFxBox : IWiredItem
     {
-        public IsNotWearingFXBox(Room Instance, Item Item)
+        public IsNotWearingFxBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
         public Room Instance { get; set; }
         public Item Item { get; set; }
-        public WiredBoxType Type => WiredBoxType.ConditionIsWearingFX;
+        public WiredBoxType Type => WiredBoxType.ConditionIsWearingFx;
         public ConcurrentDictionary<int, Item> SetItems { get; set; }
         public string StringData { get; set; }
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopInt();
-            StringData = Unknown2.ToString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopInt();
+            StringData = unknown2.ToString();
         }
 
         public bool Execute(params object[] Params)
@@ -40,12 +40,12 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
-            if (Player.Effects().CurrentEffect != int.Parse(StringData))
+            if (player.Effects().CurrentEffect != int.Parse(StringData))
             {
                 return true;
             }

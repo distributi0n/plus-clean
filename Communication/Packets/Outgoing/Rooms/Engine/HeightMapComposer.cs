@@ -4,43 +4,47 @@
 
     internal class HeightMapComposer : ServerPacket
     {
-        public HeightMapComposer(string Map) : base(ServerPacketHeader.HeightMapMessageComposer)
+        public HeightMapComposer(string map)
+            : base(ServerPacketHeader.HeightMapMessageComposer)
         {
-            Map = Map.Replace("\n", "");
-            var Split = Map.Split('\r');
-            WriteInteger(Split[0].Length);
-            WriteInteger((Split.Length - 1) * Split[0].Length);
-            var x = 0;
-            var y = 0;
-            for (y = 0; y < Split.Length - 1; y++)
+            map = map.Replace("\n", "");
+            var split = map.Split('\r');
+            WriteInteger(split[0].Length);
+            WriteInteger((split.Length - 1) * split[0].Length);
+            
+            int x;
+            int y;
+            
+            for (y = 0; y < split.Length - 1; y++)
             {
-                for (x = 0; x < Split[0].Length; x++)
+                for (x = 0; x < split[0].Length; x++)
                 {
                     char pos;
+
                     try
                     {
-                        pos = Split[y][x];
+                        pos = split[y][x];
                     }
                     catch
                     {
                         pos = 'x';
                     }
+
                     if (pos == 'x')
                     {
                         WriteShort(-1);
                     }
                     else
                     {
-                        var Height = 0;
-                        if (int.TryParse(pos.ToString(), out Height))
+                        if (int.TryParse(pos.ToString(), out var height))
                         {
-                            Height = Height * 256;
+                            height = height * 256;
                         }
                         else
                         {
-                            Height = (Convert.ToInt32(pos) - 87) * 256;
+                            height = (Convert.ToInt32(pos) - 87) * 256;
                         }
-                        WriteShort(Height);
+                        WriteShort(height);
                     }
                 }
             }

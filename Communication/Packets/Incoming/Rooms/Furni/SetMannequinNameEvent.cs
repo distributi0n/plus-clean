@@ -6,39 +6,42 @@
 
     internal class SetMannequinNameEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null || !Room.CheckRights(Session, true))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null || !room.CheckRights(session, true))
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var Name = Packet.PopString();
-            var Item = Session.GetHabbo().CurrentRoom.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null)
+            var itemId = packet.PopInt();
+            var name = packet.PopString();
+
+            var item = session.GetHabbo().CurrentRoom.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            if (Item.ExtraData.Contains(Convert.ToChar(5)))
+            if (item.ExtraData.Contains(Convert.ToChar(5)))
             {
-                var Flags = Item.ExtraData.Split(Convert.ToChar(5));
-                Item.ExtraData = Flags[0] + Convert.ToChar(5) + Flags[1] + Convert.ToChar(5) + Name;
+                var flags = item.ExtraData.Split(Convert.ToChar(5));
+                item.ExtraData = flags[0] + Convert.ToChar(5) + flags[1] + Convert.ToChar(5) + name;
             }
             else
             {
-                Item.ExtraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) + "Default Mannequin";
+                item.ExtraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) + "Default Mannequin";
             }
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `items` SET `extra_data` = @Ed WHERE `id` = @itemId LIMIT 1");
-                dbClient.AddParameter("itemId", Item.Id);
-                dbClient.AddParameter("Ed", Item.ExtraData);
+                dbClient.AddParameter("itemId", item.Id);
+                dbClient.AddParameter("Ed", item.ExtraData);
                 dbClient.RunQuery();
             }
-            Item.UpdateState(true, true);
+
+            item.UpdateState(true, true);
         }
     }
 }

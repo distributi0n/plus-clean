@@ -2,14 +2,14 @@
 {
     public class Bot
     {
-        public Bot(int Id, int OwnerId, string Name, string Motto, string Figure, string Gender)
+        public Bot(int id, int ownerId, string name, string motto, string figure, string gender)
         {
-            this.Id = Id;
-            this.OwnerId = OwnerId;
-            this.Name = Name;
-            this.Motto = Motto;
-            this.Figure = Figure;
-            this.Gender = Gender;
+            Id = id;
+            OwnerId = ownerId;
+            Name = name;
+            Motto = motto;
+            Figure = figure;
+            Gender = gender;
         }
 
         public int Id { get; set; }

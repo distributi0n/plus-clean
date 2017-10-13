@@ -13,15 +13,15 @@
     {
         private int _delay;
         private long _next;
-        private bool Requested;
+        private bool _requested;
 
-        public MoveAndRotateBox(Room Instance, Item Item)
+        public MoveAndRotateBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             TickCount = Delay;
-            Requested = false;
+            _requested = false;
         }
 
         public int Delay
@@ -38,47 +38,47 @@
 
         public bool OnCycle()
         {
-            if (Instance == null || !Requested || _next == 0)
+            if (Instance == null || !_requested || _next == 0)
             {
                 return false;
             }
 
-            var Now = PlusEnvironment.Now();
-            if (_next < Now)
+            var now = PlusEnvironment.Now();
+            if (_next < now)
             {
-                foreach (var Item in SetItems.Values.ToList())
+                foreach (var item in SetItems.Values.ToList())
                 {
-                    if (Item == null)
+                    if (item == null)
                     {
                         continue;
                     }
-                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(item))
                     {
                         continue;
                     }
 
                     Item toRemove = null;
-                    if (Instance.GetWired().OtherBoxHasItem(this, Item.Id))
+                    if (Instance.GetWired().OtherBoxHasItem(this, item.Id))
                     {
-                        SetItems.TryRemove(Item.Id, out toRemove);
+                        SetItems.TryRemove(item.Id, out toRemove);
                     }
-                    var Point = HandleMovement(Convert.ToInt32(StringData.Split(';')[0]), new Point(Item.GetX, Item.GetY));
-                    var newRot = HandleRotation(Convert.ToInt32(StringData.Split(';')[1]), Item.Rotation);
-                    Instance.GetWired().onUserFurniCollision(Instance, Item);
-                    if (!Instance.GetGameMap().ItemCanMove(Item, Point))
+                    var point = HandleMovement(Convert.ToInt32(StringData.Split(';')[0]), new Point(item.GetX, item.GetY));
+                    var newRot = HandleRotation(Convert.ToInt32(StringData.Split(';')[1]), item.Rotation);
+                    Instance.GetWired().OnUserFurniCollision(Instance, item);
+                    if (!Instance.GetGameMap().ItemCanMove(item, point))
                     {
                         continue;
                     }
 
-                    if (Instance.GetGameMap().CanRollItemHere(Point.X, Point.Y) &&
-                        !Instance.GetGameMap().SquareHasUsers(Point.X, Point.Y))
+                    if (Instance.GetGameMap().CanRollItemHere(point.X, point.Y) &&
+                        !Instance.GetGameMap().SquareHasUsers(point.X, point.Y))
                     {
-                        var NewZ = Instance.GetGameMap().GetHeightForSquareFromData(Point);
-                        var CanBePlaced = true;
-                        var Items = Instance.GetGameMap().GetCoordinatedItems(Point);
-                        foreach (var IItem in Items.ToList())
+                        var newZ = Instance.GetGameMap().GetHeightForSquareFromData(point);
+                        var canBePlaced = true;
+                        var items = Instance.GetGameMap().GetCoordinatedItems(point);
+                        foreach (var IItem in items.ToList())
                         {
-                            if (IItem == null || IItem.Id == Item.Id)
+                            if (IItem == null || IItem.Id == item.Id)
                             {
                                 continue;
                             }
@@ -86,31 +86,34 @@
                             if (!IItem.GetBaseItem().Walkable)
                             {
                                 _next = 0;
-                                CanBePlaced = false;
+                                canBePlaced = false;
                                 break;
                             }
 
-                            if (IItem.TotalHeight > NewZ)
+                            if (IItem.TotalHeight > newZ)
                             {
-                                NewZ = IItem.TotalHeight;
+                                newZ = IItem.TotalHeight;
                             }
-                            if (CanBePlaced && !IItem.GetBaseItem().Stackable)
+                            if (canBePlaced && !IItem.GetBaseItem().Stackable)
                             {
-                                CanBePlaced = false;
+                                canBePlaced = false;
                             }
                         }
 
-                        if (newRot != Item.Rotation)
+                        if (newRot != item.Rotation)
                         {
-                            Item.Rotation = newRot;
-                            Item.UpdateState(false, true);
+                            item.Rotation = newRot;
+                            item.UpdateState(false, true);
                         }
-                        if (CanBePlaced && Point != Item.Coordinate)
+
+                        if (!canBePlaced || point == item.Coordinate)
                         {
-                            Instance.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, Point.X, Point.Y,
-                                NewZ, 0, 0, Item.Id));
-                            Instance.GetRoomItemHandler().SetFloorItem(Item, Point.X, Point.Y, NewZ);
+                            continue;
                         }
+
+                        Instance.SendPacket(new SlideObjectBundleComposer(item.GetX, item.GetY, item.GetZ, point.X, point.Y,
+                            newZ, 0, 0, item.Id));
+                        Instance.GetRoomItemHandler().SetFloorItem(item, point.X, point.Y, newZ);
                     }
                 }
 
@@ -131,28 +134,28 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var Movement = Packet.PopInt();
-            var Rotation = Packet.PopInt();
-            var Unknown1 = Packet.PopString();
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var unknown = packet.PopInt();
+            var movement = packet.PopInt();
+            var rotation = packet.PopInt();
+            var unknown1 = packet.PopString();
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, SelectedItem.Id))
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, selectedItem.Id))
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            StringData = Movement + ";" + Rotation;
-            Delay = Packet.PopInt();
+            StringData = movement + ";" + rotation;
+            Delay = packet.PopInt();
         }
 
         public bool Execute(params object[] Params)
@@ -166,10 +169,10 @@
             {
                 _next = PlusEnvironment.Now() + Delay;
             }
-            if (!Requested)
+            if (!_requested)
             {
                 TickCount = Delay;
-                Requested = true;
+                _requested = true;
             }
             return true;
         }
@@ -221,14 +224,14 @@
             return rotation;
         }
 
-        private Point HandleMovement(int Mode, Point Position)
+        private Point HandleMovement(int mode, Point position)
         {
-            var NewPos = new Point();
-            switch (Mode)
+            var newPos = new Point();
+            switch (mode)
             {
                 case 0:
                 {
-                    NewPos = Position;
+                    newPos = position;
                     break;
                 }
                 case 1:
@@ -236,16 +239,16 @@
                     switch (RandomNumber.GenerateRandom(1, 4))
                     {
                         case 1:
-                            NewPos = new Point(Position.X + 1, Position.Y);
+                            newPos = new Point(position.X + 1, position.Y);
                             break;
                         case 2:
-                            NewPos = new Point(Position.X - 1, Position.Y);
+                            newPos = new Point(position.X - 1, position.Y);
                             break;
                         case 3:
-                            NewPos = new Point(Position.X, Position.Y + 1);
+                            newPos = new Point(position.X, position.Y + 1);
                             break;
                         case 4:
-                            NewPos = new Point(Position.X, Position.Y - 1);
+                            newPos = new Point(position.X, position.Y - 1);
                             break;
                     }
 
@@ -255,11 +258,11 @@
                 {
                     if (RandomNumber.GenerateRandom(0, 2) == 1)
                     {
-                        NewPos = new Point(Position.X - 1, Position.Y);
+                        newPos = new Point(position.X - 1, position.Y);
                     }
                     else
                     {
-                        NewPos = new Point(Position.X + 1, Position.Y);
+                        newPos = new Point(position.X + 1, position.Y);
                     }
                     break;
                 }
@@ -267,37 +270,37 @@
                 {
                     if (RandomNumber.GenerateRandom(0, 2) == 1)
                     {
-                        NewPos = new Point(Position.X, Position.Y - 1);
+                        newPos = new Point(position.X, position.Y - 1);
                     }
                     else
                     {
-                        NewPos = new Point(Position.X, Position.Y + 1);
+                        newPos = new Point(position.X, position.Y + 1);
                     }
                     break;
                 }
                 case 4:
                 {
-                    NewPos = new Point(Position.X, Position.Y - 1);
+                    newPos = new Point(position.X, position.Y - 1);
                     break;
                 }
                 case 5:
                 {
-                    NewPos = new Point(Position.X + 1, Position.Y);
+                    newPos = new Point(position.X + 1, position.Y);
                     break;
                 }
                 case 6:
                 {
-                    NewPos = new Point(Position.X, Position.Y + 1);
+                    newPos = new Point(position.X, position.Y + 1);
                     break;
                 }
                 case 7:
                 {
-                    NewPos = new Point(Position.X - 1, Position.Y);
+                    newPos = new Point(position.X - 1, position.Y);
                     break;
                 }
             }
 
-            return NewPos;
+            return newPos;
         }
     }
 }

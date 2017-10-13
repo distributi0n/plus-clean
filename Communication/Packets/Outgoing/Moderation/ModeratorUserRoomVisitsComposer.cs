@@ -7,18 +7,19 @@
 
     internal class ModeratorUserRoomVisitsComposer : ServerPacket
     {
-        public ModeratorUserRoomVisitsComposer(Habbo Data, Dictionary<double, RoomData> Visits) : base(ServerPacketHeader
-            .ModeratorUserRoomVisitsMessageComposer)
+        public ModeratorUserRoomVisitsComposer(Habbo data, Dictionary<double, RoomData> visits)
+            : base(ServerPacketHeader.ModeratorUserRoomVisitsMessageComposer)
         {
-            WriteInteger(Data.Id);
-            WriteString(Data.Username);
-            WriteInteger(Visits.Count);
-            foreach (var Visit in Visits)
+            WriteInteger(data.Id);
+            WriteString(data.Username);
+            WriteInteger(visits.Count);
+
+            foreach (var visit in visits)
             {
-                WriteInteger(Visit.Value.Id);
-                WriteString(Visit.Value.Name);
-                WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Hour);
-                WriteInteger(UnixTimestamp.FromUnixTimestamp(Visit.Key).Minute);
+                WriteInteger(visit.Value.Id);
+                WriteString(visit.Value.Name);
+                WriteInteger(UnixTimestamp.FromUnixTimestamp(visit.Key).Hour);
+                WriteInteger(UnixTimestamp.FromUnixTimestamp(visit.Key).Minute);
             }
         }
     }

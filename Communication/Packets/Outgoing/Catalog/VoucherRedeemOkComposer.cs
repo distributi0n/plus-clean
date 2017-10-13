@@ -2,7 +2,8 @@
 {
     public class VoucherRedeemOkComposer : ServerPacket
     {
-        public VoucherRedeemOkComposer() : base(ServerPacketHeader.VoucherRedeemOkMessageComposer)
+        public VoucherRedeemOkComposer()
+            : base(ServerPacketHeader.VoucherRedeemOkMessageComposer)
         {
             WriteString(""); //productName
             WriteString(""); //productDescription

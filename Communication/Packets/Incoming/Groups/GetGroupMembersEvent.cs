@@ -4,78 +4,80 @@
     using System.Linq;
     using HabboHotel.Cache.Type;
     using HabboHotel.GameClients;
-    using HabboHotel.Groups;
     using Outgoing.Groups;
 
     internal class GetGroupMembersEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            var Page = Packet.PopInt();
-            var SearchVal = Packet.PopString();
-            var RequestType = Packet.PopInt();
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
+            var groupId = packet.PopInt();
+            var page = packet.PopInt();
+            var searchVal = packet.PopString();
+            var requestType = packet.PopInt();
+
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out var group))
             {
                 return;
             }
 
-            var Members = new List<UserCache>();
-            switch (RequestType)
+            var members = new List<UserCache>();
+
+            switch (requestType)
             {
                 case 0:
                 {
-                    var MemberIds = Group.GetAllMembers;
-                    foreach (var Id in MemberIds.ToList())
+                    var memberIds = group.GetAllMembers;
+                    foreach (var id in memberIds.ToList())
                     {
-                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                        if (GroupMember == null)
+                        var groupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(id);
+                        if (groupMember == null)
                         {
                             continue;
                         }
 
-                        if (!Members.Contains(GroupMember))
+                        if (!members.Contains(groupMember))
                         {
-                            Members.Add(GroupMember);
+                            members.Add(groupMember);
                         }
                     }
 
                     break;
                 }
+
                 case 1:
                 {
-                    var AdminIds = Group.GetAdministrators;
-                    foreach (var Id in AdminIds.ToList())
+                    var adminIds = group.GetAdministrators;
+                    foreach (var id in adminIds.ToList())
                     {
-                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                        if (GroupMember == null)
+                        var groupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(id);
+                        if (groupMember == null)
                         {
                             continue;
                         }
 
-                        if (!Members.Contains(GroupMember))
+                        if (!members.Contains(groupMember))
                         {
-                            Members.Add(GroupMember);
+                            members.Add(groupMember);
                         }
                     }
 
                     break;
                 }
+
                 case 2:
                 {
-                    var RequestIds = Group.GetRequests;
-                    foreach (var Id in RequestIds.ToList())
+                    var requestIds = group.GetRequests;
+                    foreach (var id in requestIds.ToList())
                     {
-                        var GroupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                        if (GroupMember == null)
+                        var groupMember = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(id);
+                        if (groupMember == null)
                         {
                             continue;
                         }
 
-                        if (!Members.Contains(GroupMember))
+                        if (!members.Contains(groupMember))
                         {
-                            Members.Add(GroupMember);
+                            members.Add(groupMember);
                         }
                     }
 
@@ -83,19 +85,16 @@
                 }
             }
 
-            if (!string.IsNullOrEmpty(SearchVal))
+            if (!string.IsNullOrEmpty(searchVal))
             {
-                Members = Members.Where(x => x.Username.StartsWith(SearchVal)).ToList();
+                members = members.Where(x => x.Username.StartsWith(searchVal)).ToList();
             }
-            var StartIndex = (Page - 1) * 14 + 14;
-            var FinishIndex = Members.Count;
-            Session.SendPacket(new GroupMembersComposer(Group,
-                Members.Skip(StartIndex).Take(FinishIndex - StartIndex).ToList(),
-                Members.Count,
-                Page,
-                Group.CreatorId == Session.GetHabbo().Id || Group.IsAdmin(Session.GetHabbo().Id),
-                RequestType,
-                SearchVal));
+
+            var startIndex = (page - 1) * 14 + 14;
+            var finishIndex = members.Count;
+
+            session.SendPacket(new GroupMembersComposer(group, members.Skip(startIndex).Take(finishIndex - startIndex).ToList(), members.Count, page,
+                group.CreatorId == session.GetHabbo().Id || group.IsAdmin(session.GetHabbo().Id), requestType, searchVal));
         }
     }
 }

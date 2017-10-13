@@ -2,10 +2,10 @@
 {
     internal class MarketplaceCanMakeOfferResultComposer : ServerPacket
     {
-        public MarketplaceCanMakeOfferResultComposer(int Result) : base(ServerPacketHeader
-            .MarketplaceCanMakeOfferResultMessageComposer)
+        public MarketplaceCanMakeOfferResultComposer(int result)
+            : base(ServerPacketHeader.MarketplaceCanMakeOfferResultMessageComposer)
         {
-            WriteInteger(Result);
+            WriteInteger(result);
             WriteInteger(0);
         }
     }

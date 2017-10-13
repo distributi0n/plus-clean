@@ -3,14 +3,16 @@
     using HabboHotel.GameClients;
     using Outgoing.Handshake;
 
-    public sealed class UniqueIDEvent : IPacketEvent
+    public class UniqueIdEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Junk = Packet.PopString();
-            var MachineId = Packet.PopString();
-            Session.MachineId = MachineId;
-            Session.SendPacket(new SetUniqueIdComposer(MachineId));
+            packet.PopString();
+            var machineId = packet.PopString();
+
+            session.MachineId = machineId;
+
+            session.SendPacket(new SetUniqueIdComposer(machineId));
         }
     }
 }

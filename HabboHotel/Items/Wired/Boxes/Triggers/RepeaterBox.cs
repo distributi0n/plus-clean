@@ -10,10 +10,10 @@
     {
         private int _delay;
 
-        public RepeaterBox(Room Instance, Item Item)
+        public RepeaterBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -31,51 +31,51 @@
 
         public bool OnCycle()
         {
-            var Success = false;
-            ICollection<RoomUser> Avatars = Instance.GetRoomUserManager().GetRoomUsers().ToList();
-            var Effects = Instance.GetWired().GetEffects(this);
-            var Conditions = Instance.GetWired().GetConditions(this);
-            foreach (var Condition in Conditions.ToList())
+            var success = false;
+            ICollection<RoomUser> avatars = Instance.GetRoomUserManager().GetRoomUsers().ToList();
+            var effects = Instance.GetWired().GetEffects(this);
+            var conditions = Instance.GetWired().GetConditions(this);
+            foreach (var condition in conditions.ToList())
             {
-                foreach (var Avatar in Avatars.ToList())
+                foreach (var avatar in avatars.ToList())
                 {
-                    if (Avatar == null || Avatar.GetClient() == null || Avatar.GetClient().GetHabbo() == null)
+                    if (avatar == null || avatar.GetClient() == null || avatar.GetClient().GetHabbo() == null)
                     {
                         continue;
                     }
-                    if (!Condition.Execute(Avatar.GetClient().GetHabbo()))
+                    if (!condition.Execute(avatar.GetClient().GetHabbo()))
                     {
                         continue;
                     }
 
-                    Success = true;
+                    success = true;
                 }
 
-                if (!Success)
+                if (!success)
                 {
                     return false;
                 }
 
-                Success = false;
-                Instance.GetWired().OnEvent(Condition.Item);
+                success = false;
+                Instance.GetWired().OnEvent(condition.Item);
             }
 
-            Success = false;
+            success = false;
 
             //Check the ICollection to find the random addon effect.
-            var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
-            if (HasRandomEffectAddon)
+            var hasRandomEffectAddon = effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+            if (hasRandomEffectAddon)
             {
                 //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
-                if (!RandomBox.Execute())
+                var randomBox = effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                if (!randomBox.Execute())
                 {
                     return false;
                 }
 
                 //Success! Let's get our selected box and continue.
-                var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
-                if (!SelectedBox.Execute())
+                var selectedBox = Instance.GetWired().GetRandomEffect(effects.ToList());
+                if (!selectedBox.Execute())
                 {
                     return false;
                 }
@@ -83,28 +83,28 @@
                 //Woo! Almost there captain, now lets broadcast the update to the room instance.
                 if (Instance != null)
                 {
-                    Instance.GetWired().OnEvent(RandomBox.Item);
-                    Instance.GetWired().OnEvent(SelectedBox.Item);
+                    Instance.GetWired().OnEvent(randomBox.Item);
+                    Instance.GetWired().OnEvent(selectedBox.Item);
                 }
             }
             else
             {
-                foreach (var Effect in Effects.ToList())
+                foreach (var effect in effects.ToList())
                 {
-                    if (!Effect.Execute())
+                    if (!effect.Execute())
                     {
                         continue;
                     }
 
-                    Success = true;
-                    if (!Success)
+                    success = true;
+                    if (!success)
                     {
                         return false;
                     }
 
                     if (Instance != null)
                     {
-                        Instance.GetWired().OnEvent(Effect.Item);
+                        Instance.GetWired().OnEvent(effect.Item);
                     }
                 }
             }
@@ -121,12 +121,12 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Delay = Packet.PopInt();
-            this.Delay = Delay;
-            TickCount = Delay;
+            var unknown = packet.PopInt();
+            var delay = packet.PopInt();
+            Delay = delay;
+            TickCount = delay;
         }
 
         public bool Execute(params object[] Params) => true;

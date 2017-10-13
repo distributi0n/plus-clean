@@ -12,11 +12,11 @@
         private readonly ConcurrentDictionary<int, AvatarEffect> _effects = new ConcurrentDictionary<int, AvatarEffect>();
         private Habbo _habbo;
 
-        public ICollection<AvatarEffect> GetAllEffects => _effects.Values;
+        internal ICollection<AvatarEffect> GetAllEffects => _effects.Values;
 
-        public int CurrentEffect { get; set; }
+        internal int CurrentEffect { get; set; }
 
-        public bool Init(Habbo habbo)
+        internal bool Init(Habbo habbo)
         {
             if (_effects.Count > 0)
             {
@@ -30,16 +30,16 @@
                 var getEffects = dbClient.GetTable();
                 if (getEffects != null)
                 {
-                    foreach (DataRow Row in getEffects.Rows)
+                    foreach (DataRow row in getEffects.Rows)
                     {
-                        if (_effects.TryAdd(Convert.ToInt32(Row["id"]),
-                            new AvatarEffect(Convert.ToInt32(Row["id"]),
-                                Convert.ToInt32(Row["user_id"]),
-                                Convert.ToInt32(Row["effect_id"]),
-                                Convert.ToDouble(Row["total_duration"]),
-                                PlusEnvironment.EnumToBool(Row["is_activated"].ToString()),
-                                Convert.ToDouble(Row["activated_stamp"]),
-                                Convert.ToInt32(Row["quantity"]))))
+                        if (_effects.TryAdd(Convert.ToInt32(row["id"]),
+                            new AvatarEffect(Convert.ToInt32(row["id"]),
+                                Convert.ToInt32(row["user_id"]),
+                                Convert.ToInt32(row["effect_id"]),
+                                Convert.ToDouble(row["total_duration"]),
+                                PlusEnvironment.EnumToBool(row["is_activated"].ToString()),
+                                Convert.ToDouble(row["activated_stamp"]),
+                                Convert.ToInt32(row["quantity"]))))
                         {
                             //umm?
                         }
@@ -52,60 +52,44 @@
             return true;
         }
 
-        public bool TryAdd(AvatarEffect Effect) => _effects.TryAdd(Effect.Id, Effect);
+        internal bool HasEffect(int spriteId, bool activatedOnly = false, bool unactivatedOnly = false) =>
+            GetEffectNullable(spriteId, activatedOnly, unactivatedOnly) != null;
 
-        public bool HasEffect(int SpriteId, bool ActivatedOnly = false, bool UnactivatedOnly = false) =>
-            GetEffectNullable(SpriteId, ActivatedOnly, UnactivatedOnly) != null;
-
-        public AvatarEffect GetEffectNullable(int SpriteId, bool ActivatedOnly = false, bool UnactivatedOnly = false)
+        internal AvatarEffect GetEffectNullable(int spriteId, bool activatedOnly = false, bool unactivatedOnly = false)
         {
-            foreach (var Effect in _effects.Values.ToList())
-            {
-                if (!Effect.HasExpired &&
-                    Effect.SpriteId == SpriteId &&
-                    (!ActivatedOnly || Effect.Activated) &&
-                    (!UnactivatedOnly || !Effect.Activated))
-                {
-                    return Effect;
-                }
-            }
-
-            return null;
+            return _effects.Values.ToList().FirstOrDefault(effect =>
+                !effect.HasExpired && effect.SpriteId == spriteId && (!activatedOnly || effect.Activated) && (!unactivatedOnly || !effect.Activated));
         }
 
-        public void CheckEffectExpiry(Habbo Habbo)
+        internal void CheckEffectExpiry(Habbo habbo)
         {
-            foreach (var Effect in _effects.Values.ToList())
+            foreach (var effect in _effects.Values.ToList())
             {
-                if (Effect.HasExpired)
+                if (effect.HasExpired)
                 {
-                    Effect.HandleExpiration(Habbo);
+                    effect.HandleExpiration(habbo);
                 }
             }
         }
 
-        public void ApplyEffect(int EffectId)
+        internal void ApplyEffect(int effectId)
         {
-            if (_habbo == null || _habbo.CurrentRoom == null)
+            var user = _habbo?.CurrentRoom?.GetRoomUserManager().GetRoomUserByHabbo(_habbo.Id);
+
+            if (user == null)
             {
                 return;
             }
 
-            var User = _habbo.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(_habbo.Id);
-            if (User == null)
+            CurrentEffect = effectId;
+            if (user.IsDancing)
             {
-                return;
+                _habbo.CurrentRoom.SendPacket(new DanceComposer(user, 0));
             }
-
-            CurrentEffect = EffectId;
-            if (User.IsDancing)
-            {
-                _habbo.CurrentRoom.SendPacket(new DanceComposer(User, 0));
-            }
-            _habbo.CurrentRoom.SendPacket(new AvatarEffectComposer(User.VirtualId, EffectId));
+            _habbo.CurrentRoom.SendPacket(new AvatarEffectComposer(user.VirtualId, effectId));
         }
 
-        public void Dispose()
+        internal void Dispose()
         {
             _effects.Clear();
         }

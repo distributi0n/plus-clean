@@ -12,34 +12,39 @@
                 return;
             }
 
-            var Room = session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Username = packet.PopString();
-            var Player = PlusEnvironment.GetHabboByUsername(Username);
-            if (Player == null)
-            {
-                return;
-            }
-            if (!session.GetHabbo().GetIgnores().TryGet(Player.Id))
+            var username = packet.PopString();
+
+            var player = PlusEnvironment.GetHabboByUsername(username);
+            if (player == null)
             {
                 return;
             }
 
-            if (session.GetHabbo().GetIgnores().TryRemove(Player.Id))
+            if (!session.GetHabbo().GetIgnores().TryGet(player.Id))
             {
-                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-                {
-                    dbClient.SetQuery("DELETE FROM `user_ignores` WHERE `user_id` = @uid AND `ignore_id` = @ignoreId");
-                    dbClient.AddParameter("uid", session.GetHabbo().Id);
-                    dbClient.AddParameter("ignoreId", Player.Id);
-                    dbClient.RunQuery();
-                }
-                session.SendPacket(new IgnoreStatusComposer(3, Player.Username));
+                return;
             }
+
+            if (!session.GetHabbo().GetIgnores().TryRemove(player.Id))
+            {
+                return;
+            }
+
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.SetQuery("DELETE FROM `user_ignores` WHERE `user_id` = @uid AND `ignore_id` = @ignoreId");
+                dbClient.AddParameter("uid", session.GetHabbo().Id);
+                dbClient.AddParameter("ignoreId", player.Id);
+                dbClient.RunQuery();
+            }
+
+            session.SendPacket(new IgnoreStatusComposer(3, player.Username));
         }
     }
 }

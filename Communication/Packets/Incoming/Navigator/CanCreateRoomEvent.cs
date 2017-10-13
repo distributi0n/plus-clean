@@ -3,11 +3,11 @@
     using HabboHotel.GameClients;
     using Outgoing.Navigator;
 
-    internal sealed class CanCreateRoomEvent : IPacketEvent
+    internal class CanCreateRoomEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new CanCreateRoomComposer(false, 150));
+            session.SendPacket(new CanCreateRoomComposer(false, 150));
         }
     }
 }

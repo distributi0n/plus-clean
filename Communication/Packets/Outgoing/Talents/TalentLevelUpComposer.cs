@@ -2,7 +2,8 @@
 {
     internal class TalentLevelUpComposer : ServerPacket
     {
-        public TalentLevelUpComposer() : base(ServerPacketHeader.TalentLevelUpMessageComposer)
+        public TalentLevelUpComposer()
+            : base(ServerPacketHeader.TalentLevelUpMessageComposer)
         {
         }
     }

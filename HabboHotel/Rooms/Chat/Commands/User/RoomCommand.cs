@@ -12,159 +12,159 @@
 
         public string Description => "Gives you the ability to enable or disable basic room commands.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Oops, you must choose a room option to disable.");
+                session.SendWhisper("Oops, you must choose a room option to disable.");
                 return;
             }
 
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
-                Session.SendWhisper("Oops, only the room owner or staff can use this command.");
+                session.SendWhisper("Oops, only the room owner or staff can use this command.");
                 return;
             }
 
-            var Option = Params[1];
-            switch (Option)
+            var option = Params[1];
+            switch (option)
             {
                 case "list":
                 {
-                    var List = new StringBuilder("");
-                    List.AppendLine("Room Command List");
-                    List.AppendLine("-------------------------");
-                    List.AppendLine("Pet Morphs: " + (Room.PetMorphsAllowed ? "enabled" : "disabled"));
-                    List.AppendLine("Pull: " + (Room.PullEnabled ? "enabled" : "disabled"));
-                    List.AppendLine("Push: " + (Room.PushEnabled ? "enabled" : "disabled"));
-                    List.AppendLine("Super Pull: " + (Room.SPullEnabled ? "enabled" : "disabled"));
-                    List.AppendLine("Super Push: " + (Room.SPushEnabled ? "enabled" : "disabled"));
-                    List.AppendLine("Respect: " + (Room.RespectNotificationsEnabled ? "enabled" : "disabled"));
-                    List.AppendLine("Enables: " + (Room.EnablesEnabled ? "enabled" : "disabled"));
-                    Session.SendNotification(List.ToString());
+                    var list = new StringBuilder("");
+                    list.AppendLine("Room Command List");
+                    list.AppendLine("-------------------------");
+                    list.AppendLine("Pet Morphs: " + (room.PetMorphsAllowed ? "enabled" : "disabled"));
+                    list.AppendLine("Pull: " + (room.PullEnabled ? "enabled" : "disabled"));
+                    list.AppendLine("Push: " + (room.PushEnabled ? "enabled" : "disabled"));
+                    list.AppendLine("Super Pull: " + (room.SPullEnabled ? "enabled" : "disabled"));
+                    list.AppendLine("Super Push: " + (room.SPushEnabled ? "enabled" : "disabled"));
+                    list.AppendLine("Respect: " + (room.RespectNotificationsEnabled ? "enabled" : "disabled"));
+                    list.AppendLine("Enables: " + (room.EnablesEnabled ? "enabled" : "disabled"));
+                    session.SendNotification(list.ToString());
                     break;
                 }
                 case "push":
                 {
-                    Room.PushEnabled = !Room.PushEnabled;
+                    room.PushEnabled = !room.PushEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `push_enabled` = @PushEnabled WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `push_enabled` = @PushEnabled WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("PushEnabled", PlusEnvironment.BoolToEnum(Room.PushEnabled));
+                        dbClient.AddParameter("PushEnabled", PlusEnvironment.BoolToEnum(room.PushEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Push mode is now " + (Room.PushEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Push mode is now " + (room.PushEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "spush":
                 {
-                    Room.SPushEnabled = !Room.SPushEnabled;
+                    room.SPushEnabled = !room.SPushEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `spush_enabled` = @PushEnabled WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `spush_enabled` = @PushEnabled WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("PushEnabled", PlusEnvironment.BoolToEnum(Room.SPushEnabled));
+                        dbClient.AddParameter("PushEnabled", PlusEnvironment.BoolToEnum(room.SPushEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Super Push mode is now " + (Room.SPushEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Super Push mode is now " + (room.SPushEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "spull":
                 {
-                    Room.SPullEnabled = !Room.SPullEnabled;
+                    room.SPullEnabled = !room.SPullEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `spull_enabled` = @PullEnabled WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `spull_enabled` = @PullEnabled WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("PullEnabled", PlusEnvironment.BoolToEnum(Room.SPullEnabled));
+                        dbClient.AddParameter("PullEnabled", PlusEnvironment.BoolToEnum(room.SPullEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Super Pull mode is now " + (Room.SPullEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Super Pull mode is now " + (room.SPullEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "pull":
                 {
-                    Room.PullEnabled = !Room.PullEnabled;
+                    room.PullEnabled = !room.PullEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `pull_enabled` = @PullEnabled WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `pull_enabled` = @PullEnabled WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("PullEnabled", PlusEnvironment.BoolToEnum(Room.PullEnabled));
+                        dbClient.AddParameter("PullEnabled", PlusEnvironment.BoolToEnum(room.PullEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Pull mode is now " + (Room.PullEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Pull mode is now " + (room.PullEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "enable":
                 case "enables":
                 {
-                    Room.EnablesEnabled = !Room.EnablesEnabled;
+                    room.EnablesEnabled = !room.EnablesEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `enables_enabled` = @EnablesEnabled WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `enables_enabled` = @EnablesEnabled WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("EnablesEnabled", PlusEnvironment.BoolToEnum(Room.EnablesEnabled));
+                        dbClient.AddParameter("EnablesEnabled", PlusEnvironment.BoolToEnum(room.EnablesEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Enables mode set to " + (Room.EnablesEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Enables mode set to " + (room.EnablesEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "respect":
                 {
-                    Room.RespectNotificationsEnabled = !Room.RespectNotificationsEnabled;
+                    room.RespectNotificationsEnabled = !room.RespectNotificationsEnabled;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.SetQuery(
                             "UPDATE `rooms` SET `respect_notifications_enabled` = @RespectNotificationsEnabled WHERE `id` = '" +
-                            Room.Id +
+                            room.Id +
                             "' LIMIT 1");
                         dbClient.AddParameter("RespectNotificationsEnabled",
-                            PlusEnvironment.BoolToEnum(Room.RespectNotificationsEnabled));
+                            PlusEnvironment.BoolToEnum(room.RespectNotificationsEnabled));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Respect notifications mode set to " +
-                                        (Room.RespectNotificationsEnabled ? "enabled!" : "disabled!"));
+                    session.SendWhisper("Respect notifications mode set to " +
+                                        (room.RespectNotificationsEnabled ? "enabled!" : "disabled!"));
                     break;
                 }
                 case "pets":
                 case "morphs":
                 {
-                    Room.PetMorphsAllowed = !Room.PetMorphsAllowed;
+                    room.PetMorphsAllowed = !room.PetMorphsAllowed;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        dbClient.SetQuery("UPDATE `rooms` SET `pet_morphs_allowed` = @PetMorphsAllowed WHERE `id` = '" + Room.Id +
+                        dbClient.SetQuery("UPDATE `rooms` SET `pet_morphs_allowed` = @PetMorphsAllowed WHERE `id` = '" + room.Id +
                                           "' LIMIT 1");
-                        dbClient.AddParameter("PetMorphsAllowed", PlusEnvironment.BoolToEnum(Room.PetMorphsAllowed));
+                        dbClient.AddParameter("PetMorphsAllowed", PlusEnvironment.BoolToEnum(room.PetMorphsAllowed));
                         dbClient.RunQuery();
                     }
-                    Session.SendWhisper("Human pet morphs notifications mode set to " +
-                                        (Room.PetMorphsAllowed ? "enabled!" : "disabled!"));
-                    if (!Room.PetMorphsAllowed)
+                    session.SendWhisper("Human pet morphs notifications mode set to " +
+                                        (room.PetMorphsAllowed ? "enabled!" : "disabled!"));
+                    if (!room.PetMorphsAllowed)
                     {
-                        foreach (var User in Room.GetRoomUserManager().GetRoomUsers())
+                        foreach (var user in room.GetRoomUserManager().GetRoomUsers())
                         {
-                            if (User == null || User.GetClient() == null || User.GetClient().GetHabbo() == null)
+                            if (user == null || user.GetClient() == null || user.GetClient().GetHabbo() == null)
                             {
                                 continue;
                             }
 
-                            User.GetClient()
+                            user.GetClient()
                                 .SendWhisper("The room owner has disabled the ability to use a pet morph in this room.");
-                            if (User.GetClient().GetHabbo().PetId > 0)
+                            if (user.GetClient().GetHabbo().PetId > 0)
                             {
                                 //Tell the user what is going on.
-                                User.GetClient()
+                                user.GetClient()
                                     .SendWhisper("Oops, the room owner has just disabled pet-morphs, un-morphing you.");
 
                                 //Change the users Pet Id.
-                                User.GetClient().GetHabbo().PetId = 0;
+                                user.GetClient().GetHabbo().PetId = 0;
 
                                 //Quickly remove the old user instance.
-                                Room.SendPacket(new UserRemoveComposer(User.VirtualId));
+                                room.SendPacket(new UserRemoveComposer(user.VirtualId));
 
                                 //Add the new one, they won't even notice a thing!!11 8-)
-                                Room.SendPacket(new UsersComposer(User));
+                                room.SendPacket(new UsersComposer(user));
                             }
                         }
                     }

@@ -7,10 +7,10 @@
 
     internal class RegenerateMapsBox : IWiredItem
     {
-        public RegenerateMapsBox(Room Instance, Item Item)
+        public RegenerateMapsBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             StringData = "";
             SetItems = new ConcurrentDictionary<int, Item>();
         }
@@ -25,10 +25,10 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
         }
 
         public bool Execute(params object[] Params)
@@ -38,8 +38,8 @@
                 return false;
             }
 
-            var TimeSinceRegen = DateTime.Now - Instance.lastRegeneration;
-            if (TimeSinceRegen.TotalMinutes > 1)
+            var timeSinceRegen = DateTime.Now - Instance.lastRegeneration;
+            if (timeSinceRegen.TotalMinutes > 1)
             {
                 Instance.GetGameMap().GenerateMaps();
                 Instance.lastRegeneration = DateTime.Now;

@@ -2,7 +2,7 @@
 {
     using GameClients;
 
-    internal class DNDCommand : IChatCommand
+    internal class DndCommand : IChatCommand
     {
         public string PermissionRequired => "command_dnd";
 
@@ -10,10 +10,10 @@
 
         public string Description => "Allows you to chose the option to enable or disable console messages.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            Session.GetHabbo().AllowConsoleMessages = !Session.GetHabbo().AllowConsoleMessages;
-            Session.SendWhisper("You're " + (Session.GetHabbo().AllowConsoleMessages ? "now" : "no longer") +
+            session.GetHabbo().AllowConsoleMessages = !session.GetHabbo().AllowConsoleMessages;
+            session.SendWhisper("You're " + (session.GetHabbo().AllowConsoleMessages ? "now" : "no longer") +
                                 " accepting console messages.");
         }
     }

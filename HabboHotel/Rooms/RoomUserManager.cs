@@ -66,7 +66,7 @@
                 BotUser.SetRot(Model.DoorOrientation, false);
             }
             BotUser.BotData = Bot;
-            BotUser.BotAI = Bot.GenerateBotAI(BotUser.VirtualId);
+            BotUser.BotAI = Bot.GenerateBotAi(BotUser.VirtualId);
             if (BotUser.IsPet)
             {
                 BotUser.BotAI.Init(Bot.BotId, BotUser.VirtualId, _room.RoomId, BotUser, _room);
@@ -184,7 +184,7 @@
             {
                 if (!Model.DoorIsValid())
                 {
-                    var Square = _room.GetGameMap().getRandomWalkableSquare();
+                    var Square = _room.GetGameMap().GetRandomWalkableSquare();
                     Model.DoorX = Square.X;
                     Model.DoorY = Square.Y;
                     Model.DoorZ = _room.GetGameMap().GetHeightForSquareFromData(Square);
@@ -460,7 +460,7 @@
             RoomUser toRemove = null;
             if (_users.TryRemove(user.InternalRoomID, out toRemove))
             {
-                //uhmm, could put the below stuff in but idk.
+                // todo: uhmm, could put the below stuff in but idk.
             }
             user.InternalRoomID = -1;
             onRemove(user);
@@ -504,69 +504,29 @@
             return User;
         }
 
-        public RoomUser GetRoomUserByHabbo(int Id)
+        internal RoomUser GetRoomUserByHabbo(int id)
         {
-            if (this == null)
-            {
-                return null;
-            }
-
-            var User = GetUserList()
-                .Where(x => x != null && x.GetClient() != null && x.GetClient().GetHabbo() != null &&
-                            x.GetClient().GetHabbo().Id == Id)
-                .FirstOrDefault();
-            if (User != null)
-            {
-                return User;
-            }
-
-            return null;
+            return GetUserList().FirstOrDefault(x => x?.GetClient() != null && x.GetClient().GetHabbo() != null && x.GetClient().GetHabbo().Id == id);
         }
 
-        public List<RoomUser> GetRoomUsers()
+        internal List<RoomUser> GetRoomUsers()
         {
             var List = new List<RoomUser>();
             List = GetUserList().Where(x => !x.IsBot).ToList();
             return List;
         }
 
-        public List<RoomUser> GetRoomUserByRank(int minRank)
+        internal List<RoomUser> GetRoomUserByRank(int minRank)
         {
-            var returnList = new List<RoomUser>();
-            foreach (var user in GetUserList().ToList())
-            {
-                if (user == null)
-                {
-                    continue;
-                }
-
-                if (!user.IsBot && user.GetClient() != null && user.GetClient().GetHabbo() != null &&
-                    user.GetClient().GetHabbo().Rank >= minRank)
-                {
-                    returnList.Add(user);
-                }
-            }
-
-            return returnList;
+            return GetUserList().ToList().Where(user => user != null).Where(user => !user.IsBot && user.GetClient() != null && user.GetClient().GetHabbo() != null && user.GetClient().GetHabbo().Rank >= minRank).ToList();
         }
 
-        public RoomUser GetRoomUserByHabbo(string pName)
+        internal RoomUser GetRoomUserByHabbo(string pName)
         {
-            var User = GetUserList()
-                .FirstOrDefault(x =>
-                    x != null &&
-                    x.GetClient() != null &&
-                    x.GetClient().GetHabbo() != null &&
-                    x.GetClient().GetHabbo().Username.Equals(pName, StringComparison.OrdinalIgnoreCase));
-            if (User != null)
-            {
-                return User;
-            }
-
-            return null;
+            return GetUserList().FirstOrDefault(x => x?.GetClient() != null && x.GetClient().GetHabbo() != null && x.GetClient().GetHabbo().Username.Equals(pName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public void UpdatePets()
+        internal void UpdatePets()
         {
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
@@ -577,7 +537,7 @@
                         continue;
                     }
 
-                    if (Pet.DBState == DatabaseUpdateState.NeedsInsert)
+                    if (Pet.DbState == DatabaseUpdateState.NeedsInsert)
                     {
                         dbClient.SetQuery("INSERT INTO `bots` (`id`,`user_id`,`room_id`,`name`,`x`,`y`,`z`) VALUES ('" +
                                           Pet.PetId +
@@ -598,23 +558,14 @@
                         dbClient.AddParameter(Pet.PetId + "color", Pet.Color);
                         dbClient.RunQuery();
                     }
-                    else if (Pet.DBState == DatabaseUpdateState.NeedsUpdate)
+                    else if (Pet.DbState == DatabaseUpdateState.NeedsUpdate)
                     {
-                        //Surely this can be *99 better? // TODO
-                        var User = GetRoomUserByVirtualId(Pet.VirtualId);
-                        dbClient.RunQuery("UPDATE `bots` SET room_id = " +
-                                          Pet.RoomId +
-                                          ", x = " +
-                                          (User != null ? User.X : 0) +
-                                          ", Y = " +
-                                          (User != null ? User.Y : 0) +
-                                          ", Z = " +
-                                          (User != null ? User.Z : 0) +
-                                          " WHERE `id` = '" +
-                                          Pet.PetId +
-                                          "' LIMIT 1");
+                        // Surely this can be *99 better? TODO
+                        
+                        var user = GetRoomUserByVirtualId(Pet.VirtualId);
+                        dbClient.RunQuery("UPDATE `bots` SET room_id = " + Pet.RoomId + ", x = " + (user?.X ?? 0) + ", Y = " + (user?.Y ?? 0) + ", Z = " + (user?.Z ?? 0) + " WHERE `id` = '" + Pet.PetId + "' LIMIT 1");
                         dbClient.RunQuery("UPDATE `bots_petdata` SET `experience` = '" +
-                                          Pet.experience +
+                                          Pet.Experience +
                                           "', `energy` = '" +
                                           Pet.Energy +
                                           "', `nutrition` = '" +
@@ -625,7 +576,7 @@
                                           Pet.PetId +
                                           "' LIMIT 1");
                     }
-                    Pet.DBState = DatabaseUpdateState.Updated;
+                    Pet.DbState = DatabaseUpdateState.Updated;
                 }
             }
         }
@@ -700,7 +651,7 @@
             }
         }
 
-        public void UpdateUserStatusses()
+        internal void UpdateUserStatusses()
         {
             foreach (var user in GetUserList().ToList())
             {
@@ -713,7 +664,7 @@
             }
         }
 
-        private bool isValid(RoomUser user)
+        private bool IsValid(RoomUser user)
         {
             if (user == null)
             {
@@ -752,11 +703,11 @@
                         continue;
                     }
 
-                    if (!isValid(User))
+                    if (!IsValid(User))
                     {
                         if (User.GetClient() != null)
                         {
-                            RemoveUserFromRoom(User.GetClient(), false, false);
+                            RemoveUserFromRoom(User.GetClient(), false);
                         }
                         else
                         {
@@ -1092,7 +1043,7 @@
                     var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(toRemove.HabboId);
                     if (client != null)
                     {
-                        RemoveUserFromRoom(client, true, false);
+                        RemoveUserFromRoom(client, true);
                     }
                     else
                     {
@@ -1211,8 +1162,8 @@
                     }
                     switch (Item.GetBaseItem().InteractionType)
                     {
-                        case InteractionType.BED:
-                        case InteractionType.TENT_SMALL:
+                        case InteractionType.Bed:
+                        case InteractionType.TentSmall:
                         {
                             if (!User.Statusses.ContainsKey("lay"))
                             {
@@ -1224,24 +1175,24 @@
                             User.UpdateNeeded = true;
                             break;
                         }
-                        case InteractionType.banzaigategreen:
-                        case InteractionType.banzaigateblue:
-                        case InteractionType.banzaigatered:
-                        case InteractionType.banzaigateyellow:
+                        case InteractionType.Banzaigategreen:
+                        case InteractionType.Banzaigateblue:
+                        case InteractionType.Banzaigatered:
+                        case InteractionType.Banzaigateyellow:
                         {
                             if (cyclegameitems)
                             {
-                                var effectID = Convert.ToInt32(Item.team + 32);
+                                var effectID = Convert.ToInt32(Item.Team + 32);
                                 var t = User.GetClient().GetHabbo().CurrentRoom.GetTeamManagerForBanzai();
                                 if (User.Team == TEAM.NONE)
                                 {
-                                    if (t.CanEnterOnTeam(Item.team))
+                                    if (t.CanEnterOnTeam(Item.Team))
                                     {
                                         if (User.Team != TEAM.NONE)
                                         {
                                             t.OnUserLeave(User);
                                         }
-                                        User.Team = Item.team;
+                                        User.Team = Item.Team;
                                         t.AddUser(User);
                                         if (User.GetClient().GetHabbo().Effects().CurrentEffect != effectID)
                                         {
@@ -1249,7 +1200,7 @@
                                         }
                                     }
                                 }
-                                else if (User.Team != TEAM.NONE && User.Team != Item.team)
+                                else if (User.Team != TEAM.NONE && User.Team != Item.Team)
                                 {
                                     t.OnUserLeave(User);
                                     User.Team = TEAM.NONE;
@@ -1271,24 +1222,24 @@
                             }
                             break;
                         }
-                        case InteractionType.FREEZE_YELLOW_GATE:
-                        case InteractionType.FREEZE_RED_GATE:
-                        case InteractionType.FREEZE_GREEN_GATE:
-                        case InteractionType.FREEZE_BLUE_GATE:
+                        case InteractionType.FreezeYellowGate:
+                        case InteractionType.FreezeRedGate:
+                        case InteractionType.FreezeGreenGate:
+                        case InteractionType.FreezeBlueGate:
                         {
                             if (cyclegameitems)
                             {
-                                var effectID = Convert.ToInt32(Item.team + 39);
+                                var effectID = Convert.ToInt32(Item.Team + 39);
                                 var t = User.GetClient().GetHabbo().CurrentRoom.GetTeamManagerForFreeze();
                                 if (User.Team == TEAM.NONE)
                                 {
-                                    if (t.CanEnterOnTeam(Item.team))
+                                    if (t.CanEnterOnTeam(Item.Team))
                                     {
                                         if (User.Team != TEAM.NONE)
                                         {
                                             t.OnUserLeave(User);
                                         }
-                                        User.Team = Item.team;
+                                        User.Team = Item.Team;
                                         t.AddUser(User);
                                         if (User.GetClient().GetHabbo().Effects().CurrentEffect != effectID)
                                         {
@@ -1296,7 +1247,7 @@
                                         }
                                     }
                                 }
-                                else if (User.Team != TEAM.NONE && User.Team != Item.team)
+                                else if (User.Team != TEAM.NONE && User.Team != Item.Team)
                                 {
                                     t.OnUserLeave(User);
                                     User.Team = TEAM.NONE;
@@ -1318,7 +1269,7 @@
                             }
                             break;
                         }
-                        case InteractionType.banzaitele:
+                        case InteractionType.Banzaitele:
                         {
                             if (User.Statusses.ContainsKey("mv"))
                             {
@@ -1326,7 +1277,7 @@
                             }
                             break;
                         }
-                        case InteractionType.EFFECT:
+                        case InteractionType.Effect:
                         {
                             if (User == null)
                             {
@@ -1356,7 +1307,7 @@
 
                             break;
                         }
-                        case InteractionType.ARROW:
+                        case InteractionType.Arrow:
                         {
                             if (User.GoalX == Item.GetX && User.GoalY == Item.GetY)
                             {
@@ -1400,7 +1351,7 @@
                                             User.GetClient().GetHabbo() != null)
                                         {
                                             User.GetClient().GetHabbo().IsTeleporting = true;
-                                            User.GetClient().GetHabbo().TeleportingRoomID = TeleRoomId;
+                                            User.GetClient().GetHabbo().TeleportingRoomId = TeleRoomId;
                                             User.GetClient().GetHabbo().TeleporterId = LinkedTele;
                                             User.GetClient().GetHabbo().PrepareRoom(TeleRoomId, "");
                                         }

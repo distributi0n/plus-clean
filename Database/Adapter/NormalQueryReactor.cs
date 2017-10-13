@@ -5,12 +5,12 @@
 
     public class NormalQueryReactor : QueryAdapter, IQueryAdapter, IRegularQueryAdapter, IDisposable
     {
-        public NormalQueryReactor(IDatabaseClient Client) : base(Client) => command = Client.createNewCommand();
+        public NormalQueryReactor(IDatabaseClient client) : base(client) => Command = client.CreateNewCommand();
 
         public void Dispose()
         {
-            command.Dispose();
-            client.reportDone();
+            Command.Dispose();
+            Client.ReportDone();
             GC.SuppressFinalize(this);
         }
     }

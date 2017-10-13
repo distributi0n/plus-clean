@@ -4,37 +4,42 @@
 
     internal class RoomSettingsDataComposer : ServerPacket
     {
-        public RoomSettingsDataComposer(Room Room) : base(ServerPacketHeader.RoomSettingsDataMessageComposer)
+        public RoomSettingsDataComposer(Room room)
+            : base(ServerPacketHeader.RoomSettingsDataMessageComposer)
         {
-            WriteInteger(Room.RoomId);
-            WriteString(Room.Name);
-            WriteString(Room.Description);
-            WriteInteger(RoomAccessUtility.GetRoomAccessPacketNum(Room.Access));
-            WriteInteger(Room.Category);
-            WriteInteger(Room.UsersMax);
-            WriteInteger(Room.RoomData.Model.MapSizeX * Room.RoomData.Model.MapSizeY > 100 ? 50 : 25);
-            WriteInteger(Room.Tags.Count);
-            foreach (var Tag in Room.Tags.ToArray())
+            WriteInteger(room.RoomId);
+            WriteString(room.Name);
+            WriteString(room.Description);
+            WriteInteger(RoomAccessUtility.GetRoomAccessPacketNum(room.Access));
+            WriteInteger(room.Category);
+            WriteInteger(room.UsersMax);
+            WriteInteger(room.RoomData.Model.MapSizeX * room.RoomData.Model.MapSizeY > 100 ? 50 : 25);
+
+            WriteInteger(room.Tags.Count);
+            foreach (var tag in room.Tags.ToArray())
             {
-                WriteString(Tag);
+                WriteString(tag);
             }
 
-            WriteInteger(Room.TradeSettings); //Trade
-            WriteInteger(Room.AllowPets); // allows pets in room - pet system lacking, so always off
-            WriteInteger(Room.AllowPetsEating); // allows pets to eat your food - pet system lacking, so always off
-            WriteInteger(Room.RoomBlockingEnabled);
-            WriteInteger(Room.Hidewall);
-            WriteInteger(Room.WallThickness);
-            WriteInteger(Room.FloorThickness);
-            WriteInteger(Room.chatMode); //Chat mode
-            WriteInteger(Room.chatSize); //Chat size
-            WriteInteger(Room.chatSpeed); //Chat speed
-            WriteInteger(Room.chatDistance); //Hearing Distance
-            WriteInteger(Room.extraFlood); //Additional Flood
+            WriteInteger(room.TradeSettings); //Trade
+            WriteInteger(room.AllowPets); // allows pets in room - pet system lacking, so always off
+            WriteInteger(room.AllowPetsEating); // allows pets to eat your food - pet system lacking, so always off
+            WriteInteger(room.RoomBlockingEnabled);
+            WriteInteger(room.Hidewall);
+            WriteInteger(room.WallThickness);
+            WriteInteger(room.FloorThickness);
+
+            WriteInteger(room.chatMode); //Chat mode
+            WriteInteger(room.chatSize); //Chat size
+            WriteInteger(room.chatSpeed); //Chat speed
+            WriteInteger(room.chatDistance); //Hearing Distance
+            WriteInteger(room.extraFlood); //Additional Flood
+
             WriteBoolean(true);
-            WriteInteger(Room.WhoCanMute); // who can mute
-            WriteInteger(Room.WhoCanKick); // who can kick
-            WriteInteger(Room.WhoCanBan); // who can ban
+
+            WriteInteger(room.WhoCanMute); // who can mute
+            WriteInteger(room.WhoCanKick); // who can kick
+            WriteInteger(room.WhoCanBan); // who can ban
         }
     }
 }

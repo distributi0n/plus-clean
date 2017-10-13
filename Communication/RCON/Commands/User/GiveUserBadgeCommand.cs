@@ -3,7 +3,7 @@
     using System;
     using Packets.Outgoing.Moderation;
 
-    internal class GiveUserBadgeCommand : IRCONCommand
+    internal class GiveUserBadgeCommand : IRconCommand
     {
         public string Description => "This command is used to give a user a badge.";
 

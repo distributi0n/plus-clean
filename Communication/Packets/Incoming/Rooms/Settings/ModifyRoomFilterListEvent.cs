@@ -4,33 +4,35 @@
 
     internal class ModifyRoomFilterListEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Instance = Session.GetHabbo().CurrentRoom;
-            if (Instance == null)
-            {
-                return;
-            }
-            if (!Instance.CheckRights(Session))
+            var instance = session.GetHabbo().CurrentRoom;
+            if (instance == null)
             {
                 return;
             }
 
-            var RoomId = Packet.PopInt();
-            var Added = Packet.PopBoolean();
-            var Word = Packet.PopString();
-            if (Added)
+            if (!instance.CheckRights(session))
             {
-                Instance.GetFilter().AddFilter(Word);
+                return;
+            }
+
+            packet.PopInt();
+            var added = packet.PopBoolean();
+            var word = packet.PopString();
+
+            if (added)
+            {
+                instance.GetFilter().AddFilter(word);
             }
             else
             {
-                Instance.GetFilter().RemoveFilter(Word);
+                instance.GetFilter().RemoveFilter(word);
             }
         }
     }

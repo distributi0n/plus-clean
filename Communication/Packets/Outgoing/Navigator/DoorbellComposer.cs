@@ -2,9 +2,10 @@
 {
     internal class DoorbellComposer : ServerPacket
     {
-        public DoorbellComposer(string Username) : base(ServerPacketHeader.DoorbellMessageComposer)
+        public DoorbellComposer(string username)
+            : base(ServerPacketHeader.DoorbellMessageComposer)
         {
-            WriteString(Username);
+            WriteString(username);
         }
     }
 }

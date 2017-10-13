@@ -11,18 +11,18 @@
 
         public string Description => "Trade ban another user.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter a username and a valid length in days (min 1 day, max 365 days).");
+                session.SendWhisper("Please enter a username and a valid length in days (min 1 day, max 365 days).");
                 return;
             }
 
-            var Habbo = PlusEnvironment.GetHabboByUsername(Params[1]);
-            if (Habbo == null)
+            var habbo = PlusEnvironment.GetHabboByUsername(Params[1]);
+            if (habbo == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user in the database.");
+                session.SendWhisper("An error occoured whilst finding that user in the database.");
                 return;
             }
 
@@ -31,47 +31,47 @@
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.RunQuery(
-                        "UPDATE `user_info` SET `trading_locked` = '0' WHERE `user_id` = '" + Habbo.Id + "' LIMIT 1");
+                        "UPDATE `user_info` SET `trading_locked` = '0' WHERE `user_id` = '" + habbo.Id + "' LIMIT 1");
                 }
-                if (Habbo.GetClient() != null)
+                if (habbo.GetClient() != null)
                 {
-                    Habbo.TradingLockExpiry = 0;
-                    Habbo.GetClient().SendNotification("Your outstanding trade ban has been removed.");
+                    habbo.TradingLockExpiry = 0;
+                    habbo.GetClient().SendNotification("Your outstanding trade ban has been removed.");
                 }
-                Session.SendWhisper("You have successfully removed " + Habbo.Username + "'s trade ban.");
+                session.SendWhisper("You have successfully removed " + habbo.Username + "'s trade ban.");
                 return;
             }
 
-            double Days;
-            if (double.TryParse(Params[2], out Days))
+            double days;
+            if (double.TryParse(Params[2], out days))
             {
-                if (Days < 1)
+                if (days < 1)
                 {
-                    Days = 1;
+                    days = 1;
                 }
-                if (Days > 365)
+                if (days > 365)
                 {
-                    Days = 365;
+                    days = 365;
                 }
-                var Length = PlusEnvironment.GetUnixTimestamp() + Days * 86400;
+                var length = PlusEnvironment.GetUnixTimestamp() + days * 86400;
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.RunQuery("UPDATE `user_info` SET `trading_locked` = '" +
-                                      Length +
+                                      length +
                                       "', `trading_locks_count` = `trading_locks_count` + '1' WHERE `user_id` = '" +
-                                      Habbo.Id +
+                                      habbo.Id +
                                       "' LIMIT 1");
                 }
-                if (Habbo.GetClient() != null)
+                if (habbo.GetClient() != null)
                 {
-                    Habbo.TradingLockExpiry = Length;
-                    Habbo.GetClient().SendNotification("You have been trade banned for " + Days + " day(s)!");
+                    habbo.TradingLockExpiry = length;
+                    habbo.GetClient().SendNotification("You have been trade banned for " + days + " day(s)!");
                 }
-                Session.SendWhisper("You have successfully trade banned " + Habbo.Username + " for " + Days + " day(s).");
+                session.SendWhisper("You have successfully trade banned " + habbo.Username + " for " + days + " day(s).");
             }
             else
             {
-                Session.SendWhisper("Please enter a valid integer.");
+                session.SendWhisper("Please enter a valid integer.");
             }
         }
     }

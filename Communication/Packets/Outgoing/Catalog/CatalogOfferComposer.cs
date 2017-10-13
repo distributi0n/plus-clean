@@ -6,69 +6,67 @@
 
     internal class CatalogOfferComposer : ServerPacket
     {
-        public CatalogOfferComposer(CatalogItem Item) : base(ServerPacketHeader.CatalogOfferMessageComposer)
+        public CatalogOfferComposer(CatalogItem item)
+            : base(ServerPacketHeader.CatalogOfferMessageComposer)
         {
-            WriteInteger(Item.OfferId);
-            WriteString(Item.Data.ItemName);
+            WriteInteger(item.OfferId);
+            WriteString(item.Data.ItemName);
             WriteBoolean(false); //IsRentable
-            WriteInteger(Item.CostCredits);
-            if (Item.CostDiamonds > 0)
+            WriteInteger(item.CostCredits);
+
+            if (item.CostDiamonds > 0)
             {
-                WriteInteger(Item.CostDiamonds);
+                WriteInteger(item.CostDiamonds);
                 WriteInteger(5); // Diamonds
             }
             else
             {
-                WriteInteger(Item.CostPixels);
+                WriteInteger(item.CostPixels);
                 WriteInteger(0); // Type of PixelCost
             }
-            WriteBoolean(ItemUtility.CanGiftItem(Item));
-            WriteInteger(string.IsNullOrEmpty(Item.Badge) ? 1 : 2); //Count 1 item if there is no badge, otherwise count as 2.
-            if (!string.IsNullOrEmpty(Item.Badge))
+
+            WriteBoolean(ItemUtility.CanGiftItem(item));
+            WriteInteger(string.IsNullOrEmpty(item.Badge) ? 1 : 2); //Count 1 item if there is no badge, otherwise count as 2.
+
+            if (!string.IsNullOrEmpty(item.Badge))
             {
                 WriteString("b");
-                WriteString(Item.Badge);
+                WriteString(item.Badge);
             }
-            WriteString(Item.Data.Type.ToString());
-            if (Item.Data.Type.ToString().ToLower() == "b")
+
+            WriteString(item.Data.Type.ToString());
+            if (item.Data.Type.ToString().ToLower() == "b")
             {
-                WriteString(Item.Data.ItemName); //Badge name.
+                WriteString(item.Data.ItemName); //Badge name.
             }
             else
             {
-                WriteInteger(Item.Data.SpriteId);
-                if (Item.Data.InteractionType == InteractionType.WALLPAPER ||
-                    Item.Data.InteractionType == InteractionType.FLOOR ||
-                    Item.Data.InteractionType == InteractionType.LANDSCAPE)
+                WriteInteger(item.Data.SpriteId);
+                if (item.Data.InteractionType == InteractionType.Wallpaper || item.Data.InteractionType == InteractionType.Floor ||
+                    item.Data.InteractionType == InteractionType.Landscape)
                 {
-                    WriteString(Item.Name.Split('_')[2]);
+                    WriteString(item.Name.Split('_')[2]);
                 }
-                else if (Item.PageID == 9) //Bots
+                else if (item.PageID == 9) //Bots
                 {
-                    CatalogBot CataBot = null;
-                    if (!PlusEnvironment.GetGame().GetCatalog().TryGetBot(Item.ItemId, out CataBot))
-                    {
-                        WriteString("hd-180-7.ea-1406-62.ch-210-1321.hr-831-49.ca-1813-62.sh-295-1321.lg-285-92");
-                    }
-                    else
-                    {
-                        WriteString(CataBot.Figure);
-                    }
+                    WriteString(!PlusEnvironment.GetGame().GetCatalog().TryGetBot(item.ItemId, out var cataBot)
+                        ? "hd-180-7.ea-1406-62.ch-210-1321.hr-831-49.ca-1813-62.sh-295-1321.lg-285-92"
+                        : cataBot.Figure);
                 }
-                else if (Item.ExtraData != null)
+                else if (item.ExtraData != null)
                 {
-                    WriteString(Item.ExtraData != null ? Item.ExtraData : string.Empty);
+                    WriteString(item.ExtraData != null ? item.ExtraData : string.Empty);
                 }
-                WriteInteger(Item.Amount);
-                WriteBoolean(Item.IsLimited); // IsLimited
-                if (Item.IsLimited)
+                WriteInteger(item.Amount);
+                WriteBoolean(item.IsLimited); // IsLimited
+                if (item.IsLimited)
                 {
-                    WriteInteger(Item.LimitedEditionStack);
-                    WriteInteger(Item.LimitedEditionStack - Item.LimitedEditionSells);
+                    WriteInteger(item.LimitedEditionStack);
+                    WriteInteger(item.LimitedEditionStack - item.LimitedEditionSells);
                 }
             }
             WriteInteger(0); // club_level
-            WriteBoolean(ItemUtility.CanSelectAmount(Item));
+            WriteBoolean(ItemUtility.CanSelectAmount(item));
             WriteBoolean(false); // TODO: Figure out
             WriteString(""); //previewImage -> e.g; catalogue/pet_lion.png
         }

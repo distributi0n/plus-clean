@@ -5,30 +5,30 @@
 
     public class ConnectionHandling
     {
-        private readonly SocketManager manager;
+        private readonly SocketManager _manager;
 
-        public ConnectionHandling(int port, int maxConnections, int connectionsPerIP, bool enabeNagles)
+        internal ConnectionHandling(int port, int connectionsPerIp, bool enabeNagles)
         {
-            manager = new SocketManager();
-            manager.init(port, maxConnections, connectionsPerIP, new InitialPacketParser(), !enabeNagles);
+            _manager = new SocketManager();
+            _manager.Init(port, connectionsPerIp, new InitialPacketParser(), !enabeNagles);
         }
 
-        public void init()
+        internal void Init()
         {
-            manager.connectionEvent += manager_connectionEvent;
-            manager.initializeConnectionRequests();
+            _manager.connectionEvent += manager_connectionEvent;
+            _manager.InitializeConnectionRequests();
         }
 
         private void manager_connectionEvent(ConnectionInformation connection)
         {
-            connection.connectionChanged += ConnectionChanged;
+            connection.ConnectionChanged += ConnectionChanged;
             PlusEnvironment.GetGame().GetClientManager()
-                .CreateAndStartClient(Convert.ToInt32(connection.getConnectionID()), connection);
+                .CreateAndStartClient(Convert.ToInt32(connection.GetConnectionId()), connection);
         }
 
         private void ConnectionChanged(ConnectionInformation information, ConnectionState state)
         {
-            if (state == ConnectionState.CLOSED)
+            if (state == ConnectionState.Closed)
             {
                 CloseConnection(information);
             }
@@ -39,7 +39,7 @@
             try
             {
                 connection.Dispose();
-                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32(connection.getConnectionID()));
+                PlusEnvironment.GetGame().GetClientManager().DisposeConnection(Convert.ToInt32(connection.GetConnectionId()));
             }
             catch (Exception e)
             {
@@ -49,7 +49,7 @@
 
         internal void Destroy()
         {
-            manager.destroy();
+            _manager.Destroy();
         }
     }
 }

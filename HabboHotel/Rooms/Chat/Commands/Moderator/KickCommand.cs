@@ -10,55 +10,55 @@
 
         public string Description => "Kick a user from a room and send them a reason.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you wish to summon.");
+                session.SendWhisper("Please enter the username of the user you wish to summon.");
                 return;
             }
 
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
-            if (TargetClient == null)
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            if (targetClient == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            if (TargetClient.GetHabbo() == null)
+            if (targetClient.GetHabbo() == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
+            if (targetClient.GetHabbo().Username == session.GetHabbo().Username)
             {
-                Session.SendWhisper("Get a life.");
+                session.SendWhisper("Get a life.");
                 return;
             }
 
-            if (!TargetClient.GetHabbo().InRoom)
+            if (!targetClient.GetHabbo().InRoom)
             {
-                Session.SendWhisper("That user currently isn't in a room.");
+                session.SendWhisper("That user currently isn't in a room.");
                 return;
             }
 
-            Room TargetRoom;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(TargetClient.GetHabbo().CurrentRoomId, out TargetRoom))
+            Room targetRoom;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(targetClient.GetHabbo().CurrentRoomId, out targetRoom))
             {
                 return;
             }
 
             if (Params.Length > 2)
             {
-                TargetClient.SendNotification("A moderator has kicked you from the room for the following reason: " +
+                targetClient.SendNotification("A moderator has kicked you from the room for the following reason: " +
                                               CommandManager.MergeParams(Params, 2));
             }
             else
             {
-                TargetClient.SendNotification("A moderator has kicked you from the room.");
+                targetClient.SendNotification("A moderator has kicked you from the room.");
             }
-            TargetRoom.GetRoomUserManager().RemoveUserFromRoom(TargetClient, true, false);
+            targetRoom.GetRoomUserManager().RemoveUserFromRoom(targetClient, true);
         }
     }
 }

@@ -4,17 +4,19 @@
 
     internal class MoodlightConfigComposer : ServerPacket
     {
-        public MoodlightConfigComposer(MoodlightData MoodlightData) : base(ServerPacketHeader.MoodlightConfigMessageComposer)
+        public MoodlightConfigComposer(MoodlightData moodlightData)
+            : base(ServerPacketHeader.MoodlightConfigMessageComposer)
         {
-            WriteInteger(MoodlightData.Presets.Count);
-            WriteInteger(MoodlightData.CurrentPreset);
+            WriteInteger(moodlightData.Presets.Count);
+            WriteInteger(moodlightData.CurrentPreset);
+
             var i = 1;
-            foreach (var Preset in MoodlightData.Presets)
+            foreach (var preset in moodlightData.Presets)
             {
                 WriteInteger(i);
-                WriteInteger(Preset.BackgroundOnly ? 2 : 1);
-                WriteString(Preset.ColorCode);
-                WriteInteger(Preset.ColorIntensity);
+                WriteInteger(preset.BackgroundOnly ? 2 : 1);
+                WriteString(preset.ColorCode);
+                WriteInteger(preset.ColorIntensity);
                 i++;
             }
         }

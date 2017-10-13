@@ -2,7 +2,8 @@
 {
     internal class QuestAbortedComposer : ServerPacket
     {
-        public QuestAbortedComposer() : base(ServerPacketHeader.QuestAbortedMessageComposer)
+        public QuestAbortedComposer()
+            : base(ServerPacketHeader.QuestAbortedMessageComposer)
         {
             WriteBoolean(false);
         }

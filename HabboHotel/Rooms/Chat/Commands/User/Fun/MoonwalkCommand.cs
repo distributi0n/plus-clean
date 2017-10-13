@@ -10,22 +10,22 @@
 
         public string Description => "Wear the shoes of Michael Jackson.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.moonwalkEnabled = !User.moonwalkEnabled;
-            if (User.moonwalkEnabled)
+            user.moonwalkEnabled = !user.moonwalkEnabled;
+            if (user.moonwalkEnabled)
             {
-                Session.SendWhisper("Moonwalk enabled!");
+                session.SendWhisper("Moonwalk enabled!");
             }
             else
             {
-                Session.SendWhisper("Moonwalk disabled!");
+                session.SendWhisper("Moonwalk disabled!");
             }
         }
     }

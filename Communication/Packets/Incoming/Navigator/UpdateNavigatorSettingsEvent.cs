@@ -5,22 +5,22 @@
 
     internal class UpdateNavigatorSettingsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var roomID = Packet.PopInt();
-            if (roomID == 0)
+            var roomId = packet.PopInt();
+            if (roomId == 0)
             {
                 return;
             }
 
-            var Data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomID);
-            if (Data == null)
+            var data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomId);
+            if (data == null)
             {
                 return;
             }
 
-            Session.GetHabbo().HomeRoom = roomID;
-            Session.SendPacket(new NavigatorSettingsComposer(roomID));
+            session.GetHabbo().HomeRoom = roomId;
+            session.SendPacket(new NavigatorSettingsComposer(roomId));
         }
     }
 }

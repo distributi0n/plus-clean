@@ -3,20 +3,21 @@
     using HabboHotel.Catalog;
     using HabboHotel.Items;
 
-    public class PurchaseOKComposer : ServerPacket
+    public class PurchaseOkComposer : ServerPacket
     {
-        public PurchaseOKComposer(CatalogItem Item, ItemData BaseItem) : base(ServerPacketHeader.PurchaseOKMessageComposer)
+        public PurchaseOkComposer(CatalogItem item, ItemData baseItem)
+            : base(ServerPacketHeader.PurchaseOkMessageComposer)
         {
-            WriteInteger(BaseItem.Id);
-            WriteString(BaseItem.ItemName);
+            WriteInteger(baseItem.Id);
+            WriteString(baseItem.ItemName);
             WriteBoolean(false);
-            WriteInteger(Item.CostCredits);
-            WriteInteger(Item.CostPixels);
+            WriteInteger(item.CostCredits);
+            WriteInteger(item.CostPixels);
             WriteInteger(0);
             WriteBoolean(true);
             WriteInteger(1);
-            WriteString(BaseItem.Type.ToString().ToLower());
-            WriteInteger(BaseItem.SpriteId);
+            WriteString(baseItem.Type.ToString().ToLower());
+            WriteInteger(baseItem.SpriteId);
             WriteString("");
             WriteInteger(1);
             WriteInteger(0);
@@ -24,7 +25,8 @@
             WriteInteger(1);
         }
 
-        public PurchaseOKComposer() : base(ServerPacketHeader.PurchaseOKMessageComposer)
+        public PurchaseOkComposer()
+            : base(ServerPacketHeader.PurchaseOkMessageComposer)
         {
             WriteInteger(0);
             WriteString("");

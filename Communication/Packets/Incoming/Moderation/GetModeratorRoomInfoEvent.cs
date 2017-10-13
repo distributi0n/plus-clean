@@ -4,30 +4,31 @@
     using HabboHotel.Rooms;
     using Outgoing.Moderation;
 
-    internal sealed class GetModeratorRoomInfoEvent : IPacketEvent
+    internal class GetModeratorRoomInfoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            var RoomId = Packet.PopInt();
-            var Data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(RoomId);
-            if (Data == null)
+            var roomId = packet.PopInt();
+
+            var data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomId);
+            if (data == null)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(RoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(roomId, out room))
             {
                 return;
             }
 
-            Session.SendPacket(new ModeratorRoomInfoComposer(Data,
-                Room.GetRoomUserManager().GetRoomUserByHabbo(Data.OwnerName) != null));
+            session.SendPacket(new ModeratorRoomInfoComposer(data, room.GetRoomUserManager().GetRoomUserByHabbo(data.OwnerName) != null));
         }
     }
 }

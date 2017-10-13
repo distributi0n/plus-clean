@@ -6,16 +6,17 @@
 
     internal class BotInventoryComposer : ServerPacket
     {
-        public BotInventoryComposer(ICollection<Bot> Bots) : base(ServerPacketHeader.BotInventoryMessageComposer)
+        public BotInventoryComposer(ICollection<Bot> bots)
+            : base(ServerPacketHeader.BotInventoryMessageComposer)
         {
-            WriteInteger(Bots.Count);
-            foreach (var Bot in Bots.ToList())
+            WriteInteger(bots.Count);
+            foreach (var bot in bots.ToList())
             {
-                WriteInteger(Bot.Id);
-                WriteString(Bot.Name);
-                WriteString(Bot.Motto);
-                WriteString(Bot.Gender);
-                WriteString(Bot.Figure);
+                WriteInteger(bot.Id);
+                WriteString(bot.Name);
+                WriteString(bot.Motto);
+                WriteString(bot.Gender);
+                WriteString(bot.Figure);
             }
         }
     }

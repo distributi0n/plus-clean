@@ -6,36 +6,40 @@
 
     internal class UpdateGroupBadgeEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
-            {
-                return;
-            }
-            if (Group.CreatorId != Session.GetHabbo().Id)
+            var groupId = packet.PopInt();
+
+            Group group;
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out group))
             {
                 return;
             }
 
-            var Count = Packet.PopInt();
-            var Badge = "";
-            for (var i = 0; i < Count; i++)
+            if (group.CreatorId != session.GetHabbo().Id)
             {
-                Badge += BadgePartUtility.WorkBadgeParts(i == 0, Packet.PopInt().ToString(), Packet.PopInt().ToString(),
-                    Packet.PopInt().ToString());
+                return;
             }
 
-            Group.Badge = string.IsNullOrWhiteSpace(Badge) ? "b05114s06114" : Badge;
+            var count = packet.PopInt();
+
+            var badge = "";
+            for (var i = 0; i < count; i++)
+            {
+                badge += BadgePartUtility.WorkBadgeParts(i == 0, packet.PopInt().ToString(), packet.PopInt().ToString(), packet.PopInt().ToString());
+            }
+
+            group.Badge = string.IsNullOrWhiteSpace(badge) ? "b05114s06114" : badge;
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `groups` SET `badge` = @badge WHERE `id` = @groupId LIMIT 1");
-                dbClient.AddParameter("badge", Group.Badge);
-                dbClient.AddParameter("groupId", Group.Id);
+                dbClient.AddParameter("badge", group.Badge);
+                dbClient.AddParameter("groupId", group.Id);
                 dbClient.RunQuery();
             }
-            Session.SendPacket(new GroupInfoComposer(Group, Session));
+
+            session.SendPacket(new GroupInfoComposer(group, session));
         }
     }
 }

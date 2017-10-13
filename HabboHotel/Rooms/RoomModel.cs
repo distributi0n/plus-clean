@@ -39,14 +39,14 @@
         //public List<PublicRoomSquare> Furnis;
 
         public RoomModel(int DoorX,
-            int DoorY,
-            double DoorZ,
-            int DoorOrientation,
-            string Heightmap,
-            string StaticFurniMap,
-            bool ClubOnly,
-            string Poolmap,
-            int WallHeight)
+                         int DoorY,
+                         double DoorZ,
+                         int DoorOrientation,
+                         string Heightmap,
+                         string StaticFurniMap,
+                         bool ClubOnly,
+                         string Poolmap,
+                         int WallHeight)
         {
             try
             {

@@ -4,11 +4,12 @@
 
     internal class ItemRemoveComposer : ServerPacket
     {
-        public ItemRemoveComposer(Item Item, int UserId) : base(ServerPacketHeader.ItemRemoveMessageComposer)
+        public ItemRemoveComposer(Item item, int userId)
+            : base(ServerPacketHeader.ItemRemoveMessageComposer)
         {
-            WriteString(Item.Id.ToString());
+            WriteString(item.Id.ToString());
             WriteBoolean(false);
-            WriteInteger(UserId);
+            WriteInteger(userId);
         }
     }
 }

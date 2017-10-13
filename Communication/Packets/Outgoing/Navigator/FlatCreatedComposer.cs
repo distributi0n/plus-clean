@@ -2,9 +2,10 @@
 {
     internal class FlatCreatedComposer : ServerPacket
     {
-        public FlatCreatedComposer(int roomID, string roomName) : base(ServerPacketHeader.FlatCreatedMessageComposer)
+        public FlatCreatedComposer(int roomId, string roomName)
+            : base(ServerPacketHeader.FlatCreatedMessageComposer)
         {
-            WriteInteger(roomID);
+            WriteInteger(roomId);
             WriteString(roomName);
         }
     }

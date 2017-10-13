@@ -2,9 +2,10 @@
 {
     internal class RoomMuteSettingsComposer : ServerPacket
     {
-        public RoomMuteSettingsComposer(bool Status) : base(ServerPacketHeader.RoomMuteSettingsMessageComposer)
+        public RoomMuteSettingsComposer(bool status)
+            : base(ServerPacketHeader.RoomMuteSettingsMessageComposer)
         {
-            WriteBoolean(Status);
+            WriteBoolean(status);
         }
     }
 }

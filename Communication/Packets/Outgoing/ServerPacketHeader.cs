@@ -6,7 +6,7 @@
         public const int InitCryptoMessageComposer = 3531; //675
 
         public const int SecretKeyMessageComposer = 696; //3179
-        public const int AuthenticationOKMessageComposer = 1079; //1442
+        public const int AuthenticationOkMessageComposer = 1079; //1442
         public const int UserObjectMessageComposer = 845; //1823
         public const int UserPerksMessageComposer = 1790; //2807
         public const int UserRightsMessageComposer = 3315; //1862
@@ -21,7 +21,7 @@
         public const int CatalogIndexMessageComposer = 2140; //2018
 
         public const int CatalogItemDiscountMessageComposer = 796; //3322
-        public const int PurchaseOKMessageComposer = 1450; //2843
+        public const int PurchaseOkMessageComposer = 1450; //2843
         public const int CatalogOfferMessageComposer = 1757; //3848
         public const int CatalogPageMessageComposer = 3277; //3477
         public const int CatalogUpdatedMessageComposer = 1411; //885
@@ -232,7 +232,7 @@
         public const int FavouritesMessageComposer = 3267; //604
         public const int TalentLevelUpMessageComposer = 3150; //3538
 
-        public const int BCBorrowedItemsMessageComposer = 1043; //3424
+        public const int BcBorrowedItemsMessageComposer = 1043; //3424
         public const int UserTagsMessageComposer = 940; //774
         public const int CampaignMessageComposer = 2394; //3234
         public const int RoomEventMessageComposer = 1587; //2274
@@ -301,7 +301,7 @@
         public const int RoomEntryInfoMessageComposer = 3675; //3378
         public const int RoomNotificationMessageComposer = 3152; //2419
         public const int ClubGiftsMessageComposer = 2992; //1549
-        public const int MOTDNotificationMessageComposer = 1368; //1829
+        public const int MotdNotificationMessageComposer = 1368; //1829
         public const int PopularRoomTagsResultMessageComposer = 1002; //234
         public const int NewConsoleMessageMessageComposer = 984; //2121
         public const int RoomPropertyMessageComposer = 1897; //1328

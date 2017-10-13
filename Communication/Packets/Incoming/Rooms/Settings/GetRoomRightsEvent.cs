@@ -5,24 +5,25 @@
 
     internal class GetRoomRightsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Instance = Session.GetHabbo().CurrentRoom;
-            if (Instance == null)
-            {
-                return;
-            }
-            if (!Instance.CheckRights(Session))
+            var instance = session.GetHabbo().CurrentRoom;
+            if (instance == null)
             {
                 return;
             }
 
-            Session.SendPacket(new RoomRightsListComposer(Instance));
+            if (!instance.CheckRights(session))
+            {
+                return;
+            }
+
+            session.SendPacket(new RoomRightsListComposer(instance));
         }
     }
 }

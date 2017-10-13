@@ -12,29 +12,29 @@
 
         public string Description => "Picks up all of the furniture from your room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
-            Room.GetRoomItemHandler().RemoveItems(Session);
-            Room.GetGameMap().GenerateMaps();
+            room.GetRoomItemHandler().RemoveItems(session);
+            room.GetGameMap().GenerateMaps();
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `items` SET `room_id` = '0' WHERE `room_id` = @RoomId AND `user_id` = @UserId");
-                dbClient.AddParameter("RoomId", Room.Id);
-                dbClient.AddParameter("UserId", Session.GetHabbo().Id);
+                dbClient.AddParameter("RoomId", room.Id);
+                dbClient.AddParameter("UserId", session.GetHabbo().Id);
                 dbClient.RunQuery();
             }
-            var Items = Room.GetRoomItemHandler().GetWallAndFloor.ToList();
-            if (Items.Count > 0)
+            var items = room.GetRoomItemHandler().GetWallAndFloor.ToList();
+            if (items.Count > 0)
             {
-                Session.SendWhisper(
+                session.SendWhisper(
                     "There are still more items in this room, manually remove them or use :ejectall to eject them!");
             }
-            Session.SendPacket(new FurniListUpdateComposer());
+            session.SendPacket(new FurniListUpdateComposer());
         }
     }
 }

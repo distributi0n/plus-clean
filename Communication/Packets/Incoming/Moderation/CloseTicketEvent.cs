@@ -1,48 +1,48 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Moderation
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Moderation;
     using Outgoing.Moderation;
 
-    internal sealed class CloseTicketEvent : IPacketEvent
+    internal class CloseTicketEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (session?.GetHabbo() == null || !session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            var Result = Packet.PopInt(); // 1 = useless, 2 = abusive, 3 = resolved
-            var Junk = Packet.PopInt();
-            var TicketId = Packet.PopInt();
-            ModerationTicket Ticket = null;
-            if (!PlusEnvironment.GetGame().GetModerationManager().TryGetTicket(TicketId, out Ticket))
-            {
-                return;
-            }
-            if (Ticket.Moderator.Id != Session.GetHabbo().Id)
+            var result = packet.PopInt(); // 1 = useless, 2 = abusive, 3 = resolved
+
+            packet.PopInt();
+
+            var ticketId = packet.PopInt();
+
+            if (!PlusEnvironment.GetGame().GetModerationManager().TryGetTicket(ticketId, out var ticket))
             {
                 return;
             }
 
-            var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Ticket.Sender.Id);
-            if (Client != null)
+            if (ticket.Moderator.Id != session.GetHabbo().Id)
             {
-                Client.SendPacket(new ModeratorSupportTicketResponseComposer(Result));
+                return;
             }
-            if (Result == 2)
+
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(ticket.Sender.Id);
+
+            client?.SendPacket(new ModeratorSupportTicketResponseComposer(result));
+
+            if (result == 2)
             {
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `user_info` SET `cfhs_abusive` = `cfhs_abusive` + 1 WHERE `user_id` = '" +
-                                      Ticket.Sender.Id +
-                                      "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `user_info` SET `cfhs_abusive` = `cfhs_abusive` + 1 WHERE `user_id` = '" + ticket.Sender.Id + "' LIMIT 1");
                 }
             }
-            Ticket.Answered = true;
-            PlusEnvironment.GetGame().GetClientManager()
-                .SendPacket(new ModeratorSupportTicketComposer(Session.GetHabbo().Id, Ticket), "mod_tool");
+
+            ticket.Answered = true;
+
+            PlusEnvironment.GetGame().GetClientManager().SendPacket(new ModeratorSupportTicketComposer(session.GetHabbo().Id, ticket), "mod_tool");
         }
     }
 }

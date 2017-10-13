@@ -5,71 +5,66 @@
 
     internal class ModerationBanEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_soft_ban"))
+            if (session?.GetHabbo() == null || !session.GetHabbo().GetPermissions().HasRight("mod_soft_ban"))
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var Message = Packet.PopString();
-            var Length = Packet.PopInt() * 3600 + PlusEnvironment.GetUnixTimestamp();
-            var Unknown1 = Packet.PopString();
-            var Unknown2 = Packet.PopString();
-            var IPBan = Packet.PopBoolean();
-            var MachineBan = Packet.PopBoolean();
-            if (MachineBan)
+            var userId = packet.PopInt();
+            var message = packet.PopString();
+            var length = packet.PopInt() * 3600 + PlusEnvironment.GetUnixTimestamp();
+            packet.PopString(); // unknown
+            packet.PopString(); // unknown
+            var ipBan = packet.PopBoolean();
+            var machineBan = packet.PopBoolean();
+
+            if (machineBan)
             {
-                IPBan = false;
+                ipBan = false;
             }
-            var Habbo = PlusEnvironment.GetHabboById(UserId);
-            if (Habbo == null)
+
+            var habbo = PlusEnvironment.GetHabboById(userId);
+
+            if (habbo == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user in the database.");
+                session.SendWhisper("An error occoured whilst finding that user in the database.");
                 return;
             }
 
-            if (Habbo.GetPermissions().HasRight("mod_tool") && !Session.GetHabbo().GetPermissions().HasRight("mod_ban_any"))
+            if (habbo.GetPermissions().HasRight("mod_tool") && !session.GetHabbo().GetPermissions().HasRight("mod_ban_any"))
             {
-                Session.SendWhisper("Oops, you cannot ban that user.");
+                session.SendWhisper("Oops, you cannot ban that user.");
                 return;
             }
 
-            Message = Message != null ? Message : "No reason specified.";
-            var Username = Habbo.Username;
+            message = message ?? "No reason specified.";
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `user_info` SET `bans` = `bans` + '1' WHERE `user_id` = '" + Habbo.Id + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `user_info` SET `bans` = `bans` + '1' WHERE `user_id` = '" + habbo.Id + "' LIMIT 1");
             }
-            if (IPBan == false && MachineBan == false)
+
+            if (ipBan == false && machineBan == false)
             {
-                PlusEnvironment.GetGame()
-                    .GetModerationManager()
-                    .BanUser(Session.GetHabbo().Username, ModerationBanType.USERNAME, Habbo.Username, Message, Length);
+                PlusEnvironment.GetGame().GetModerationManager().BanUser(session.GetHabbo().Username, ModerationBanType.Username, habbo.Username, message, length);
             }
-            else if (IPBan)
+            else if (ipBan)
             {
-                PlusEnvironment.GetGame()
-                    .GetModerationManager()
-                    .BanUser(Session.GetHabbo().Username, ModerationBanType.IP, Habbo.Username, Message, Length);
+                PlusEnvironment.GetGame().GetModerationManager().BanUser(session.GetHabbo().Username, ModerationBanType.Ip, habbo.Username, message, length);
             }
-            else if (MachineBan)
+            else if (machineBan)
             {
-                PlusEnvironment.GetGame()
-                    .GetModerationManager()
-                    .BanUser(Session.GetHabbo().Username, ModerationBanType.IP, Habbo.Username, Message, Length);
-                PlusEnvironment.GetGame()
-                    .GetModerationManager()
-                    .BanUser(Session.GetHabbo().Username, ModerationBanType.USERNAME, Habbo.Username, Message, Length);
-                PlusEnvironment.GetGame()
-                    .GetModerationManager()
-                    .BanUser(Session.GetHabbo().Username, ModerationBanType.MACHINE, Habbo.Username, Message, Length);
+                PlusEnvironment.GetGame().GetModerationManager().BanUser(session.GetHabbo().Username, ModerationBanType.Ip, habbo.Username, message, length);
+                PlusEnvironment.GetGame().GetModerationManager().BanUser(session.GetHabbo().Username, ModerationBanType.Username, habbo.Username, message, length);
+                PlusEnvironment.GetGame().GetModerationManager().BanUser(session.GetHabbo().Username, ModerationBanType.Machine, habbo.Username, message, length);
             }
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Habbo.Username);
-            if (TargetClient != null)
+
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(habbo.Username);
+            if (targetClient != null)
             {
-                TargetClient.Disconnect();
+                targetClient.Disconnect();
             }
         }
     }

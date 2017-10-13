@@ -5,30 +5,33 @@
 
     internal class ObjectUpdateComposer : ServerPacket
     {
-        public ObjectUpdateComposer(Item Item, int UserId) : base(ServerPacketHeader.ObjectUpdateMessageComposer)
+        public ObjectUpdateComposer(Item item, int userId)
+            : base(ServerPacketHeader.ObjectUpdateMessageComposer)
         {
-            WriteInteger(Item.Id);
-            WriteInteger(Item.GetBaseItem().SpriteId);
-            WriteInteger(Item.GetX);
-            WriteInteger(Item.GetY);
-            WriteInteger(Item.Rotation);
-            WriteString(string.Format("{0:0.00}", TextHandling.GetString(Item.GetZ)));
+            WriteInteger(item.Id);
+            WriteInteger(item.GetBaseItem().SpriteId);
+            WriteInteger(item.GetX);
+            WriteInteger(item.GetY);
+            WriteInteger(item.Rotation);
+            WriteString($"{TextHandling.GetString(item.GetZ):0.00}");
             WriteString(string.Empty);
-            if (Item.LimitedNo > 0)
+
+            if (item.LimitedNo > 0)
             {
                 WriteInteger(1);
                 WriteInteger(256);
-                WriteString(Item.ExtraData);
-                WriteInteger(Item.LimitedNo);
-                WriteInteger(Item.LimitedTot);
+                WriteString(item.ExtraData);
+                WriteInteger(item.LimitedNo);
+                WriteInteger(item.LimitedTot);
             }
             else
             {
-                ItemBehaviourUtility.GenerateExtradata(Item, this);
+                ItemBehaviourUtility.GenerateExtradata(item, this);
             }
+
             WriteInteger(-1); // to-do: check
-            WriteInteger(Item.GetBaseItem().Modes > 1 ? 1 : 0);
-            WriteInteger(UserId);
+            WriteInteger(item.GetBaseItem().Modes > 1 ? 1 : 0);
+            WriteInteger(userId);
         }
     }
 }

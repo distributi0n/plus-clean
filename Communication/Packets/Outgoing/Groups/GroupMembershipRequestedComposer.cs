@@ -4,15 +4,15 @@
 
     internal class GroupMembershipRequestedComposer : ServerPacket
     {
-        public GroupMembershipRequestedComposer(int GroupId, Habbo Habbo, int Type) : base(ServerPacketHeader
-            .GroupMembershipRequestedMessageComposer)
+        public GroupMembershipRequestedComposer(int groupId, Habbo habbo, int type)
+            : base(ServerPacketHeader.GroupMembershipRequestedMessageComposer)
         {
-            WriteInteger(GroupId); //GroupId
-            WriteInteger(Type); //Type?
+            WriteInteger(groupId); //GroupId
+            WriteInteger(type); //Type?
             {
-                WriteInteger(Habbo.Id); //UserId
-                WriteString(Habbo.Username);
-                WriteString(Habbo.Look);
+                WriteInteger(habbo.Id); //UserId
+                WriteString(habbo.Username);
+                WriteString(habbo.Look);
                 WriteString(string.Empty);
             }
         }

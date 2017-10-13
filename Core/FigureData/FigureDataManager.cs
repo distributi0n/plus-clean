@@ -10,7 +10,7 @@
 
     public class FigureDataManager
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.Core.FigureData");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.Core.FigureData");
         private readonly Dictionary<int, Palette> _palettes; //pallet id, Pallet
 
         private readonly List<string> _requirements;
@@ -38,56 +38,56 @@
             }
             var xDoc = new XmlDocument();
             xDoc.Load(@"extra/figuredata.xml");
-            var Colors = xDoc.GetElementsByTagName("colors");
-            foreach (XmlNode Node in Colors)
+            var colors = xDoc.GetElementsByTagName("colors");
+            foreach (XmlNode node in colors)
             {
-                foreach (XmlNode Child in Node.ChildNodes)
+                foreach (XmlNode child in node.ChildNodes)
                 {
-                    _palettes.Add(Convert.ToInt32(Child.Attributes["id"].Value),
-                        new Palette(Convert.ToInt32(Child.Attributes["id"].Value)));
-                    foreach (XmlNode Sub in Child.ChildNodes)
+                    _palettes.Add(Convert.ToInt32(child.Attributes["id"].Value),
+                        new Palette(Convert.ToInt32(child.Attributes["id"].Value)));
+                    foreach (XmlNode sub in child.ChildNodes)
                     {
-                        _palettes[Convert.ToInt32(Child.Attributes["id"].Value)]
-                            .Colors.Add(Convert.ToInt32(Sub.Attributes["id"].Value),
-                                new Color(Convert.ToInt32(Sub.Attributes["id"].Value),
-                                    Convert.ToInt32(Sub.Attributes["index"].Value),
-                                    Convert.ToInt32(Sub.Attributes["club"].Value),
-                                    Convert.ToInt32(Sub.Attributes["selectable"].Value) == 1,
-                                    Convert.ToString(Sub.InnerText)));
+                        _palettes[Convert.ToInt32(child.Attributes["id"].Value)]
+                            .Colors.Add(Convert.ToInt32(sub.Attributes["id"].Value),
+                                new Color(Convert.ToInt32(sub.Attributes["id"].Value),
+                                    Convert.ToInt32(sub.Attributes["index"].Value),
+                                    Convert.ToInt32(sub.Attributes["club"].Value),
+                                    Convert.ToInt32(sub.Attributes["selectable"].Value) == 1,
+                                    Convert.ToString(sub.InnerText)));
                     }
                 }
             }
 
-            var Sets = xDoc.GetElementsByTagName("sets");
-            foreach (XmlNode Node in Sets)
+            var sets = xDoc.GetElementsByTagName("sets");
+            foreach (XmlNode node in sets)
             {
-                foreach (XmlNode Child in Node.ChildNodes)
+                foreach (XmlNode child in node.ChildNodes)
                 {
-                    _setTypes.Add(Child.Attributes["type"].Value,
-                        new FigureSet(SetTypeUtility.GetSetType(Child.Attributes["type"].Value),
-                            Convert.ToInt32(Child.Attributes["paletteid"].Value)));
-                    foreach (XmlNode Sub in Child.ChildNodes)
+                    _setTypes.Add(child.Attributes["type"].Value,
+                        new FigureSet(SetTypeUtility.GetSetType(child.Attributes["type"].Value),
+                            Convert.ToInt32(child.Attributes["paletteid"].Value)));
+                    foreach (XmlNode sub in child.ChildNodes)
                     {
-                        _setTypes[Child.Attributes["type"].Value]
-                            .Sets.Add(Convert.ToInt32(Sub.Attributes["id"].Value),
-                                new Set(Convert.ToInt32(Sub.Attributes["id"].Value),
-                                    Convert.ToString(Sub.Attributes["gender"].Value),
-                                    Convert.ToInt32(Sub.Attributes["club"].Value),
-                                    Convert.ToInt32(Sub.Attributes["colorable"].Value) == 1,
-                                    Convert.ToInt32(Sub.Attributes["selectable"].Value) == 1,
-                                    Convert.ToInt32(Sub.Attributes["preselectable"].Value) == 1));
-                        foreach (XmlNode Subb in Sub.ChildNodes)
+                        _setTypes[child.Attributes["type"].Value]
+                            .Sets.Add(Convert.ToInt32(sub.Attributes["id"].Value),
+                                new Set(Convert.ToInt32(sub.Attributes["id"].Value),
+                                    Convert.ToString(sub.Attributes["gender"].Value),
+                                    Convert.ToInt32(sub.Attributes["club"].Value),
+                                    Convert.ToInt32(sub.Attributes["colorable"].Value) == 1,
+                                    Convert.ToInt32(sub.Attributes["selectable"].Value) == 1,
+                                    Convert.ToInt32(sub.Attributes["preselectable"].Value) == 1));
+                        foreach (XmlNode subb in sub.ChildNodes)
                         {
-                            if (Subb.Attributes["type"] != null)
+                            if (subb.Attributes["type"] != null)
                             {
-                                _setTypes[Child.Attributes["type"].Value]
-                                    .Sets[Convert.ToInt32(Sub.Attributes["id"].Value)]
-                                    .Parts.Add(Convert.ToInt32(Subb.Attributes["id"].Value) + "-" + Subb.Attributes["type"].Value,
-                                        new Part(Convert.ToInt32(Subb.Attributes["id"].Value),
-                                            SetTypeUtility.GetSetType(Child.Attributes["type"].Value),
-                                            Convert.ToInt32(Subb.Attributes["colorable"].Value) == 1,
-                                            Convert.ToInt32(Subb.Attributes["index"].Value),
-                                            Convert.ToInt32(Subb.Attributes["colorindex"].Value)));
+                                _setTypes[child.Attributes["type"].Value]
+                                    .Sets[Convert.ToInt32(sub.Attributes["id"].Value)]
+                                    .Parts.Add(Convert.ToInt32(subb.Attributes["id"].Value) + "-" + subb.Attributes["type"].Value,
+                                        new Part(Convert.ToInt32(subb.Attributes["id"].Value),
+                                            SetTypeUtility.GetSetType(child.Attributes["type"].Value),
+                                            Convert.ToInt32(subb.Attributes["colorable"].Value) == 1,
+                                            Convert.ToInt32(subb.Attributes["index"].Value),
+                                            Convert.ToInt32(subb.Attributes["colorindex"].Value)));
                             }
                         }
                     }
@@ -96,8 +96,8 @@
 
             //Faceless.
             _setTypes["hd"].Sets.Add(99999, new Set(99999, "U", 0, true, false, false));
-            log.Info("Loaded " + _palettes.Count + " Color Palettes");
-            log.Info("Loaded " + _setTypes.Count + " Set Types");
+            Log.Info("Loaded " + _palettes.Count + " Color Palettes");
+            Log.Info("Loaded " + _setTypes.Count + " Set Types");
         }
 
         public string ProcessFigure(string figure, string gender, ICollection<ClothingParts> clothingParts, bool hasHabboClub)

@@ -10,12 +10,12 @@
         private int _delay;
 
         private long _next;
-        private bool Requested;
+        private bool _requested;
 
-        public ToggleFurniBox(Room Instance, Item Item)
+        public ToggleFurniBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -33,32 +33,32 @@
 
         public bool OnCycle()
         {
-            if (SetItems.Count == 0 || !Requested)
+            if (SetItems.Count == 0 || !_requested)
             {
                 return false;
             }
 
-            var Now = PlusEnvironment.Now();
-            if (_next < Now)
+            var now = PlusEnvironment.Now();
+            if (_next < now)
             {
-                foreach (var Item in SetItems.Values.ToList())
+                foreach (var item in SetItems.Values.ToList())
                 {
-                    if (Item == null)
+                    if (item == null)
                     {
                         continue;
                     }
 
-                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(item))
                     {
                         Item n = null;
-                        SetItems.TryRemove(Item.Id, out n);
+                        SetItems.TryRemove(item.Id, out n);
                         continue;
                     }
 
-                    Item.Interactor.OnWiredTrigger(Item);
+                    item.Interactor.OnWiredTrigger(item);
                 }
 
-                Requested = false;
+                _requested = false;
                 _next = 0;
                 TickCount = Delay;
             }
@@ -74,23 +74,23 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             SetItems.Clear();
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            var Delay = Packet.PopInt();
-            this.Delay = Delay;
+            var delay = packet.PopInt();
+            Delay = delay;
         }
 
         public bool Execute(params object[] Params)
@@ -99,7 +99,7 @@
             {
                 _next = PlusEnvironment.Now() + Delay;
             }
-            Requested = true;
+            _requested = true;
             TickCount = Delay;
             return true;
         }

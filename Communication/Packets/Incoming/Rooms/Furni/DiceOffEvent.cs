@@ -4,26 +4,17 @@
 
     internal class DiceOffEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+
+            if (room == null)
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
-            if (Item == null)
-            {
-                return;
-            }
-
-            var hasRights = false;
-            if (Room.CheckRights(Session))
-            {
-                hasRights = true;
-            }
-            Item.Interactor.OnTrigger(Session, Item, -1, hasRights);
+            var item = room.GetRoomItemHandler().GetItem(packet.PopInt());
+            item?.Interactor.OnTrigger(session, item, -1, room.CheckRights(session));
         }
     }
 }

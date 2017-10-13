@@ -7,8 +7,8 @@
 
     internal class ModeratorRoomChatlogComposer : ServerPacket
     {
-        public ModeratorRoomChatlogComposer(Room room, ICollection<ChatlogEntry> chats) : base(ServerPacketHeader
-            .ModeratorRoomChatlogMessageComposer)
+        public ModeratorRoomChatlogComposer(Room room, ICollection<ChatlogEntry> chats)
+            : base(ServerPacketHeader.ModeratorRoomChatlogMessageComposer)
         {
             WriteByte(1);
             WriteShort(2); //Count
@@ -18,20 +18,20 @@
             WriteString("roomId");
             WriteByte(1);
             WriteInteger(room.Id);
+
             WriteShort(chats.Count);
-            foreach (var Entry in chats)
+            foreach (var entry in chats)
             {
-                var Username = "Unknown";
-                if (Entry.PlayerNullable() != null)
+                var username = "Unknown";
+                if (entry.PlayerNullable() != null)
                 {
-                    Username = Entry.PlayerNullable().Username;
+                    username = entry.PlayerNullable().Username;
                 }
-                WriteString(UnixTimestamp.FromUnixTimestamp(Entry.Timestamp).ToShortTimeString()); // time?
-                WriteInteger(Entry.PlayerId); // User Id
-                WriteString(Username); // Username
-                WriteString(!string.IsNullOrEmpty(Entry.Message)
-                    ? Entry.Message
-                    : "** user sent a blank message **"); // Message        
+
+                WriteString(UnixTimestamp.FromUnixTimestamp(entry.Timestamp).ToShortTimeString()); // time?
+                WriteInteger(entry.PlayerId); // User Id
+                WriteString(username); // Username
+                WriteString(!string.IsNullOrEmpty(entry.Message) ? entry.Message : "** user sent a blank message **"); // Message        
                 WriteBoolean(false); //TODO, AI's?
             }
         }

@@ -20,10 +20,10 @@
         private readonly ConcurrentDictionary<int, Item> _wallItems;
         private GameClient _client;
 
-        public InventoryComponent(int UserId, GameClient Client)
+        public InventoryComponent(int userId, GameClient client)
         {
-            _client = Client;
-            _userId = UserId;
+            _client = client;
+            _userId = userId;
             _floorItems = new ConcurrentDictionary<int, Item>();
             _wallItems = new ConcurrentDictionary<int, Item>();
             _petsItems = new ConcurrentDictionary<int, Pet>();
@@ -31,11 +31,11 @@
             Init();
         }
 
-        public IEnumerable<Item> GetItems => _floorItems.Values.Concat(_wallItems.Values);
+        internal IEnumerable<Item> GetItems => _floorItems.Values.Concat(_wallItems.Values);
 
-        public IEnumerable<Item> GetWallAndFloor => _floorItems.Values.Concat(_wallItems.Values);
+        internal IEnumerable<Item> GetWallAndFloor => _floorItems.Values.Concat(_wallItems.Values);
 
-        public void Init()
+        private void Init()
         {
             if (_floorItems.Count > 0)
             {
@@ -53,38 +53,38 @@
             {
                 _botItems.Clear();
             }
-            var Items = ItemLoader.GetItemsForUser(_userId);
-            foreach (var Item in Items.ToList())
+            var items = ItemLoader.GetItemsForUser(_userId);
+            foreach (var item in items.ToList())
             {
-                if (Item.IsFloorItem)
+                if (item.IsFloorItem)
                 {
-                    if (!_floorItems.TryAdd(Item.Id, Item))
+                    if (!_floorItems.TryAdd(item.Id, item))
                     {
                     }
                 }
-                else if (Item.IsWallItem)
+                else if (item.IsWallItem)
                 {
-                    if (!_wallItems.TryAdd(Item.Id, Item))
+                    if (!_wallItems.TryAdd(item.Id, item))
                     {
                     }
                 }
             }
 
-            var Pets = PetLoader.GetPetsForUser(Convert.ToInt32(_userId));
-            foreach (var Pet in Pets)
+            var pets = PetLoader.GetPetsForUser(Convert.ToInt32(_userId));
+            foreach (var pet in pets)
             {
-                if (!_petsItems.TryAdd(Pet.PetId, Pet))
+                if (!_petsItems.TryAdd(pet.PetId, pet))
                 {
-                    Console.WriteLine("Error whilst loading pet x1: " + Pet.PetId);
+                    Console.WriteLine("Error whilst loading pet x1: " + pet.PetId);
                 }
             }
 
-            var Bots = BotLoader.GetBotsForUser(Convert.ToInt32(_userId));
-            foreach (var Bot in Bots)
+            var bots = BotLoader.GetBotsForUser(Convert.ToInt32(_userId));
+            foreach (var bot in bots)
             {
-                if (!_botItems.TryAdd(Bot.Id, Bot))
+                if (!_botItems.TryAdd(bot.Id, bot))
                 {
-                    Console.WriteLine("Error whilst loading bot x1: " + Bot.Id);
+                    Console.WriteLine("Error whilst loading bot x1: " + bot.Id);
                 }
             }
         }
@@ -98,10 +98,7 @@
             }
             _floorItems.Clear();
             _wallItems.Clear();
-            if (_client != null)
-            {
-                _client.SendPacket(new FurniListUpdateComposer());
-            }
+            _client?.SendPacket(new FurniListUpdateComposer());
         }
 
         public void SetIdleState()
@@ -125,116 +122,109 @@
             _client = null;
         }
 
-        public void UpdateItems(bool FromDatabase)
+        internal void UpdateItems(bool fromDatabase)
         {
-            if (FromDatabase)
+            if (fromDatabase)
             {
                 Init();
             }
-            if (_client != null)
-            {
-                _client.SendPacket(new FurniListUpdateComposer());
-            }
+            _client?.SendPacket(new FurniListUpdateComposer());
         }
 
-        public Item GetItem(int Id)
+        public Item GetItem(int id)
         {
-            if (_floorItems.ContainsKey(Id))
+            if (_floorItems.ContainsKey(id))
             {
-                return _floorItems[Id];
-            }
-            if (_wallItems.ContainsKey(Id))
-            {
-                return _wallItems[Id];
+                return _floorItems[id];
             }
 
-            return null;
+            return _wallItems.ContainsKey(id) ? _wallItems[id] : null;
         }
 
-        public Item AddNewItem(int Id, int BaseItem, string ExtraData, int Group, bool ToInsert, bool FromRoom, int LimitedNumber,
-            int LimitedStack)
+        public Item AddNewItem(int id, int baseItem, string extraData, int group, bool toInsert, bool fromRoom, int limitedNumber,
+                               int limitedStack)
         {
-            if (ToInsert)
+            if (toInsert)
             {
-                if (FromRoom)
+                if (fromRoom)
                 {
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.RunQuery("UPDATE `items` SET `room_id` = '0', `user_id` = '" + _userId + "' WHERE `id` = '" +
-                                          Id + "' LIMIT 1");
+                                          id + "' LIMIT 1");
                     }
                 }
                 else
                 {
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
-                        if (Id > 0)
+                        if (id > 0)
                         {
                             dbClient.RunQuery(
                                 "INSERT INTO `items` (`id`,`base_item`, `user_id`, `limited_number`, `limited_stack`) VALUES ('" +
-                                Id +
+                                id +
                                 "', '" +
-                                BaseItem +
+                                baseItem +
                                 "', '" +
                                 _userId +
                                 "', '" +
-                                LimitedNumber +
+                                limitedNumber +
                                 "', '" +
-                                LimitedStack +
+                                limitedStack +
                                 "')");
                         }
                         else
                         {
                             dbClient.SetQuery(
                                 "INSERT INTO `items` (`base_item`, `user_id`, `limited_number`, `limited_stack`) VALUES ('" +
-                                BaseItem +
+                                baseItem +
                                 "', '" +
                                 _userId +
                                 "', '" +
-                                LimitedNumber +
+                                limitedNumber +
                                 "', '" +
-                                LimitedStack +
+                                limitedStack +
                                 "')");
-                            Id = Convert.ToInt32(dbClient.InsertQuery());
+                            id = Convert.ToInt32(dbClient.InsertQuery());
                         }
-                        SendNewItems(Convert.ToInt32(Id));
-                        if (Group > 0)
+                        SendNewItems(Convert.ToInt32(id));
+                        if (group > 0)
                         {
-                            dbClient.RunQuery("INSERT INTO `items_groups` VALUES (" + Id + ", " + Group + ")");
+                            dbClient.RunQuery("INSERT INTO `items_groups` VALUES (" + id + ", " + group + ")");
                         }
-                        if (!string.IsNullOrEmpty(ExtraData))
+                        if (!string.IsNullOrEmpty(extraData))
                         {
-                            dbClient.SetQuery("UPDATE `items` SET `extra_data` = @extradata WHERE `id` = '" + Id + "' LIMIT 1");
-                            dbClient.AddParameter("extradata", ExtraData);
+                            dbClient.SetQuery("UPDATE `items` SET `extra_data` = @extradata WHERE `id` = '" + id + "' LIMIT 1");
+                            dbClient.AddParameter("extradata", extraData);
                             dbClient.RunQuery();
                         }
                     }
                 }
             }
-            var ItemToAdd = new Item(Id, 0, BaseItem, ExtraData, 0, 0, 0, 0, _userId, Group, LimitedNumber, LimitedStack,
+            var itemToAdd = new Item(id, 0, baseItem, extraData, 0, 0, 0, 0, _userId, group, limitedNumber, limitedStack,
                 string.Empty);
-            if (UserHoldsItem(Id))
+            if (UserHoldsItem(id))
             {
-                RemoveItem(Id);
+                RemoveItem(id);
             }
-            if (ItemToAdd.IsWallItem)
+            if (itemToAdd.IsWallItem)
             {
-                _wallItems.TryAdd(ItemToAdd.Id, ItemToAdd);
+                _wallItems.TryAdd(itemToAdd.Id, itemToAdd);
             }
             else
             {
-                _floorItems.TryAdd(ItemToAdd.Id, ItemToAdd);
+                _floorItems.TryAdd(itemToAdd.Id, itemToAdd);
             }
-            return ItemToAdd;
+            return itemToAdd;
         }
 
-        private bool UserHoldsItem(int itemID)
+        private bool UserHoldsItem(int itemId)
         {
-            if (_floorItems.ContainsKey(itemID))
+            if (_floorItems.ContainsKey(itemId))
             {
                 return true;
             }
-            if (_wallItems.ContainsKey(itemID))
+            if (_wallItems.ContainsKey(itemId))
             {
                 return true;
             }
@@ -242,7 +232,7 @@
             return false;
         }
 
-        public void RemoveItem(int Id)
+        public void RemoveItem(int id)
         {
             if (GetClient() == null)
             {
@@ -253,81 +243,81 @@
             {
                 GetClient().Disconnect();
             }
-            if (_floorItems.ContainsKey(Id))
+            if (_floorItems.ContainsKey(id))
             {
-                Item ToRemove = null;
-                _floorItems.TryRemove(Id, out ToRemove);
+                Item toRemove = null;
+                _floorItems.TryRemove(id, out toRemove);
             }
-            if (_wallItems.ContainsKey(Id))
+            if (_wallItems.ContainsKey(id))
             {
-                Item ToRemove = null;
-                _wallItems.TryRemove(Id, out ToRemove);
+                Item toRemove = null;
+                _wallItems.TryRemove(id, out toRemove);
             }
-            GetClient().SendPacket(new FurniListRemoveComposer(Id));
+            GetClient().SendPacket(new FurniListRemoveComposer(id));
         }
 
         private GameClient GetClient() => PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(_userId);
 
-        public void SendNewItems(int Id)
+        public void SendNewItems(int id)
         {
-            _client.SendPacket(new FurniListNotificationComposer(Id, 1));
+            _client.SendPacket(new FurniListNotificationComposer(id, 1));
         }
 
         public ICollection<Pet> GetPets() => _petsItems.Values;
 
-        public bool TryAddPet(Pet Pet)
+        public bool TryAddPet(Pet pet)
         {
             //TODO: Sort this mess.
-            Pet.RoomId = 0;
-            Pet.PlacedInRoom = false;
-            return _petsItems.TryAdd(Pet.PetId, Pet);
+            pet.RoomId = 0;
+            pet.PlacedInRoom = false;
+            return _petsItems.TryAdd(pet.PetId, pet);
         }
 
-        public bool TryRemovePet(int PetId, out Pet PetItem)
+        public bool TryRemovePet(int petId, out Pet petItem)
         {
-            if (_petsItems.ContainsKey(PetId))
+            if (_petsItems.ContainsKey(petId))
             {
-                return _petsItems.TryRemove(PetId, out PetItem);
+                return _petsItems.TryRemove(petId, out petItem);
             }
 
-            PetItem = null;
+            petItem = null;
             return false;
         }
 
-        public bool TryGetPet(int PetId, out Pet Pet)
+        public bool TryGetPet(int petId, out Pet pet)
         {
-            if (_petsItems.ContainsKey(PetId))
+            if (_petsItems.ContainsKey(petId))
             {
-                return _petsItems.TryGetValue(PetId, out Pet);
+                return _petsItems.TryGetValue(petId, out pet);
             }
 
-            Pet = null;
+            pet = null;
             return false;
         }
 
         public ICollection<Bot> GetBots() => _botItems.Values;
 
-        public bool TryAddBot(Bot Bot) => _botItems.TryAdd(Bot.Id, Bot);
+        public bool TryAddBot(Bot bot) => _botItems.TryAdd(bot.Id, bot);
 
-        public bool TryRemoveBot(int BotId, out Bot Bot)
+        public bool TryRemoveBot(int botId, out Bot bot)
         {
-            if (_botItems.ContainsKey(BotId))
+            if (_botItems.ContainsKey(botId))
             {
-                return _botItems.TryRemove(BotId, out Bot);
+                return _botItems.TryRemove(botId, out bot);
             }
 
-            Bot = null;
+            bot = null;
             return false;
         }
 
-        public bool TryGetBot(int BotId, out Bot Bot)
+        public bool TryGetBot(int botId, out Bot bot)
         {
-            if (_botItems.ContainsKey(BotId))
+            if (_botItems.ContainsKey(botId))
             {
-                return _botItems.TryGetValue(BotId, out Bot);
+                return _botItems.TryGetValue(botId, out bot);
             }
 
-            Bot = null;
+            bot = null;
             return false;
         }
 

@@ -3,12 +3,13 @@
     using HabboHotel.GameClients;
     using Outgoing.Marketplace;
 
-    internal sealed class GetMarketplaceCanMakeOfferEvent : IPacketEvent
+    internal class GetMarketplaceCanMakeOfferEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var ErrorCode = Session.GetHabbo().TradingLockExpiry > 0 ? 6 : 1;
-            Session.SendPacket(new MarketplaceCanMakeOfferResultComposer(ErrorCode));
+            var errorCode = session.GetHabbo().TradingLockExpiry > 0 ? 6 : 1;
+
+            session.SendPacket(new MarketplaceCanMakeOfferResultComposer(errorCode));
         }
     }
 }

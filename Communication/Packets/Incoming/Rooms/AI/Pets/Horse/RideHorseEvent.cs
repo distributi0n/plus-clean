@@ -8,107 +8,115 @@
 
     internal class RideHorseEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            var PetId = Packet.PopInt();
-            var Type = Packet.PopBoolean();
-            RoomUser Pet = null;
-            if (!Room.GetRoomUserManager().TryGetPet(PetId, out Pet))
-            {
-                return;
-            }
-            if (Pet.PetData == null)
+            var petId = packet.PopInt();
+            var type = packet.PopBoolean();
+
+            RoomUser pet;
+            if (!room.GetRoomUserManager().TryGetPet(petId, out pet))
             {
                 return;
             }
 
-            if (Pet.PetData.AnyoneCanRide == 0 && Pet.PetData.OwnerId != User.UserId)
+            if (pet.PetData == null)
             {
-                Session.SendNotification(
+                return;
+            }
+
+            if (pet.PetData.AnyoneCanRide == 0 && pet.PetData.OwnerId != user.UserId)
+            {
+                session.SendNotification(
                     "You are unable to ride this horse.\nThe owner of the pet has not selected for anyone to ride it.");
                 return;
             }
 
-            if (Type)
+            if (type)
             {
-                if (Pet.RidingHorse)
+                if (pet.RidingHorse)
                 {
-                    var Speech2 = PlusEnvironment.GetGame().GetChatManager().GetPetLocale().GetValue("pet.alreadymounted");
-                    var RandomSpeech2 = new Random();
-                    Pet.Chat(Speech2[RandomSpeech2.Next(0, Speech2.Length - 1)], false);
+                    var speech2 = PlusEnvironment.GetGame().GetChatManager().GetPetLocale().GetValue("pet.alreadymounted");
+                    var randomSpeech2 = new Random();
+                    pet.Chat(speech2[randomSpeech2.Next(0, speech2.Length - 1)], false);
                 }
-                else if (User.RidingHorse)
+                else if (user.RidingHorse)
                 {
-                    Session.SendNotification("You are already riding a horse!");
+                    session.SendNotification("You are already riding a horse!");
                 }
                 else
                 {
-                    if (Pet.Statusses.Count > 0)
+                    if (pet.Statusses.Count > 0)
                     {
-                        Pet.Statusses.Clear();
+                        pet.Statusses.Clear();
                     }
-                    var NewX2 = User.X;
-                    var NewY2 = User.Y;
-                    Room.SendPacket(Room.GetRoomItemHandler()
-                        .UpdateUserOnRoller(Pet, new Point(NewX2, NewY2), 0, Room.GetGameMap().SqAbsoluteHeight(NewX2, NewY2)));
-                    Room.SendPacket(Room.GetRoomItemHandler()
-                        .UpdateUserOnRoller(User, new Point(NewX2, NewY2), 0,
-                            Room.GetGameMap().SqAbsoluteHeight(NewX2, NewY2) + 1));
-                    User.MoveTo(NewX2, NewY2);
-                    Pet.ClearMovement(true);
-                    User.RidingHorse = true;
-                    Pet.RidingHorse = true;
-                    Pet.HorseID = User.VirtualId;
-                    User.HorseID = Pet.VirtualId;
-                    User.ApplyEffect(77);
-                    User.RotBody = Pet.RotBody;
-                    User.RotHead = Pet.RotHead;
-                    User.UpdateNeeded = true;
-                    Pet.UpdateNeeded = true;
+
+                    var newX2 = user.X;
+                    var newY2 = user.Y;
+                    room.SendPacket(room.GetRoomItemHandler().UpdateUserOnRoller(pet, new Point(newX2, newY2), 0, room.GetGameMap().SqAbsoluteHeight(newX2, newY2)));
+                    room.SendPacket(room.GetRoomItemHandler().UpdateUserOnRoller(user, new Point(newX2, newY2), 0, room.GetGameMap().SqAbsoluteHeight(newX2, newY2) + 1));
+
+                    user.MoveTo(newX2, newY2);
+
+                    pet.ClearMovement(true);
+
+                    user.RidingHorse = true;
+                    pet.RidingHorse = true;
+                    pet.HorseID = user.VirtualId;
+                    user.HorseID = pet.VirtualId;
+
+                    user.ApplyEffect(77);
+
+                    user.RotBody = pet.RotBody;
+                    user.RotHead = pet.RotHead;
+
+                    user.UpdateNeeded = true;
+                    pet.UpdateNeeded = true;
                 }
             }
             else
             {
-                if (User.VirtualId == Pet.HorseID)
+                if (user.VirtualId == pet.HorseID)
                 {
-                    Pet.Statusses.Remove("sit");
-                    Pet.Statusses.Remove("lay");
-                    Pet.Statusses.Remove("snf");
-                    Pet.Statusses.Remove("eat");
-                    Pet.Statusses.Remove("ded");
-                    Pet.Statusses.Remove("jmp");
-                    User.RidingHorse = false;
-                    User.HorseID = 0;
-                    Pet.RidingHorse = false;
-                    Pet.HorseID = 0;
-                    User.MoveTo(new Point(User.X + 2, User.Y + 2));
-                    User.ApplyEffect(-1);
-                    User.UpdateNeeded = true;
-                    Pet.UpdateNeeded = true;
+                    pet.Statusses.Remove("sit");
+                    pet.Statusses.Remove("lay");
+                    pet.Statusses.Remove("snf");
+                    pet.Statusses.Remove("eat");
+                    pet.Statusses.Remove("ded");
+                    pet.Statusses.Remove("jmp");
+                    user.RidingHorse = false;
+                    user.HorseID = 0;
+                    pet.RidingHorse = false;
+                    pet.HorseID = 0;
+                    user.MoveTo(new Point(user.X + 2, user.Y + 2));
+                    user.ApplyEffect(-1);
+                    user.UpdateNeeded = true;
+                    pet.UpdateNeeded = true;
                 }
                 else
                 {
-                    Session.SendNotification("Could not dismount this horse - You are not riding it!");
+                    session.SendNotification("Could not dismount this horse - You are not riding it!");
                 }
             }
-            Room.SendPacket(new PetHorseFigureInformationComposer(Pet));
+
+            room.SendPacket(new PetHorseFigureInformationComposer(pet));
         }
     }
 }

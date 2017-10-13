@@ -2,11 +2,12 @@
 {
     internal class CheckGnomeNameComposer : ServerPacket
     {
-        public CheckGnomeNameComposer(string PetName, int ErrorId) : base(ServerPacketHeader.CheckGnomeNameMessageComposer)
+        public CheckGnomeNameComposer(string petName, int errorId)
+            : base(ServerPacketHeader.CheckGnomeNameMessageComposer)
         {
             WriteInteger(0);
-            WriteInteger(ErrorId);
-            WriteString(PetName);
+            WriteInteger(errorId);
+            WriteString(petName);
         }
     }
 }

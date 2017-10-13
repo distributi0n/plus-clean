@@ -35,10 +35,10 @@
                     continue;
                 }
 
-                if (item.interactionCountHelper == 0 && item.ExtraData == "1")
+                if (item.InteractionCountHelper == 0 && item.ExtraData == "1")
                 {
                     room.GetGameMap().RemoveFromMap(item, false);
-                    item.interactionCountHelper = 1;
+                    item.InteractionCountHelper = 1;
                 }
                 if (string.IsNullOrEmpty(item.ExtraData))
                 {
@@ -55,7 +55,7 @@
                     }
                     else
                     {
-                        if (room.GetGameMap().itemCanBePlacedHere(item.GetX, item.GetY))
+                        if (room.GetGameMap().ItemCanBePlacedHere(item.GetX, item.GetY))
                         {
                             item.ExtraData = "0";
                             item.UpdateState();

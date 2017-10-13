@@ -6,18 +6,18 @@
     using System.Net.Sockets;
     using Commands;
 
-    public class RCONSocket
+    public class RconSocket
     {
         private readonly List<string> _allowedConnections;
         private readonly CommandManager _commands;
         private readonly int _musPort;
         private readonly Socket _musSocket;
 
-        private string _musIP;
+        private string _musIp;
 
-        public RCONSocket(string musIP, int musPort, string[] allowedConnections)
+        public RconSocket(string musIp, int musPort, string[] allowedConnections)
         {
-            _musIP = musIP;
+            _musIp = musIp;
             _musPort = musPort;
             _allowedConnections = new List<string>();
             foreach (var ipAddress in allowedConnections)
@@ -48,7 +48,7 @@
                 var ip = socket.RemoteEndPoint.ToString().Split(':')[0];
                 if (_allowedConnections.Contains(ip))
                 {
-                    new RCONConnection(socket);
+                    new RconConnection(socket);
                 }
                 else
                 {

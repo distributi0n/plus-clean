@@ -2,7 +2,8 @@
 {
     internal class PollOfferComposer : ServerPacket
     {
-        public PollOfferComposer() : base(1074)
+        public PollOfferComposer()
+            : base(1074)
         {
             WriteInteger(111141); //Room Id
             WriteString("CLIENT_NPS");

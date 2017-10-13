@@ -2,11 +2,12 @@
 {
     internal class AvatarEffectAddedComposer : ServerPacket
     {
-        public AvatarEffectAddedComposer(int SpriteId, int Duration) : base(ServerPacketHeader.AvatarEffectAddedMessageComposer)
+        public AvatarEffectAddedComposer(int spriteId, int duration)
+            : base(ServerPacketHeader.AvatarEffectAddedMessageComposer)
         {
-            WriteInteger(SpriteId);
+            WriteInteger(spriteId);
             WriteInteger(0); //Types
-            WriteInteger(Duration);
+            WriteInteger(duration);
             WriteBoolean(false); //Permanent
         }
     }

@@ -6,31 +6,30 @@
 
     internal class FloorPlanEditorRoomPropertiesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Model = Room.GetGameMap().Model;
-            if (Model == null)
+            var model = room.GetGameMap().Model;
+            if (model == null)
             {
                 return;
             }
 
-            var FloorItems = Room.GetRoomItemHandler().GetFloor;
-            Session.SendPacket(new FloorPlanFloorMapComposer(FloorItems));
-            Session.SendPacket(new FloorPlanSendDoorComposer(Model.DoorX, Model.DoorY, Model.DoorOrientation));
-            Session.SendPacket(new RoomVisualizationSettingsComposer(Room.WallThickness,
-                Room.FloorThickness,
-                PlusEnvironment.EnumToBool(Room.Hidewall.ToString())));
+            var floorItems = room.GetRoomItemHandler().GetFloor;
+
+            session.SendPacket(new FloorPlanFloorMapComposer(floorItems));
+            session.SendPacket(new FloorPlanSendDoorComposer(model.DoorX, model.DoorY, model.DoorOrientation));
+            session.SendPacket(new RoomVisualizationSettingsComposer(room.WallThickness, room.FloorThickness, PlusEnvironment.EnumToBool(room.Hidewall.ToString())));
         }
     }
 }

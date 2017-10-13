@@ -2,9 +2,10 @@
 {
     internal class RoomInfoUpdatedComposer : ServerPacket
     {
-        public RoomInfoUpdatedComposer(int roomID) : base(ServerPacketHeader.RoomInfoUpdatedMessageComposer)
+        public RoomInfoUpdatedComposer(int roomId)
+            : base(ServerPacketHeader.RoomInfoUpdatedMessageComposer)
         {
-            WriteInteger(roomID);
+            WriteInteger(roomId);
         }
     }
 }

@@ -32,12 +32,14 @@
 
     public class Habbo
     {
-        private static readonly ILog log = LogManager.GetLogger("Plus.HabboHotel.Users");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.HabboHotel.Users");
         private readonly HabboStats _habboStats;
 
         //Room related
 
         private readonly DateTime _timeCached;
+
+        private BadgeComponent _badgeComponent;
 
         //Abilitys triggered by generic events.
 
@@ -59,6 +61,9 @@
         //Generic player values.
         private IgnoresComponent _ignores;
 
+        private InventoryComponent _inventoryComponent;
+        private HabboMessenger _messenger;
+
         //Anti-script placeholders.
 
         private SearchesComponent _navigatorSearches;
@@ -70,117 +75,106 @@
         //Values generated within the game.
         public ConcurrentDictionary<string, UserAchievement> Achievements;
 
-        private BadgeComponent BadgeComponent;
         public ArrayList FavoriteRooms;
-        private InventoryComponent InventoryComponent;
-        private HabboMessenger Messenger;
-        public Dictionary<int, int> quests;
+        public Dictionary<int, int> Quests;
 
         public List<int> RatedRooms;
         public Dictionary<int, Relationship> Relationships;
         public List<RoomData> UsersRooms;
 
-        public Habbo(int Id,
-            string Username,
-            int Rank,
-            string Motto,
-            string Look,
-            string Gender,
-            int Credits,
-            int ActivityPoints,
-            int HomeRoom,
-            bool HasFriendRequestsDisabled,
-            int LastOnline,
-            bool AppearOffline,
-            bool HideInRoom,
-            double CreateDate,
-            int Diamonds,
-            string machineID,
-            string clientVolume,
-            bool ChatPreference,
-            bool FocusPreference,
-            bool PetsMuted,
-            bool BotsMuted,
-            bool AdvertisingReportBlocked,
-            double LastNameChange,
-            int GOTWPoints,
-            bool IgnoreInvites,
-            double TimeMuted,
-            double TradingLock,
-            bool AllowGifts,
-            int FriendBarState,
-            bool DisableForcedEffects,
-            bool AllowMimic,
-            int VIPRank)
+        public Habbo(int id,
+                     string username,
+                     int rank,
+                     string motto,
+                     string look,
+                     string gender,
+                     int credits,
+                     int activityPoints,
+                     int homeRoom,
+                     bool hasFriendRequestsDisabled,
+                     int lastOnline,
+                     bool appearOffline,
+                     bool hideInRoom,
+                     double createDate,
+                     int diamonds,
+                     string machineId,
+                     string clientVolume,
+                     bool chatPreference,
+                     bool focusPreference,
+                     bool petsMuted,
+                     bool botsMuted,
+                     bool advertisingReportBlocked,
+                     double lastNameChange,
+                     int gotwPoints,
+                     bool ignoreInvites,
+                     double timeMuted,
+                     double tradingLock,
+                     bool allowGifts,
+                     int friendBarState,
+                     bool disableForcedEffects,
+                     bool allowMimic,
+                     int vipRank)
         {
-            this.Id = Id;
-            this.Username = Username;
-            this.Rank = Rank;
-            this.Motto = Motto;
-            this.Look = Look;
-            this.Gender = Gender.ToLower();
-            FootballLook = PlusEnvironment.FilterFigure(Look.ToLower());
-            FootballGender = Gender.ToLower();
-            this.Credits = Credits;
-            Duckets = ActivityPoints;
-            this.Diamonds = Diamonds;
-            this.GOTWPoints = GOTWPoints;
-            this.HomeRoom = HomeRoom;
-            this.LastOnline = LastOnline;
-            AccountCreated = CreateDate;
+            Id = id;
+            Username = username;
+            Rank = rank;
+            Motto = motto;
+            Look = look;
+            Gender = gender.ToLower();
+            FootballLook = PlusEnvironment.FilterFigure(look.ToLower());
+            FootballGender = gender.ToLower();
+            Credits = credits;
+            Duckets = activityPoints;
+            Diamonds = diamonds;
+            GotwPoints = gotwPoints;
+            HomeRoom = homeRoom;
+            LastOnline = lastOnline;
+            AccountCreated = createDate;
             ClientVolume = new List<int>();
-            foreach (var Str in clientVolume.Split(','))
+            foreach (var str in clientVolume.Split(','))
             {
-                var Val = 0;
-                if (int.TryParse(Str, out Val))
-                {
-                    ClientVolume.Add(int.Parse(Str));
-                }
-                else
-                {
-                    ClientVolume.Add(100);
-                }
+                ClientVolume.Add(int.TryParse(str, out _) ? int.Parse(str) : 100);
             }
 
-            this.LastNameChange = LastNameChange;
-            MachineId = machineID;
-            this.ChatPreference = ChatPreference;
-            this.FocusPreference = FocusPreference;
+            LastNameChange = lastNameChange;
+            MachineId = machineId;
+            ChatPreference = chatPreference;
+            FocusPreference = focusPreference;
             IsExpert = IsExpert;
-            this.AppearOffline = AppearOffline;
+            AppearOffline = appearOffline;
             AllowTradingRequests = true; //TODO
             AllowUserFollowing = true; //TODO
-            AllowFriendRequests = HasFriendRequestsDisabled; //TODO
-            AllowMessengerInvites = IgnoreInvites;
-            AllowPetSpeech = PetsMuted;
-            AllowBotSpeech = BotsMuted;
-            AllowPublicRoomStatus = HideInRoom;
+            AllowFriendRequests = hasFriendRequestsDisabled; //TODO
+            AllowMessengerInvites = ignoreInvites;
+            AllowPetSpeech = petsMuted;
+            AllowBotSpeech = botsMuted;
+            AllowPublicRoomStatus = hideInRoom;
             AllowConsoleMessages = true;
-            this.AllowGifts = AllowGifts;
-            this.AllowMimic = AllowMimic;
+            AllowGifts = allowGifts;
+            AllowMimic = allowMimic;
             ReceiveWhispers = true;
             IgnorePublicWhispers = false;
             PlayingFastFood = false;
-            FriendbarState = FriendBarStateUtility.GetEnum(FriendBarState);
+            FriendbarState = FriendBarStateUtility.GetEnum(friendBarState);
             ChristmasDay = ChristmasDay;
             WantsToRideHorse = 0;
-            TimeAFK = 0;
-            this.DisableForcedEffects = DisableForcedEffects;
-            this.VIPRank = VIPRank;
+            TimeAfk = 0;
+            DisableForcedEffects = disableForcedEffects;
+            VipRank = vipRank;
             _disconnected = false;
             _habboSaved = false;
             ChangingName = false;
             FloodTime = 0;
             FriendCount = 0;
-            this.TimeMuted = TimeMuted;
+            TimeMuted = timeMuted;
             _timeCached = DateTime.Now;
-            TradingLockExpiry = TradingLock;
+            TradingLockExpiry = tradingLock;
             if (TradingLockExpiry > 0 && PlusEnvironment.GetUnixTimestamp() > TradingLockExpiry)
             {
                 TradingLockExpiry = 0;
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `user_info` SET `trading_locked` = '0' WHERE `user_id` = '" + Id + "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `user_info` SET `trading_locked` = '0' WHERE `user_id` = '" + id + "' LIMIT 1");
                 }
             }
             BannedPhraseCount = 0;
@@ -193,13 +187,13 @@
             IsHopping = false;
             TeleporterId = 0;
             IsTeleporting = false;
-            TeleportingRoomID = 0;
+            TeleportingRoomId = 0;
             RoomAuthOk = false;
             CurrentRoomId = 0;
             HasSpoken = false;
             LastAdvertiseReport = 0;
             AdvertisingReported = false;
-            AdvertisingReportedBlocked = AdvertisingReportBlocked;
+            AdvertisingReportedBlocked = advertisingReportBlocked;
             WiredInteraction = false;
             QuestLastCompleted = 0;
             InventoryAlert = false;
@@ -228,60 +222,60 @@
 
             //TODO: Nope.
             InitPermissions();
-            DataRow StatRow = null;
+            DataRow statRow = null;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery(
                     "SELECT `id`,`roomvisits`,`onlinetime`,`respect`,`respectgiven`,`giftsgiven`,`giftsreceived`,`dailyrespectpoints`,`dailypetrespectpoints`,`achievementscore`,`quest_id`,`quest_progress`,`groupid`,`tickets_answered`,`respectstimestamp`,`forum_posts` FROM `user_stats` WHERE `id` = @user_id LIMIT 1");
-                dbClient.AddParameter("user_id", Id);
-                StatRow = dbClient.GetRow();
-                if (StatRow == null) //No row, add it yo
+                dbClient.AddParameter("user_id", id);
+                statRow = dbClient.GetRow();
+                if (statRow == null) //No row, add it yo
                 {
-                    dbClient.RunQuery("INSERT INTO `user_stats` (`id`) VALUES ('" + Id + "')");
+                    dbClient.RunQuery("INSERT INTO `user_stats` (`id`) VALUES ('" + id + "')");
                     dbClient.SetQuery(
                         "SELECT `id`,`roomvisits`,`onlinetime`,`respect`,`respectgiven`,`giftsgiven`,`giftsreceived`,`dailyrespectpoints`,`dailypetrespectpoints`,`achievementscore`,`quest_id`,`quest_progress`,`groupid`,`tickets_answered`,`respectstimestamp`,`forum_posts` FROM `user_stats` WHERE `id` = @user_id LIMIT 1");
-                    dbClient.AddParameter("user_id", Id);
-                    StatRow = dbClient.GetRow();
+                    dbClient.AddParameter("user_id", id);
+                    statRow = dbClient.GetRow();
                 }
                 try
                 {
-                    _habboStats = new HabboStats(Convert.ToInt32(StatRow["roomvisits"]),
-                        Convert.ToDouble(StatRow["onlineTime"]),
-                        Convert.ToInt32(StatRow["respect"]),
-                        Convert.ToInt32(StatRow["respectGiven"]),
-                        Convert.ToInt32(StatRow["giftsGiven"]),
-                        Convert.ToInt32(StatRow["giftsReceived"]),
-                        Convert.ToInt32(StatRow["dailyRespectPoints"]),
-                        Convert.ToInt32(StatRow["dailyPetRespectPoints"]),
-                        Convert.ToInt32(StatRow["AchievementScore"]),
-                        Convert.ToInt32(StatRow["quest_id"]),
-                        Convert.ToInt32(StatRow["quest_progress"]),
-                        Convert.ToInt32(StatRow["groupid"]),
-                        Convert.ToString(StatRow["respectsTimestamp"]),
-                        Convert.ToInt32(StatRow["forum_posts"]));
-                    if (Convert.ToString(StatRow["respectsTimestamp"]) != DateTime.Today.ToString("MM/dd"))
+                    _habboStats = new HabboStats(Convert.ToInt32(statRow["roomvisits"]),
+                        Convert.ToDouble(statRow["onlineTime"]),
+                        Convert.ToInt32(statRow["respect"]),
+                        Convert.ToInt32(statRow["respectGiven"]),
+                        Convert.ToInt32(statRow["giftsGiven"]),
+                        Convert.ToInt32(statRow["giftsReceived"]),
+                        Convert.ToInt32(statRow["dailyRespectPoints"]),
+                        Convert.ToInt32(statRow["dailyPetRespectPoints"]),
+                        Convert.ToInt32(statRow["AchievementScore"]),
+                        Convert.ToInt32(statRow["quest_id"]),
+                        Convert.ToInt32(statRow["quest_progress"]),
+                        Convert.ToInt32(statRow["groupid"]),
+                        Convert.ToString(statRow["respectsTimestamp"]),
+                        Convert.ToInt32(statRow["forum_posts"]));
+                    if (Convert.ToString(statRow["respectsTimestamp"]) != DateTime.Today.ToString("MM/dd"))
                     {
                         _habboStats.RespectsTimestamp = DateTime.Today.ToString("MM/dd");
-                        SubscriptionData SubData = null;
-                        var DailyRespects = 10;
+                        SubscriptionData subData = null;
+                        var dailyRespects = 10;
                         if (_permissions.HasRight("mod_tool"))
                         {
-                            DailyRespects = 20;
+                            dailyRespects = 20;
                         }
-                        else if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(VIPRank, out SubData))
+                        else if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(vipRank, out subData))
                         {
-                            DailyRespects = SubData.Respects;
+                            dailyRespects = subData.Respects;
                         }
-                        _habboStats.DailyRespectPoints = DailyRespects;
-                        _habboStats.DailyPetRespectPoints = DailyRespects;
+                        _habboStats.DailyRespectPoints = dailyRespects;
+                        _habboStats.DailyPetRespectPoints = dailyRespects;
                         dbClient.RunQuery("UPDATE `user_stats` SET `dailyRespectPoints` = '" +
-                                          DailyRespects +
+                                          dailyRespects +
                                           "', `dailyPetRespectPoints` = '" +
-                                          DailyRespects +
+                                          dailyRespects +
                                           "', `respectsTimestamp` = '" +
                                           DateTime.Today.ToString("MM/dd") +
                                           "' WHERE `id` = '" +
-                                          Id +
+                                          id +
                                           "' LIMIT 1");
                     }
                 }
@@ -290,85 +284,85 @@
                     ExceptionLogger.LogException(e);
                 }
             }
-            Group G = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(_habboStats.FavouriteGroupId, out G))
+            Group g = null;
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(_habboStats.FavouriteGroupId, out g))
             {
                 _habboStats.FavouriteGroupId = 0;
             }
         }
 
-        public int Id { get; set; }
+        internal int Id { get; }
 
-        public string Username { get; set; }
+        internal string Username { get; set; }
 
-        public int Rank { get; set; }
+        internal int Rank { get; set; }
 
-        public string Motto { get; set; }
+        internal string Motto { get; set; }
 
-        public string Look { get; set; }
+        internal string Look { get; set; }
 
-        public string Gender { get; set; }
+        internal string Gender { get; set; }
 
-        public string FootballLook { get; set; }
+        internal string FootballLook { get; set; }
 
-        public string FootballGender { get; set; }
+        internal string FootballGender { get; set; }
 
-        public int Credits { get; set; }
+        internal int Credits { get; set; }
 
-        public int Duckets { get; set; }
+        internal int Duckets { get; set; }
 
-        public int Diamonds { get; set; }
+        internal int Diamonds { get; set; }
 
-        public int GOTWPoints { get; set; }
+        internal int GotwPoints { get; set; }
 
-        public int HomeRoom { get; set; }
+        internal int HomeRoom { get; set; }
 
-        public double LastOnline { get; set; }
+        internal double LastOnline { get; set; }
 
-        public double AccountCreated { get; set; }
+        internal double AccountCreated { get; set; }
 
-        public List<int> ClientVolume { get; set; }
+        internal List<int> ClientVolume { get; set; }
 
-        public double LastNameChange { get; set; }
+        internal double LastNameChange { get; set; }
 
-        public string MachineId { get; set; }
+        internal string MachineId { get; set; }
 
-        public bool ChatPreference { get; set; }
-        public bool FocusPreference { get; set; }
+        internal bool ChatPreference { get; set; }
+        internal bool FocusPreference { get; set; }
 
-        public bool IsExpert { get; set; }
+        internal bool IsExpert { get; set; }
 
-        public bool AppearOffline { get; set; }
+        internal bool AppearOffline { get; set; }
 
-        public int VIPRank { get; set; }
+        internal int VipRank { get; set; }
 
-        public int TempInt { get; set; }
+        private int TempInt { get; }
 
-        public bool AllowTradingRequests { get; set; }
+        internal bool AllowTradingRequests { get; set; }
 
-        public bool AllowUserFollowing { get; set; }
+        private bool AllowUserFollowing { get; }
 
-        public bool AllowFriendRequests { get; set; }
+        internal bool AllowFriendRequests { get; set; }
 
-        public bool AllowMessengerInvites { get; set; }
+        internal bool AllowMessengerInvites { get; set; }
 
-        public bool AllowPetSpeech { get; set; }
+        internal bool AllowPetSpeech { get; set; }
 
-        public bool AllowBotSpeech { get; set; }
+        internal bool AllowBotSpeech { get; set; }
 
-        public bool AllowPublicRoomStatus { get; set; }
+        internal bool AllowPublicRoomStatus { get; set; }
 
-        public bool AllowConsoleMessages { get; set; }
+        internal bool AllowConsoleMessages { get; set; }
 
-        public bool AllowGifts { get; set; }
+        internal bool AllowGifts { get; set; }
 
-        public bool AllowMimic { get; set; }
+        internal bool AllowMimic { get; set; }
 
-        public bool ReceiveWhispers { get; set; }
+        internal bool ReceiveWhispers { get; set; }
 
-        public bool IgnorePublicWhispers { get; set; }
+        internal bool IgnorePublicWhispers { get; set; }
 
-        public bool PlayingFastFood { get; set; }
+        internal bool PlayingFastFood { get; set; }
 
         public FriendBarState FriendbarState { get; set; }
 
@@ -376,7 +370,7 @@
 
         public int WantsToRideHorse { get; set; }
 
-        public int TimeAFK { get; set; }
+        public int TimeAfk { get; set; }
 
         public bool DisableForcedEffects { get; set; }
 
@@ -414,13 +408,13 @@
 
         public bool IsTeleporting { get; set; }
 
-        public int TeleportingRoomID { get; set; }
+        public int TeleportingRoomId { get; set; }
 
         public bool HasSpoken { get; set; }
 
         public double LastAdvertiseReport { get; set; }
 
-        public bool AdvertisingReported { get; set; }
+        internal bool AdvertisingReported { get; set; }
 
         public bool AdvertisingReportedBlocked { get; set; }
 
@@ -442,7 +436,7 @@
 
         public int CreditsUpdateTick { get; set; }
 
-        public IChatCommand IChatCommand { get; set; }
+        public IChatCommand ChatCommand { get; set; }
 
         public DateTime LastGiftPurchaseTime { get; set; }
 
@@ -475,10 +469,10 @@
                     return null;
                 }
 
-                Room _room = null;
-                if (PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(CurrentRoomId, out _room))
+                Room room = null;
+                if (PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(CurrentRoomId, out room))
                 {
-                    return _room;
+                    return room;
                 }
 
                 return null;
@@ -501,7 +495,7 @@
                        "', `home_room` = '" +
                        HomeRoom +
                        "', `gotw_points` = '" +
-                       GOTWPoints +
+                       GotwPoints +
                        "', `time_muted` = '" +
                        TimeMuted +
                        "',`friend_bar_state` = '" +
@@ -544,8 +538,8 @@
 
         public bool CacheExpired()
         {
-            var Span = DateTime.Now - _timeCached;
-            return Span.TotalMinutes >= 30;
+            var span = DateTime.Now - _timeCached;
+            return span.TotalMinutes >= 30;
         }
 
         public bool InitProcess()
@@ -560,7 +554,7 @@
             return _navigatorSearches.Init(this);
         }
 
-        public bool InitFX()
+        public bool InitFx()
         {
             _fx = new EffectsComponent();
             return _fx.Init(this);
@@ -586,7 +580,7 @@
 
         public void InitInformation(UserData.UserData data)
         {
-            BadgeComponent = new BadgeComponent(this, data);
+            _badgeComponent = new BadgeComponent(this, data);
             Relationships = data.Relations;
         }
 
@@ -600,17 +594,17 @@
             }
 
             _client = client;
-            BadgeComponent = new BadgeComponent(this, data);
-            InventoryComponent = new InventoryComponent(Id, client);
-            quests = data.quests;
-            Messenger = new HabboMessenger(Id);
-            Messenger.Init(data.friends, data.requests);
+            _badgeComponent = new BadgeComponent(this, data);
+            _inventoryComponent = new InventoryComponent(Id, client);
+            Quests = data.quests;
+            _messenger = new HabboMessenger(Id);
+            _messenger.Init(data.friends, data.requests);
             FriendCount = Convert.ToInt32(data.friends.Count);
             _disconnected = false;
             UsersRooms = data.rooms;
             Relationships = data.Relations;
             InitSearches();
-            InitFX();
+            InitFx();
             InitClothing();
             InitIgnores();
         }
@@ -654,7 +648,7 @@
                                       "', `home_room` = '" +
                                       HomeRoom +
                                       "', `gotw_points` = '" +
-                                      GOTWPoints +
+                                      GotwPoints +
                                       "', `time_muted` = '" +
                                       TimeMuted +
                                       "',`friend_bar_state` = '" +
@@ -705,9 +699,9 @@
 
         public void Dispose()
         {
-            if (InventoryComponent != null)
+            if (_inventoryComponent != null)
             {
-                InventoryComponent.SetIdleState();
+                _inventoryComponent.SetIdleState();
             }
             if (UsersRooms != null)
             {
@@ -715,12 +709,12 @@
             }
             if (InRoom && CurrentRoom != null)
             {
-                CurrentRoom.GetRoomUserManager().RemoveUserFromRoom(_client, false, false);
+                CurrentRoom.GetRoomUserManager().RemoveUserFromRoom(_client, false);
             }
-            if (Messenger != null)
+            if (_messenger != null)
             {
-                Messenger.AppearOffline = true;
-                Messenger.Destroy();
+                _messenger.AppearOffline = true;
+                _messenger.Destroy();
             }
             if (_fx != null)
             {
@@ -747,20 +741,20 @@
                 CreditsUpdateTick--;
                 if (CreditsUpdateTick <= 0)
                 {
-                    var CreditUpdate = Convert.ToInt32(PlusEnvironment.GetSettingsManager()
+                    var creditUpdate = Convert.ToInt32(PlusEnvironment.GetSettingsManager()
                         .TryGetValue("user.currency_scheduler.credit_reward"));
-                    var DucketUpdate = Convert.ToInt32(PlusEnvironment.GetSettingsManager()
+                    var ducketUpdate = Convert.ToInt32(PlusEnvironment.GetSettingsManager()
                         .TryGetValue("user.currency_scheduler.ducket_reward"));
-                    SubscriptionData SubData = null;
-                    if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(VIPRank, out SubData))
+                    SubscriptionData subData = null;
+                    if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(VipRank, out subData))
                     {
-                        CreditUpdate += SubData.Credits;
-                        DucketUpdate += SubData.Duckets;
+                        creditUpdate += subData.Credits;
+                        ducketUpdate += subData.Duckets;
                     }
-                    Credits += CreditUpdate;
-                    Duckets += DucketUpdate;
+                    Credits += creditUpdate;
+                    Duckets += ducketUpdate;
                     _client.SendPacket(new CreditBalanceComposer(Credits));
-                    _client.SendPacket(new HabboActivityPointNotificationComposer(Duckets, DucketUpdate));
+                    _client.SendPacket(new HabboActivityPointNotificationComposer(Duckets, ducketUpdate));
                     CreditsUpdateTick =
                         Convert.ToInt32(PlusEnvironment.GetSettingsManager().TryGetValue("user.currency_scheduler.tick"));
                 }
@@ -780,11 +774,11 @@
             return PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Id);
         }
 
-        public HabboMessenger GetMessenger() => Messenger;
+        public HabboMessenger GetMessenger() => _messenger;
 
-        public BadgeComponent GetBadgeComponent() => BadgeComponent;
+        public BadgeComponent GetBadgeComponent() => _badgeComponent;
 
-        public InventoryComponent GetInventoryComponent() => InventoryComponent;
+        public InventoryComponent GetInventoryComponent() => _inventoryComponent;
 
         public SearchesComponent GetNavigatorSearches() => _navigatorSearches;
 
@@ -795,7 +789,7 @@
         public int GetQuestProgress(int p)
         {
             var progress = 0;
-            quests.TryGetValue(p, out progress);
+            Quests.TryGetValue(p, out progress);
             return progress;
         }
 
@@ -806,25 +800,25 @@
             return achievement;
         }
 
-        public void ChangeName(string Username)
+        public void ChangeName(string username)
         {
             LastNameChange = PlusEnvironment.GetUnixTimestamp();
-            this.Username = Username;
-            SaveKey("username", Username);
+            Username = username;
+            SaveKey("username", username);
             SaveKey("last_change", LastNameChange.ToString());
         }
 
-        public void SaveKey(string Key, string Value)
+        public void SaveKey(string key, string value)
         {
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `users` SET " + Key + " = @value WHERE `id` = '" + Id + "' LIMIT 1;");
-                dbClient.AddParameter("value", Value);
+                dbClient.SetQuery("UPDATE `users` SET " + key + " = @value WHERE `id` = '" + Id + "' LIMIT 1;");
+                dbClient.AddParameter("value", value);
                 dbClient.RunQuery();
             }
         }
 
-        public void PrepareRoom(int Id, string Password)
+        public void PrepareRoom(int id, string password)
         {
             if (GetClient() == null || GetClient().GetHabbo() == null)
             {
@@ -833,49 +827,49 @@
 
             if (GetClient().GetHabbo().InRoom)
             {
-                Room OldRoom = null;
-                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(GetClient().GetHabbo().CurrentRoomId, out OldRoom))
+                Room oldRoom = null;
+                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(GetClient().GetHabbo().CurrentRoomId, out oldRoom))
                 {
                     return;
                 }
 
-                if (OldRoom.GetRoomUserManager() != null)
+                if (oldRoom.GetRoomUserManager() != null)
                 {
-                    OldRoom.GetRoomUserManager().RemoveUserFromRoom(GetClient(), false, false);
+                    oldRoom.GetRoomUserManager().RemoveUserFromRoom(GetClient(), false);
                 }
             }
 
-            if (GetClient().GetHabbo().IsTeleporting && GetClient().GetHabbo().TeleportingRoomID != Id)
+            if (GetClient().GetHabbo().IsTeleporting && GetClient().GetHabbo().TeleportingRoomId != id)
             {
                 GetClient().SendPacket(new CloseConnectionComposer());
                 return;
             }
 
-            var Room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(Id);
-            if (Room == null)
+            var room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(id);
+            if (room == null)
             {
                 GetClient().SendPacket(new CloseConnectionComposer());
                 return;
             }
 
-            if (Room.isCrashed)
+            if (room.isCrashed)
             {
                 GetClient().SendNotification("This room has crashed! :(");
                 GetClient().SendPacket(new CloseConnectionComposer());
                 return;
             }
 
-            GetClient().GetHabbo().CurrentRoomId = Room.RoomId;
-            if (Room.GetRoomUserManager().userCount >= Room.UsersMax &&
+            GetClient().GetHabbo().CurrentRoomId = room.RoomId;
+            if (room.GetRoomUserManager().userCount >= room.UsersMax &&
                 !GetClient().GetHabbo().GetPermissions().HasRight("room_enter_full") &&
-                GetClient().GetHabbo().Id != Room.OwnerId)
+                GetClient().GetHabbo().Id != room.OwnerId)
             {
                 GetClient().SendPacket(new CantConnectComposer(1));
                 GetClient().SendPacket(new CloseConnectionComposer());
                 return;
             }
 
-            if (!GetPermissions().HasRight("room_ban_override") && Room.GetBans().IsBanned(this.Id))
+            if (!GetPermissions().HasRight("room_ban_override") && room.GetBans().IsBanned(Id))
             {
                 RoomAuthOk = false;
                 GetClient().GetHabbo().RoomAuthOk = false;
@@ -885,15 +879,15 @@
             }
 
             GetClient().SendPacket(new OpenConnectionComposer());
-            if (!Room.CheckRights(GetClient(), true, true) && !GetClient().GetHabbo().IsTeleporting &&
+            if (!room.CheckRights(GetClient(), true, true) && !GetClient().GetHabbo().IsTeleporting &&
                 !GetClient().GetHabbo().IsHopping)
             {
-                if (Room.Access == RoomAccess.DOORBELL && !GetClient().GetHabbo().GetPermissions().HasRight("room_enter_locked"))
+                if (room.Access == RoomAccess.DOORBELL && !GetClient().GetHabbo().GetPermissions().HasRight("room_enter_locked"))
                 {
-                    if (Room.UserCount > 0)
+                    if (room.UserCount > 0)
                     {
                         GetClient().SendPacket(new DoorbellComposer(""));
-                        Room.SendPacket(new DoorbellComposer(GetClient().GetHabbo().Username), true);
+                        room.SendPacket(new DoorbellComposer(GetClient().GetHabbo().Username), true);
                         return;
                     }
 
@@ -902,9 +896,9 @@
                     return;
                 }
 
-                if (Room.Access == RoomAccess.PASSWORD && !GetClient().GetHabbo().GetPermissions().HasRight("room_enter_locked"))
+                if (room.Access == RoomAccess.PASSWORD && !GetClient().GetHabbo().GetPermissions().HasRight("room_enter_locked"))
                 {
-                    if (Password.ToLower() != Room.Password.ToLower() || string.IsNullOrWhiteSpace(Password))
+                    if (password.ToLower() != room.Password.ToLower() || string.IsNullOrWhiteSpace(password))
                     {
                         GetClient().SendPacket(new GenericErrorComposer(-100002));
                         GetClient().SendPacket(new CloseConnectionComposer());
@@ -913,31 +907,31 @@
                 }
             }
 
-            if (!EnterRoom(Room))
+            if (!EnterRoom(room))
             {
                 GetClient().SendPacket(new CloseConnectionComposer());
             }
         }
 
-        public bool EnterRoom(Room Room)
+        public bool EnterRoom(Room room)
         {
-            if (Room == null)
+            if (room == null)
             {
                 GetClient().SendPacket(new CloseConnectionComposer());
             }
-            GetClient().SendPacket(new RoomReadyComposer(Room.RoomId, Room.ModelName));
-            if (Room.Wallpaper != "0.0")
+            GetClient().SendPacket(new RoomReadyComposer(room.RoomId, room.ModelName));
+            if (room.Wallpaper != "0.0")
             {
-                GetClient().SendPacket(new RoomPropertyComposer("wallpaper", Room.Wallpaper));
+                GetClient().SendPacket(new RoomPropertyComposer("wallpaper", room.Wallpaper));
             }
-            if (Room.Floor != "0.0")
+            if (room.Floor != "0.0")
             {
-                GetClient().SendPacket(new RoomPropertyComposer("floor", Room.Floor));
+                GetClient().SendPacket(new RoomPropertyComposer("floor", room.Floor));
             }
-            GetClient().SendPacket(new RoomPropertyComposer("landscape", Room.Landscape));
+            GetClient().SendPacket(new RoomPropertyComposer("landscape", room.Landscape));
             GetClient()
-                .SendPacket(new RoomRatingComposer(Room.Score,
-                    !(GetClient().GetHabbo().RatedRooms.Contains(Room.RoomId) || Room.OwnerId == GetClient().GetHabbo().Id)));
+                .SendPacket(new RoomRatingComposer(room.Score,
+                    !(GetClient().GetHabbo().RatedRooms.Contains(room.RoomId) || room.OwnerId == GetClient().GetHabbo().Id)));
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.RunQuery(
@@ -953,7 +947,7 @@
                     DateTime.Now.Minute +
                     "');"); // +
             }
-            if (Room.OwnerId != Id)
+            if (room.OwnerId != Id)
             {
                 GetClient().GetHabbo().GetStats().RoomVisits += 1;
                 PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(GetClient(), "ACH_RoomEntry", 1);

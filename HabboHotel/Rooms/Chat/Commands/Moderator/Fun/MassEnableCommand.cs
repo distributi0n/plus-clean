@@ -11,47 +11,47 @@
 
         public string Description => "Give every user in the room a specific enable ID.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter an effect ID.");
+                session.SendWhisper("Please enter an effect ID.");
                 return;
             }
 
-            var EnableId = 0;
-            if (int.TryParse(Params[1], out EnableId))
+            var enableId = 0;
+            if (int.TryParse(Params[1], out enableId))
             {
-                if (EnableId == 102 || EnableId == 178)
+                if (enableId == 102 || enableId == 178)
                 {
-                    Session.Disconnect();
+                    session.Disconnect();
                     return;
                 }
 
-                if (!Session.GetHabbo().GetPermissions().HasCommand("command_override_massenable") &&
-                    Room.OwnerId != Session.GetHabbo().Id)
+                if (!session.GetHabbo().GetPermissions().HasCommand("command_override_massenable") &&
+                    room.OwnerId != session.GetHabbo().Id)
                 {
-                    Session.SendWhisper("You can only use this command in your own room.");
+                    session.SendWhisper("You can only use this command in your own room.");
                     return;
                 }
 
-                var Users = Room.GetRoomUserManager().GetRoomUsers();
-                if (Users.Count > 0)
+                var users = room.GetRoomUserManager().GetRoomUsers();
+                if (users.Count > 0)
                 {
-                    foreach (var U in Users.ToList())
+                    foreach (var u in users.ToList())
                     {
-                        if (U == null || U.RidingHorse)
+                        if (u == null || u.RidingHorse)
                         {
                             continue;
                         }
 
-                        U.ApplyEffect(EnableId);
+                        u.ApplyEffect(enableId);
                     }
                 }
             }
             else
             {
-                Session.SendWhisper("Please enter an effect ID.");
+                session.SendWhisper("Please enter an effect ID.");
             }
         }
     }

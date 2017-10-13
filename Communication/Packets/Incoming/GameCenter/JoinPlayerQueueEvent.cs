@@ -3,30 +3,31 @@
     using System;
     using System.Text;
     using HabboHotel.GameClients;
-    using HabboHotel.Games;
     using Outgoing.GameCenter;
 
-    internal sealed class JoinPlayerQueueEvent : IPacketEvent
+    internal class JoinPlayerQueueEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var GameId = Packet.PopInt();
-            GameData GameData = null;
-            if (PlusEnvironment.GetGame().GetGameDataManager().TryGetGame(GameId, out GameData))
+            var gameId = packet.PopInt();
+
+            if (!PlusEnvironment.GetGame().GetGameDataManager().TryGetGame(gameId, out var gameData))
             {
-                var SSOTicket = "HABBOON-Fastfood-" + GenerateSSO(32) + "-" + Session.GetHabbo().Id;
-                Session.SendPacket(new JoinQueueComposer(GameData.GameId));
-                Session.SendPacket(new LoadGameComposer(GameData, SSOTicket));
+                return;
             }
+
+            var ssoTicket = "HABBOON-Fastfood-" + GenerateSso(32) + "-" + session.GetHabbo().Id;
+
+            session.SendPacket(new JoinQueueComposer(gameData.GameId));
+            session.SendPacket(new LoadGameComposer(gameData, ssoTicket));
         }
 
-        // @distributi0n TODO: Utility this
-        private string GenerateSSO(int length)
+        private string GenerateSso(int length)
         {
             var random = new Random();
             var characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

@@ -3,14 +3,15 @@
     using HabboHotel.GameClients;
     using Outgoing.Rooms.Session;
 
-    internal sealed class FindRandomFriendingRoomEvent : IPacketEvent
+    internal class FindRandomFriendingRoomEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Instance = PlusEnvironment.GetGame().GetRoomManager().TryGetRandomLoadedRoom();
-            if (Instance != null)
+            var instance = PlusEnvironment.GetGame().GetRoomManager().TryGetRandomLoadedRoom();
+
+            if (instance != null)
             {
-                Session.SendPacket(new RoomForwardComposer(Instance.Id));
+                session.SendPacket(new RoomForwardComposer(instance.Id));
             }
         }
     }

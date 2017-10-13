@@ -6,12 +6,14 @@
 
     internal class TradingUpdateComposer : ServerPacket
     {
-        public TradingUpdateComposer(Trade trade) : base(ServerPacketHeader.TradingUpdateMessageComposer)
+        public TradingUpdateComposer(Trade trade)
+            : base(ServerPacketHeader.TradingUpdateMessageComposer)
         {
             foreach (var user in trade.Users.ToList())
             {
                 WriteInteger(user.RoomUser.UserId);
                 WriteInteger(user.OfferedItems.Count);
+
                 foreach (var item in user.OfferedItems.Values)
                 {
                     WriteInteger(item.Id);
@@ -33,9 +35,11 @@
                         WriteInteger(0);
                         WriteString("");
                     }
+
                     WriteInteger(0);
                     WriteInteger(0);
                     WriteInteger(0);
+
                     if (item.GetBaseItem().Type == 's')
                     {
                         WriteInteger(0);
@@ -43,8 +47,7 @@
                 }
 
                 WriteInteger(user.OfferedItems.Count); //Item Count
-                WriteInteger(user.OfferedItems.Values.Where(x => x.Data.InteractionType == InteractionType.EXCHANGE)
-                    .Sum(t => t.Data.BehaviourData));
+                WriteInteger(user.OfferedItems.Values.Where(x => x.Data.InteractionType == InteractionType.Exchange).Sum(t => t.Data.BehaviourData));
             }
         }
     }

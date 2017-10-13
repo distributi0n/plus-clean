@@ -2,9 +2,10 @@
 {
     public class SecretKeyComposer : ServerPacket
     {
-        public SecretKeyComposer(string PublicKey) : base(ServerPacketHeader.SecretKeyMessageComposer)
+        public SecretKeyComposer(string publicKey)
+            : base(ServerPacketHeader.SecretKeyMessageComposer)
         {
-            WriteString(PublicKey);
+            WriteString(publicKey);
         }
     }
 }

@@ -11,7 +11,7 @@
     internal static class NavigatorHandler
     {
         public static void Search(ServerPacket Message, SearchResultList SearchResult, string SearchData, GameClient Session,
-            int FetchLimit)
+                                  int FetchLimit)
         {
             //Switching by categorys.
             switch (SearchResult.CategoryType)

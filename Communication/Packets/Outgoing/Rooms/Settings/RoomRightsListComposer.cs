@@ -5,22 +5,24 @@
 
     internal class RoomRightsListComposer : ServerPacket
     {
-        public RoomRightsListComposer(Room Instance) : base(ServerPacketHeader.RoomRightsListMessageComposer)
+        public RoomRightsListComposer(Room instance)
+            : base(ServerPacketHeader.RoomRightsListMessageComposer)
         {
-            WriteInteger(Instance.Id);
-            WriteInteger(Instance.UsersWithRights.Count);
-            foreach (var Id in Instance.UsersWithRights.ToList())
+            WriteInteger(instance.Id);
+
+            WriteInteger(instance.UsersWithRights.Count);
+            foreach (var id in instance.UsersWithRights.ToList())
             {
-                var Data = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Id);
-                if (Data == null)
+                var data = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(id);
+                if (data == null)
                 {
                     WriteInteger(0);
                     WriteString("Unknown Error");
                 }
                 else
                 {
-                    WriteInteger(Data.Id);
-                    WriteString(Data.Username);
+                    WriteInteger(data.Id);
+                    WriteString(data.Username);
                 }
             }
         }

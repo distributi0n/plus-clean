@@ -5,19 +5,19 @@
 
     public class GetSellablePetBreedsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Type = Packet.PopString();
-            var Item = PlusEnvironment.GetGame().GetItemManager().GetItemByName(Type);
-            if (Item == null)
+            var type = packet.PopString();
+
+            var item = PlusEnvironment.GetGame().GetItemManager().GetItemByName(type);
+            if (item == null)
             {
                 return;
             }
 
-            var PetId = Item.BehaviourData;
-            Session.SendPacket(new SellablePetBreedsComposer(Type,
-                PetId,
-                PlusEnvironment.GetGame().GetCatalog().GetPetRaceManager().GetRacesForRaceId(PetId)));
+            var petId = item.BehaviourData;
+
+            session.SendPacket(new SellablePetBreedsComposer(type, petId, PlusEnvironment.GetGame().GetCatalog().GetPetRaceManager().GetRacesForRaceId(petId)));
         }
     }
 }

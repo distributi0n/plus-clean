@@ -6,10 +6,10 @@
 
     internal class SetRollerSpeedBox : IWiredItem
     {
-        public SetRollerSpeedBox(Room Instance, Item Item)
+        public SetRollerSpeedBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             if (SetItems.Count > 0)
             {
@@ -25,17 +25,17 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var Unknown = Packet.PopInt();
-            var Message = Packet.PopString();
-            StringData = Message;
-            int Speed;
-            if (!int.TryParse(StringData, out Speed))
+            var unknown = packet.PopInt();
+            var message = packet.PopString();
+            StringData = message;
+            int speed;
+            if (!int.TryParse(StringData, out speed))
             {
                 StringData = "";
             }
@@ -43,10 +43,10 @@
 
         public bool Execute(params object[] Params)
         {
-            int Speed;
-            if (int.TryParse(StringData, out Speed))
+            int speed;
+            if (int.TryParse(StringData, out speed))
             {
-                Instance.GetRoomItemHandler().SetSpeed(Speed);
+                Instance.GetRoomItemHandler().SetSpeed(speed);
             }
             return true;
         }

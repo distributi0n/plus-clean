@@ -4,13 +4,14 @@
 
     internal class UserChangeComposer : ServerPacket
     {
-        public UserChangeComposer(RoomUser User, bool Self) : base(ServerPacketHeader.UserChangeMessageComposer)
+        public UserChangeComposer(RoomUser user, bool self)
+            : base(ServerPacketHeader.UserChangeMessageComposer)
         {
-            WriteInteger(Self ? -1 : User.VirtualId);
-            WriteString(User.GetClient().GetHabbo().Look);
-            WriteString(User.GetClient().GetHabbo().Gender);
-            WriteString(User.GetClient().GetHabbo().Motto);
-            WriteInteger(User.GetClient().GetHabbo().GetStats().AchievementPoints);
+            WriteInteger(self ? -1 : user.VirtualId);
+            WriteString(user.GetClient().GetHabbo().Look);
+            WriteString(user.GetClient().GetHabbo().Gender);
+            WriteString(user.GetClient().GetHabbo().Motto);
+            WriteInteger(user.GetClient().GetHabbo().GetStats().AchievementPoints);
         }
     }
 }

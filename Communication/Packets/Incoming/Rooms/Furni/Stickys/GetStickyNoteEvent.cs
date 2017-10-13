@@ -7,26 +7,27 @@
 
     internal class GetStickyNoteEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
-            if (Item == null || Item.GetBaseItem().InteractionType != InteractionType.POSTIT)
+            var item = room.GetRoomItemHandler().GetItem(packet.PopInt());
+            if (item == null || item.GetBaseItem().InteractionType != InteractionType.Postit)
             {
                 return;
             }
 
-            Session.SendPacket(new StickyNoteComposer(Item.Id.ToString(), Item.ExtraData));
+            session.SendPacket(new StickyNoteComposer(item.Id.ToString(), item.ExtraData));
         }
     }
 }

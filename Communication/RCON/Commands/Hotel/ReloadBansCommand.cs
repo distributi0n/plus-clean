@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.Hotel
 {
-    internal class ReloadBansCommand : IRCONCommand
+    internal class ReloadBansCommand : IRconCommand
     {
         public string Description => "This command is used to re-cache the bans.";
 

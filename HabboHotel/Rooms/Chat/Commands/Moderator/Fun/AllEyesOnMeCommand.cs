@@ -12,23 +12,23 @@
 
         public string Description => "Want some attention? Make everyone face you!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (ThisUser == null)
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (thisUser == null)
             {
                 return;
             }
 
-            var Users = Room.GetRoomUserManager().GetRoomUsers();
-            foreach (var U in Users.ToList())
+            var users = room.GetRoomUserManager().GetRoomUsers();
+            foreach (var u in users.ToList())
             {
-                if (U == null || Session.GetHabbo().Id == U.UserId)
+                if (u == null || session.GetHabbo().Id == u.UserId)
                 {
                     continue;
                 }
 
-                U.SetRot(Rotation.Calculate(U.X, U.Y, ThisUser.X, ThisUser.Y), false);
+                u.SetRot(Rotation.Calculate(u.X, u.Y, thisUser.X, thisUser.Y), false);
             }
         }
     }

@@ -2,9 +2,10 @@
 {
     internal class FlatAccessibleComposer : ServerPacket
     {
-        public FlatAccessibleComposer(string Username) : base(ServerPacketHeader.FlatAccessibleMessageComposer)
+        public FlatAccessibleComposer(string username)
+            : base(ServerPacketHeader.FlatAccessibleMessageComposer)
         {
-            WriteString(Username);
+            WriteString(username);
         }
     }
 }

@@ -6,58 +6,58 @@
 
     public class InteractorWired : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
             //Room Room = Item.GetRoom();
             //Room.GetWiredHandler().RemoveWired(Item);
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Session == null || Item == null)
+            if (session == null || item == null)
             {
                 return;
             }
-            if (!HasRights)
-            {
-                return;
-            }
-
-            IWiredItem Box = null;
-            if (!Item.GetRoom().GetWired().TryGet(Item.Id, out Box))
+            if (!hasRights)
             {
                 return;
             }
 
-            Item.ExtraData = "1";
-            Item.UpdateState(false, true);
-            Item.RequestUpdate(2, true);
-            if (Item.GetBaseItem().WiredType == WiredBoxType.AddonRandomEffect)
+            IWiredItem box = null;
+            if (!item.GetRoom().GetWired().TryGet(item.Id, out box))
             {
                 return;
             }
 
-            if (Item.GetRoom().GetWired().IsTrigger(Item))
+            item.ExtraData = "1";
+            item.UpdateState(false, true);
+            item.RequestUpdate(2, true);
+            if (item.GetBaseItem().WiredType == WiredBoxType.AddonRandomEffect)
             {
-                var BlockedItems = WiredBoxTypeUtility.ContainsBlockedEffect(Box, Item.GetRoom().GetWired().GetEffects(Box));
-                Session.SendPacket(new WiredTriggerConfigComposer(Box, BlockedItems));
+                return;
             }
-            else if (Item.GetRoom().GetWired().IsEffect(Item))
+
+            if (item.GetRoom().GetWired().IsTrigger(item))
             {
-                var BlockedItems = WiredBoxTypeUtility.ContainsBlockedTrigger(Box, Item.GetRoom().GetWired().GetTriggers(Box));
-                Session.SendPacket(new WiredEffectConfigComposer(Box, BlockedItems));
+                var blockedItems = WiredBoxTypeUtility.ContainsBlockedEffect(box, item.GetRoom().GetWired().GetEffects(box));
+                session.SendPacket(new WiredTriggerConfigComposer(box, blockedItems));
             }
-            else if (Item.GetRoom().GetWired().IsCondition(Item))
+            else if (item.GetRoom().GetWired().IsEffect(item))
             {
-                Session.SendPacket(new WiredConditionConfigComposer(Box));
+                var blockedItems = WiredBoxTypeUtility.ContainsBlockedTrigger(box, item.GetRoom().GetWired().GetTriggers(box));
+                session.SendPacket(new WiredEffectConfigComposer(box, blockedItems));
+            }
+            else if (item.GetRoom().GetWired().IsCondition(item))
+            {
+                session.SendPacket(new WiredConditionConfigComposer(box));
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

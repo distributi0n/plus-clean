@@ -2,12 +2,12 @@
 {
     internal class NewConsoleMessageComposer : ServerPacket
     {
-        public NewConsoleMessageComposer(int Sender, string Message, int Time = 0) : base(ServerPacketHeader
-            .NewConsoleMessageMessageComposer)
+        public NewConsoleMessageComposer(int sender, string message, int time = 0)
+            : base(ServerPacketHeader.NewConsoleMessageMessageComposer)
         {
-            WriteInteger(Sender);
-            WriteString(Message);
-            WriteInteger(Time);
+            WriteInteger(sender);
+            WriteString(message);
+            WriteInteger(time);
         }
     }
 }

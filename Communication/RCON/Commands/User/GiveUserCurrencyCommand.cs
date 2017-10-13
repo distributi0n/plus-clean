@@ -3,7 +3,7 @@
     using System;
     using Packets.Outgoing.Inventory.Purse;
 
-    internal class GiveUserCurrencyCommand : IRCONCommand
+    internal class GiveUserCurrencyCommand : IRconCommand
     {
         public string Description => "This command is used to give a user a specified amount of a specified currency.";
 
@@ -11,8 +11,7 @@
 
         public bool TryExecute(string[] parameters)
         {
-            var userId = 0;
-            if (!int.TryParse(parameters[0], out userId))
+            if (!int.TryParse(parameters[0], out var userId))
             {
                 return false;
             }
@@ -83,15 +82,15 @@
                 }
                 case "gotw":
                 {
-                    client.GetHabbo().GOTWPoints += amount;
+                    client.GetHabbo().GotwPoints += amount;
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.SetQuery("UPDATE `users` SET `gotw_points` = @gotw WHERE `id` = @id LIMIT 1");
-                        dbClient.AddParameter("gotw", client.GetHabbo().GOTWPoints);
+                        dbClient.AddParameter("gotw", client.GetHabbo().GotwPoints);
                         dbClient.AddParameter("id", userId);
                         dbClient.RunQuery();
                     }
-                    client.SendPacket(new HabboActivityPointNotificationComposer(client.GetHabbo().GOTWPoints, 0, 103));
+                    client.SendPacket(new HabboActivityPointNotificationComposer(client.GetHabbo().GotwPoints, 0, 103));
                     break;
                 }
             }

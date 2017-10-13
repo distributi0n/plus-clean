@@ -2,11 +2,11 @@
 {
     internal class ConcurrentUsersGoalProgressComposer : ServerPacket
     {
-        public ConcurrentUsersGoalProgressComposer(int UsersNow) : base(ServerPacketHeader
-            .ConcurrentUsersGoalProgressMessageComposer)
+        public ConcurrentUsersGoalProgressComposer(int usersNow)
+            : base(ServerPacketHeader.ConcurrentUsersGoalProgressMessageComposer)
         {
             WriteInteger(0); //0/1 = Not done, 2 = Done & can claim, 3 = claimed.
-            WriteInteger(UsersNow);
+            WriteInteger(usersNow);
             WriteInteger(1000);
         }
     }

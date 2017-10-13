@@ -2,7 +2,8 @@
 {
     internal class YouAreOwnerComposer : ServerPacket
     {
-        public YouAreOwnerComposer() : base(ServerPacketHeader.YouAreOwnerMessageComposer)
+        public YouAreOwnerComposer()
+            : base(ServerPacketHeader.YouAreOwnerMessageComposer)
         {
         }
     }

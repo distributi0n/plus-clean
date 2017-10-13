@@ -2,11 +2,11 @@
 {
     internal class AvatarAspectUpdateComposer : ServerPacket
     {
-        public AvatarAspectUpdateComposer(string Figure, string Gender) : base(ServerPacketHeader
-            .AvatarAspectUpdateMessageComposer)
+        public AvatarAspectUpdateComposer(string figure, string gender)
+            : base(ServerPacketHeader.AvatarAspectUpdateMessageComposer)
         {
-            WriteString(Figure);
-            WriteString(Gender);
+            WriteString(figure);
+            WriteString(gender);
         }
     }
 }

@@ -9,6 +9,7 @@
         public void Parse(GameClient session, ClientPacket packet)
         {
             var ignoredUsers = new List<string>();
+
             foreach (var userId in new List<int>(session.GetHabbo().GetIgnores().IgnoredUserIds()))
             {
                 var player = PlusEnvironment.GetHabboById(userId);

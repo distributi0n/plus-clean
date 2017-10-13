@@ -2,10 +2,10 @@
 {
     internal class LoveLockDialogueSetLockedMessageComposer : ServerPacket
     {
-        public LoveLockDialogueSetLockedMessageComposer(int ItemId) : base(ServerPacketHeader
-            .LoveLockDialogueSetLockedMessageComposer)
+        public LoveLockDialogueSetLockedMessageComposer(int itemId)
+            : base(ServerPacketHeader.LoveLockDialogueSetLockedMessageComposer)
         {
-            WriteInteger(ItemId);
+            WriteInteger(itemId);
         }
     }
 }

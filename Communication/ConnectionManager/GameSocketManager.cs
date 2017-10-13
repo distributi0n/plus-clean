@@ -11,50 +11,49 @@
     {
         public delegate void ConnectionEvent(ConnectionInformation connection);
 
-        private static readonly ILog log = LogManager.GetLogger("Plus.Communication.ConnectionManager");
+        private static readonly ILog Log = LogManager.GetLogger("Plus.Communication.ConnectionManager");
 
         private bool _acceptConnections;
 
         private int _acceptedConnections;
 
-        //private Dictionary<string, int> ipConnectionCount;
+        private Socket _connectionListener;
+
+        private bool _disableNagleAlgorithm;
+
         private ConcurrentDictionary<string, int> _ipConnectionsCount;
 
-        private Socket connectionListener;
+        private int _maxIpConnectionCount;
 
-        private bool disableNagleAlgorithm;
-
-        private int maximumConnections;
-
-        private int maxIpConnectionCount;
+        private int _portInformation;
 
         private IDataParser parser;
 
-        private int portInformation;
-
         public event ConnectionEvent connectionEvent;
 
-        public void init(int portID, int maxConnections, int connectionsPerIP, IDataParser parser, bool disableNaglesAlgorithm)
+        internal void Init(int portId, int connectionsPerIp, IDataParser parser, bool disableNaglesAlgorithm)
         {
             _ipConnectionsCount = new ConcurrentDictionary<string, int>();
             this.parser = parser;
-            disableNagleAlgorithm = disableNaglesAlgorithm;
-            maximumConnections = maxConnections;
-            portInformation = portID;
-            maxIpConnectionCount = connectionsPerIP;
-            prepareConnectionDetails();
+            _disableNagleAlgorithm = disableNaglesAlgorithm;
+            _portInformation = portId;
+            _maxIpConnectionCount = connectionsPerIp;
+            PrepareConnectionDetails();
             _acceptedConnections = 0;
-            log.Info("Successfully setup GameSocketManager on port (" + portID + ")!");
-            log.Info("Maximum connections per IP has been set to [" + connectionsPerIP + "]!");
+            Log.Info("Successfully setup GameSocketManager on port (" + portId + ")!");
+            Log.Info("Maximum connections per IP has been set to [" + connectionsPerIp + "]!");
         }
 
-        private void prepareConnectionDetails()
+        private void PrepareConnectionDetails()
         {
-            connectionListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            connectionListener.NoDelay = disableNagleAlgorithm;
+            _connectionListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            {
+                NoDelay = _disableNagleAlgorithm
+            };
+
             try
             {
-                connectionListener.Bind(new IPEndPoint(IPAddress.Any, portInformation));
+                _connectionListener.Bind(new IPEndPoint(IPAddress.Any, _portInformation));
             }
             catch (SocketException ex)
             {
@@ -62,73 +61,74 @@
             }
         }
 
-        public void initializeConnectionRequests()
+        internal void InitializeConnectionRequests()
         {
             //Out.writeLine("Starting to listen to connection requests", Out.logFlags.ImportantLogLevel);
-            connectionListener.Listen(100);
+            _connectionListener.Listen(100);
             _acceptConnections = true;
             try
             {
-                connectionListener.BeginAccept(newConnectionRequest, connectionListener);
+                _connectionListener.BeginAccept(NewConnectionRequest, _connectionListener);
             }
             catch
             {
-                destroy();
+                Destroy();
             }
         }
 
-        public void destroy()
+        internal void Destroy()
         {
             _acceptConnections = false;
+
             try
             {
-                connectionListener.Close();
+                _connectionListener.Close();
             }
             catch
             {
+                // ignored
             }
-            connectionListener = null;
+
+            _connectionListener = null;
         }
 
-        private void newConnectionRequest(IAsyncResult iAr)
+        private void NewConnectionRequest(IAsyncResult iAr)
         {
-            if (connectionListener != null)
+            if (_connectionListener != null)
             {
                 if (_acceptConnections)
                 {
                     try
                     {
                         var replyFromComputer = ((Socket) iAr.AsyncState).EndAccept(iAr);
-                        replyFromComputer.NoDelay = disableNagleAlgorithm;
+                        replyFromComputer.NoDelay = _disableNagleAlgorithm;
                         var Ip = replyFromComputer.RemoteEndPoint.ToString().Split(':')[0];
-                        var ConnectionCount = getAmountOfConnectionFromIp(Ip);
-                        if (ConnectionCount < maxIpConnectionCount)
+                        var connectionCount = GetAmountOfConnectionFromIp(Ip);
+                        if (connectionCount < _maxIpConnectionCount)
                         {
                             _acceptedConnections++;
-                            var c = new ConnectionInformation(_acceptedConnections, replyFromComputer, this,
+                            var c = new ConnectionInformation(_acceptedConnections, replyFromComputer,
                                 parser.Clone() as IDataParser, Ip);
-                            reportUserLogin(Ip);
-                            c.connectionChanged += c_connectionChanged;
-                            if (connectionEvent != null)
-                            {
-                                connectionEvent(c);
-                            }
+                            ReportUserLogin(Ip);
+                            c.ConnectionChanged += c_connectionChanged;
+                            connectionEvent?.Invoke(c);
                         }
                         else
                         {
-                            log.Info("Connection denied from [" +
+                            Log.Info("Connection denied from [" +
                                      replyFromComputer.RemoteEndPoint.ToString().Split(':')[0] +
                                      "]. Too many connections (" +
-                                     ConnectionCount +
+                                     connectionCount +
                                      ").");
                         }
                     }
                     catch
                     {
+                        // ignored
                     }
                     finally
                     {
-                        connectionListener.BeginAccept(newConnectionRequest, connectionListener);
+                        _connectionListener.BeginAccept(NewConnectionRequest, _connectionListener);
                     }
                 }
             }
@@ -136,7 +136,7 @@
 
         private void c_connectionChanged(ConnectionInformation information, ConnectionState state)
         {
-            if (state == ConnectionState.CLOSED)
+            if (state == ConnectionState.Closed)
             {
                 reportDisconnect(information);
             }
@@ -144,23 +144,21 @@
 
         public void reportDisconnect(ConnectionInformation gameConnection)
         {
-            gameConnection.connectionChanged -= c_connectionChanged;
-            reportUserLogout(gameConnection.GetIp());
-
-            //activeConnections.Remove(gameConnection.getConnectionID());
+            gameConnection.ConnectionChanged -= c_connectionChanged;
+            ReportUserLogout(gameConnection.GetIp());
         }
 
-        private void reportUserLogin(string ip)
+        private void ReportUserLogin(string ip)
         {
-            alterIpConnectionCount(ip, getAmountOfConnectionFromIp(ip) + 1);
+            AlterIpConnectionCount(ip, GetAmountOfConnectionFromIp(ip) + 1);
         }
 
-        private void reportUserLogout(string ip)
+        private void ReportUserLogout(string ip)
         {
-            alterIpConnectionCount(ip, getAmountOfConnectionFromIp(ip) - 1);
+            AlterIpConnectionCount(ip, GetAmountOfConnectionFromIp(ip) - 1);
         }
 
-        private void alterIpConnectionCount(string ip, int amount)
+        private void AlterIpConnectionCount(string ip, int amount)
         {
             if (_ipConnectionsCount.ContainsKey(ip))
             {
@@ -170,7 +168,7 @@
             _ipConnectionsCount.TryAdd(ip, amount);
         }
 
-        private int getAmountOfConnectionFromIp(string ip)
+        private int GetAmountOfConnectionFromIp(string ip)
         {
             if (_ipConnectionsCount.ContainsKey(ip))
             {

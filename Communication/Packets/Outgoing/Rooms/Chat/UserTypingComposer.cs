@@ -2,10 +2,11 @@
 {
     public class UserTypingComposer : ServerPacket
     {
-        public UserTypingComposer(int VirtualId, bool Typing) : base(ServerPacketHeader.UserTypingMessageComposer)
+        public UserTypingComposer(int virtualId, bool typing)
+            : base(ServerPacketHeader.UserTypingMessageComposer)
         {
-            WriteInteger(VirtualId);
-            WriteInteger(Typing ? 1 : 0);
+            WriteInteger(virtualId);
+            WriteInteger(typing ? 1 : 0);
         }
     }
 }

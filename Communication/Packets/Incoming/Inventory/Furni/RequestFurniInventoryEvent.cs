@@ -9,20 +9,23 @@
 
     internal class RequestFurniInventoryEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Items = Session.GetHabbo().GetInventoryComponent().GetWallAndFloor;
+            var items = session.GetHabbo().GetInventoryComponent().GetWallAndFloor;
+
             var page = 0;
-            var pages = (Items.Count() - 1) / 700 + 1;
-            if (!Items.Any())
+            var pages = (items.Count() - 1) / 700 + 1;
+
+            if (!items.Any())
             {
-                Session.SendPacket(new FurniListComposer(Items.ToList(), 1, 0));
+                session.SendPacket(new FurniListComposer(items.ToList(), 1, 0));
             }
             else
             {
-                foreach (ICollection<Item> batch in Items.Batch(700))
+                foreach (ICollection<Item> batch in items.Batch(700))
                 {
-                    Session.SendPacket(new FurniListComposer(batch.ToList(), pages, page));
+                    session.SendPacket(new FurniListComposer(batch.ToList(), pages, page));
+
                     page++;
                 }
             }

@@ -8,87 +8,84 @@
 
     internal class RespectPetEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null ||
-                Session.GetHabbo() == null ||
-                !Session.GetHabbo().InRoom ||
-                Session.GetHabbo().GetStats() == null ||
-                Session.GetHabbo().GetStats().DailyPetRespectPoints == 0)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom || session.GetHabbo().GetStats() == null || session.GetHabbo().GetStats().DailyPetRespectPoints == 0)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (ThisUser == null)
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (thisUser == null)
             {
                 return;
             }
 
-            var PetId = Packet.PopInt();
-            RoomUser Pet = null;
-            if (!Session.GetHabbo().CurrentRoom.GetRoomUserManager().TryGetPet(PetId, out Pet))
+            var petId = packet.PopInt();
+
+            if (!session.GetHabbo().CurrentRoom.GetRoomUserManager().TryGetPet(petId, out var pet))
             {
                 //Okay so, we've established we have no pets in this room by this virtual Id, let us check out users, maybe they're creeping as a pet?!
-                var TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(PetId);
-                if (TargetUser == null)
+                var targetUser = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(petId);
+                if (targetUser == null)
                 {
                     return;
                 }
 
                 //Check some values first, please!
-                if (TargetUser.GetClient() == null || TargetUser.GetClient().GetHabbo() == null)
+                if (targetUser.GetClient() == null || targetUser.GetClient().GetHabbo() == null)
                 {
                     return;
                 }
 
-                if (TargetUser.GetClient().GetHabbo().Id == Session.GetHabbo().Id)
+                if (targetUser.GetClient().GetHabbo().Id == session.GetHabbo().Id)
                 {
-                    Session.SendWhisper("Oops, you cannot use this on yourself! (You haven't lost a point, simply reload!)");
+                    session.SendWhisper("Oops, you cannot use this on yourself! (You haven't lost a point, simply reload!)");
                     return;
                 }
 
                 //And boom! Let us send some respect points.
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.SOCIAL_RESPECT);
-                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_RespectGiven", 1);
-                PlusEnvironment.GetGame().GetAchievementManager()
-                    .ProgressAchievement(TargetUser.GetClient(), "ACH_RespectEarned", 1);
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.SocialRespect);
+                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_RespectGiven", 1);
+                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(targetUser.GetClient(), "ACH_RespectEarned", 1);
 
                 //Take away from pet respect points, just in-case users abuse this..
-                Session.GetHabbo().GetStats().DailyPetRespectPoints -= 1;
-                Session.GetHabbo().GetStats().RespectGiven += 1;
-                TargetUser.GetClient().GetHabbo().GetStats().Respect += 1;
+                session.GetHabbo().GetStats().DailyPetRespectPoints -= 1;
+                session.GetHabbo().GetStats().RespectGiven += 1;
+                targetUser.GetClient().GetHabbo().GetStats().Respect += 1;
 
                 //Apply the effect.
-                ThisUser.CarryItemID = 999999999;
-                ThisUser.CarryTimer = 5;
+                thisUser.CarryItemID = 999999999;
+                thisUser.CarryTimer = 5;
 
                 //Send the magic out.
-                if (Room.RespectNotificationsEnabled)
+                if (room.RespectNotificationsEnabled)
                 {
-                    Room.SendPacket(new RespectPetNotificationMessageComposer(TargetUser.GetClient().GetHabbo(), TargetUser));
+                    room.SendPacket(new RespectPetNotificationMessageComposer(targetUser.GetClient().GetHabbo(), targetUser));
                 }
-                Room.SendPacket(new CarryObjectComposer(ThisUser.VirtualId, ThisUser.CarryItemID));
+                room.SendPacket(new CarryObjectComposer(thisUser.VirtualId, thisUser.CarryItemID));
                 return;
             }
 
-            if (Pet == null || Pet.PetData == null || Pet.RoomId != Session.GetHabbo().CurrentRoomId)
+            if (pet?.PetData == null || pet.RoomId != session.GetHabbo().CurrentRoomId)
             {
                 return;
             }
 
-            Session.GetHabbo().GetStats().DailyPetRespectPoints -= 1;
-            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_PetRespectGiver", 1, false);
-            ThisUser.CarryItemID = 999999999;
-            ThisUser.CarryTimer = 5;
-            Pet.PetData.OnRespect();
-            Room.SendPacket(new CarryObjectComposer(ThisUser.VirtualId, ThisUser.CarryItemID));
+            session.GetHabbo().GetStats().DailyPetRespectPoints -= 1;
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_PetRespectGiver", 1);
+
+            thisUser.CarryItemID = 999999999;
+            thisUser.CarryTimer = 5;
+            pet.PetData.OnRespect();
+            room.SendPacket(new CarryObjectComposer(thisUser.VirtualId, thisUser.CarryItemID));
         }
     }
 }

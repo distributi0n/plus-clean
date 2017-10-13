@@ -2,11 +2,11 @@
 {
     public class MessengerRequest
     {
-        public MessengerRequest(int ToUser, int FromUser, string Username)
+        public MessengerRequest(int toUser, int fromUser, string username)
         {
-            To = ToUser;
-            From = FromUser;
-            this.Username = Username;
+            To = toUser;
+            From = fromUser;
+            Username = username;
         }
 
         public string Username { get; }

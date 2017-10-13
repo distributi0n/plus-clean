@@ -2,10 +2,11 @@
 {
     public class UserRightsComposer : ServerPacket
     {
-        public UserRightsComposer(int Rank) : base(ServerPacketHeader.UserRightsMessageComposer)
+        public UserRightsComposer(int rank)
+            : base(ServerPacketHeader.UserRightsMessageComposer)
         {
             WriteInteger(2); //Club level
-            WriteInteger(Rank);
+            WriteInteger(rank);
             WriteBoolean(false); //Is an ambassador
         }
     }

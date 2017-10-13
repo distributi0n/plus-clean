@@ -5,21 +5,22 @@
 
     internal class RemoveGroupFavouriteEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.GetHabbo().GetStats().FavouriteGroupId = 0;
-            if (Session.GetHabbo().InRoom)
+            session.GetHabbo().GetStats().FavouriteGroupId = 0;
+
+            if (session.GetHabbo().InRoom)
             {
-                var User = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-                if (User != null)
+                var user = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+                if (user != null)
                 {
-                    Session.GetHabbo().CurrentRoom.SendPacket(new UpdateFavouriteGroupComposer(null, User.VirtualId));
+                    session.GetHabbo().CurrentRoom.SendPacket(new UpdateFavouriteGroupComposer(null, user.VirtualId));
                 }
-                Session.GetHabbo().CurrentRoom.SendPacket(new RefreshFavouriteGroupComposer(Session.GetHabbo().Id));
+                session.GetHabbo().CurrentRoom.SendPacket(new RefreshFavouriteGroupComposer(session.GetHabbo().Id));
             }
             else
             {
-                Session.SendPacket(new RefreshFavouriteGroupComposer(Session.GetHabbo().Id));
+                session.SendPacket(new RefreshFavouriteGroupComposer(session.GetHabbo().Id));
             }
         }
     }

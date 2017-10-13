@@ -10,45 +10,45 @@
     public sealed class GamePacketParser : IDataParser
     {
         public delegate void HandlePacket(ClientPacket message);
+
         private readonly GameClient _currentClient;
         private bool _deciphered;
         private byte[] _halfData;
 
         private bool _halfDataRecieved;
-        private ConnectionInformation con;
 
-        public GamePacketParser(GameClient me) => _currentClient = me;
+        internal GamePacketParser(GameClient me) => _currentClient = me;
 
-        public void handlePacketData(byte[] Data)
+        public void HandlePacketData(byte[] data)
         {
             try
             {
-                if (_currentClient.RC4Client != null && !_deciphered)
+                if (_currentClient.Rc4Client != null && !_deciphered)
                 {
-                    _currentClient.RC4Client.Decrypt(ref Data);
+                    _currentClient.Rc4Client.Decrypt(ref data);
                     _deciphered = true;
                 }
                 if (_halfDataRecieved)
                 {
-                    var fullDataRcv = new byte[_halfData.Length + Data.Length];
+                    var fullDataRcv = new byte[_halfData.Length + data.Length];
                     Buffer.BlockCopy(_halfData, 0, fullDataRcv, 0, _halfData.Length);
-                    Buffer.BlockCopy(Data, 0, fullDataRcv, _halfData.Length, Data.Length);
+                    Buffer.BlockCopy(data, 0, fullDataRcv, _halfData.Length, data.Length);
                     _halfDataRecieved = false; // mark done this round
-                    handlePacketData(fullDataRcv); // repeat now we have the combined array
+                    HandlePacketData(fullDataRcv); // repeat now we have the combined array
                     return;
                 }
 
-                using (var Reader = new BinaryReader(new MemoryStream(Data)))
+                using (var reader = new BinaryReader(new MemoryStream(data)))
                 {
-                    if (Data.Length < 4)
+                    if (data.Length < 4)
                     {
                         return;
                     }
 
-                    var msgLen = HabboEncoding.DecodeInt32(Reader.ReadBytes(4));
-                    if (Reader.BaseStream.Length - 4 < msgLen)
+                    var msgLen = HabboEncoding.DecodeInt32(reader.ReadBytes(4));
+                    if (reader.BaseStream.Length - 4 < msgLen)
                     {
-                        _halfData = Data;
+                        _halfData = data;
                         _halfDataRecieved = true;
                         return;
                     }
@@ -58,7 +58,7 @@
                         return;
                     }
 
-                    var packet = Reader.ReadBytes(msgLen);
+                    var packet = reader.ReadBytes(msgLen);
                     using (var r = new BinaryReader(new MemoryStream(packet)))
                     {
                         var header = HabboEncoding.DecodeInt16(r.ReadBytes(2));
@@ -70,22 +70,22 @@
 
                         _deciphered = false;
                     }
-                    
-                    if (Reader.BaseStream.Length - 4 <= msgLen)
+
+                    if (reader.BaseStream.Length - 4 <= msgLen)
                     {
                         return;
                     }
 
-                    var extra = new byte[Reader.BaseStream.Length - Reader.BaseStream.Position];
-                    
-                    Buffer.BlockCopy(Data,
-                        (int) Reader.BaseStream.Position,
+                    var extra = new byte[reader.BaseStream.Length - reader.BaseStream.Position];
+
+                    Buffer.BlockCopy(data,
+                        (int) reader.BaseStream.Position,
                         extra,
                         0,
-                        (int) (Reader.BaseStream.Length - Reader.BaseStream.Position));
-                    
+                        (int) (reader.BaseStream.Length - reader.BaseStream.Position));
+
                     _deciphered = true;
-                    handlePacketData(extra);
+                    HandlePacketData(extra);
                 }
             }
             catch
@@ -106,7 +106,6 @@
 
         internal void SetConnection(ConnectionInformation con)
         {
-            this.con = con;
             OnNewPacket = null;
         }
     }

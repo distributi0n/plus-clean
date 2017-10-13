@@ -10,27 +10,27 @@
 
         public string Description => "Prevent another user from walking.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you wish to freeze.");
+                session.SendWhisper("Please enter the username of the user you wish to freeze.");
                 return;
             }
 
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
-            if (TargetClient == null)
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            if (targetClient == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            var TargetUser = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Params[1]);
-            if (TargetUser != null)
+            var targetUser = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Params[1]);
+            if (targetUser != null)
             {
-                TargetUser.Frozen = true;
+                targetUser.Frozen = true;
             }
-            Session.SendWhisper("Successfully froze " + TargetClient.GetHabbo().Username + "!");
+            session.SendWhisper("Successfully froze " + targetClient.GetHabbo().Username + "!");
         }
     }
 }

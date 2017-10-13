@@ -5,31 +5,30 @@
 
     internal class GetCurrentQuestEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var UserQuest = PlusEnvironment.GetGame().GetQuestManager().GetQuest(Session.GetHabbo().QuestLastCompleted);
-            var NextQuest = PlusEnvironment.GetGame().GetQuestManager()
-                .GetNextQuestInSeries(UserQuest.Category, UserQuest.Number + 1);
-            if (NextQuest == null)
+            var userQuest = PlusEnvironment.GetGame().GetQuestManager().GetQuest(session.GetHabbo().QuestLastCompleted);
+            var nextQuest = PlusEnvironment.GetGame().GetQuestManager().GetNextQuestInSeries(userQuest.Category, userQuest.Number + 1);
+
+            if (nextQuest == null)
             {
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("REPLACE INTO `user_quests`(`user_id`,`quest_id`) VALUES (" + Session.GetHabbo().Id + ", " +
-                                  NextQuest.Id + ")");
-                dbClient.RunQuery("UPDATE `user_stats` SET `quest_id` = '" + NextQuest.Id + "' WHERE `id` = '" +
-                                  Session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.RunQuery("REPLACE INTO `user_quests`(`user_id`,`quest_id`) VALUES (" + session.GetHabbo().Id + ", " + nextQuest.Id + ")");
+                dbClient.RunQuery("UPDATE `user_stats` SET `quest_id` = '" + nextQuest.Id + "' WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
             }
-            Session.GetHabbo().GetStats().QuestID = NextQuest.Id;
-            PlusEnvironment.GetGame().GetQuestManager().GetList(Session, null);
-            Session.SendPacket(new QuestStartedComposer(Session, NextQuest));
+
+            session.GetHabbo().GetStats().QuestID = nextQuest.Id;
+            PlusEnvironment.GetGame().GetQuestManager().GetList(session, null);
+            session.SendPacket(new QuestStartedComposer(session, nextQuest));
         }
     }
 }

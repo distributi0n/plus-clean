@@ -8,82 +8,89 @@
 
     internal class ModerateRoomEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Packet.PopInt(), out Room))
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(packet.PopInt(), out var room))
             {
                 return;
             }
 
-            var SetLock = Packet.PopInt() == 1;
-            var SetName = Packet.PopInt() == 1;
-            var KickAll = Packet.PopInt() == 1;
-            if (SetName)
+            var setLock = packet.PopInt() == 1;
+            var setName = packet.PopInt() == 1;
+            var kickAll = packet.PopInt() == 1;
+
+            if (setName)
             {
-                Room.RoomData.Name = "Inappropriate to Hotel Management";
-                Room.RoomData.Description = "Inappropriate to Hotel Management";
+                room.RoomData.Name = "Inappropriate to Hotel Management";
+                room.RoomData.Description = "Inappropriate to Hotel Management";
             }
-            if (SetLock)
+
+            if (setLock)
             {
-                Room.RoomData.Access = RoomAccess.DOORBELL;
+                room.RoomData.Access = RoomAccess.DOORBELL;
             }
-            if (Room.Tags.Count > 0)
+
+            if (room.Tags.Count > 0)
             {
-                Room.ClearTags();
+                room.ClearTags();
             }
-            if (Room.RoomData.HasActivePromotion)
+
+            if (room.RoomData.HasActivePromotion)
             {
-                Room.RoomData.EndPromotion();
+                room.RoomData.EndPromotion();
             }
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                if (SetName && SetLock)
+                if (setName && setLock)
                 {
                     dbClient.RunQuery(
                         "UPDATE `rooms` SET `caption` = 'Inappropriate to Hotel Management', `description` = 'Inappropriate to Hotel Management', `tags` = '', `state` = '1' WHERE `id` = '" +
-                        Room.RoomId +
-                        "' LIMIT 1");
+                        room.RoomId + "' LIMIT 1");
                 }
-                else if (SetName && !SetLock)
+                else if (setName)
                 {
                     dbClient.RunQuery(
                         "UPDATE `rooms` SET `caption` = 'Inappropriate to Hotel Management', `description` = 'Inappropriate to Hotel Management', `tags` = '' WHERE `id` = '" +
-                        Room.RoomId +
-                        "' LIMIT 1");
+                        room.RoomId + "' LIMIT 1");
                 }
-                else if (!SetName && SetLock)
+                else if (setLock)
                 {
-                    dbClient.RunQuery("UPDATE `rooms` SET `state` = '1', `tags` = '' WHERE `id` = '" + Room.RoomId + "' LIMIT 1");
+                    dbClient.RunQuery("UPDATE `rooms` SET `state` = '1', `tags` = '' WHERE `id` = '" + room.RoomId + "' LIMIT 1");
                 }
             }
-            Room.SendPacket(new RoomSettingsSavedComposer(Room.RoomId));
-            Room.SendPacket(new RoomInfoUpdatedComposer(Room.RoomId));
-            if (KickAll)
-            {
-                foreach (var RoomUser in Room.GetRoomUserManager().GetUserList().ToList())
-                {
-                    if (RoomUser == null || RoomUser.IsBot)
-                    {
-                        continue;
-                    }
-                    if (RoomUser.GetClient() == null || RoomUser.GetClient().GetHabbo() == null)
-                    {
-                        continue;
-                    }
-                    if (RoomUser.GetClient().GetHabbo().Rank >= Session.GetHabbo().Rank ||
-                        RoomUser.GetClient().GetHabbo().Id == Session.GetHabbo().Id)
-                    {
-                        continue;
-                    }
 
-                    Room.GetRoomUserManager().RemoveUserFromRoom(RoomUser.GetClient(), true, false);
+            room.SendPacket(new RoomSettingsSavedComposer(room.RoomId));
+            room.SendPacket(new RoomInfoUpdatedComposer(room.RoomId));
+
+            if (!kickAll)
+            {
+                return;
+            }
+
+            foreach (var roomUser in room.GetRoomUserManager().GetUserList().ToList())
+            {
+                if (roomUser == null || roomUser.IsBot)
+                {
+                    continue;
                 }
+
+                if (roomUser.GetClient() == null || roomUser.GetClient().GetHabbo() == null)
+                {
+                    continue;
+                }
+
+                if (roomUser.GetClient().GetHabbo().Rank >= session.GetHabbo().Rank || roomUser.GetClient().GetHabbo().Id == session.GetHabbo().Id)
+                {
+                    continue;
+                }
+
+                room.GetRoomUserManager().RemoveUserFromRoom(roomUser.GetClient(), true);
             }
         }
     }

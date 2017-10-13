@@ -6,63 +6,63 @@
 
     internal class InteractorSwitch : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Session == null)
+            if (session == null)
             {
                 return;
             }
 
-            var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            if (Gamemap.TilesTouching(Item.GetX, Item.GetY, User.X, User.Y))
+            if (Gamemap.TilesTouching(item.GetX, item.GetY, user.X, user.Y))
             {
-                var Modes = Item.GetBaseItem().Modes - 1;
-                if (Modes <= 0)
+                var modes = item.GetBaseItem().Modes - 1;
+                if (modes <= 0)
                 {
                     return;
                 }
 
-                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.FURNI_SWITCH);
-                var CurrentMode = 0;
-                var NewMode = 0;
-                if (!int.TryParse(Item.ExtraData, out CurrentMode))
+                PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.FurniSwitch);
+                var currentMode = 0;
+                var newMode = 0;
+                if (!int.TryParse(item.ExtraData, out currentMode))
                 {
                 }
-                if (CurrentMode <= 0)
+                if (currentMode <= 0)
                 {
-                    NewMode = 1;
+                    newMode = 1;
                 }
-                else if (CurrentMode >= Modes)
+                else if (currentMode >= modes)
                 {
-                    NewMode = 0;
+                    newMode = 0;
                 }
                 else
                 {
-                    NewMode = CurrentMode + 1;
+                    newMode = currentMode + 1;
                 }
-                Item.ExtraData = NewMode.ToString();
-                Item.UpdateState();
+                item.ExtraData = newMode.ToString();
+                item.UpdateState();
             }
             else
             {
-                User.MoveTo(Item.SquareInFront);
+                user.MoveTo(item.SquareInFront);
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

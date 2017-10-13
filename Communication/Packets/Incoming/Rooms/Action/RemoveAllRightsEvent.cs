@@ -10,47 +10,52 @@
 
     internal class RemoveAllRightsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Instance;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Instance))
-            {
-                return;
-            }
-            if (!Instance.CheckRights(Session, true))
+            Room instance;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out instance))
             {
                 return;
             }
 
-            foreach (var UserId in new List<int>(Instance.UsersWithRights))
+            if (!instance.CheckRights(session, true))
             {
-                var User = Instance.GetRoomUserManager().GetRoomUserByHabbo(UserId);
-                if (User != null && !User.IsBot)
+                return;
+            }
+
+            foreach (var userId in new List<int>(instance.UsersWithRights))
+            {
+                var user = instance.GetRoomUserManager().GetRoomUserByHabbo(userId);
+                if (user != null && !user.IsBot)
                 {
-                    User.RemoveStatus("flatctrl 1");
-                    User.UpdateNeeded = true;
-                    User.GetClient().SendPacket(new YouAreControllerComposer(0));
+                    user.RemoveStatus("flatctrl 1");
+                    user.UpdateNeeded = true;
+
+                    user.GetClient().SendPacket(new YouAreControllerComposer(0));
                 }
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.SetQuery("DELETE FROM `room_rights` WHERE `user_id` = @uid AND `room_id` = @rid LIMIT 1");
-                    dbClient.AddParameter("uid", UserId);
-                    dbClient.AddParameter("rid", Instance.Id);
+                    dbClient.AddParameter("uid", userId);
+                    dbClient.AddParameter("rid", instance.Id);
                     dbClient.RunQuery();
                 }
-                Session.SendPacket(new FlatControllerRemovedComposer(Instance, UserId));
-                Session.SendPacket(new RoomRightsListComposer(Instance));
-                Session.SendPacket(new UserUpdateComposer(Instance.GetRoomUserManager().GetUserList().ToList()));
+
+                session.SendPacket(new FlatControllerRemovedComposer(instance, userId));
+                session.SendPacket(new RoomRightsListComposer(instance));
+                session.SendPacket(new UserUpdateComposer(instance.GetRoomUserManager().GetUserList().ToList()));
             }
 
-            if (Instance.UsersWithRights.Count > 0)
+            if (instance.UsersWithRights.Count > 0)
             {
-                Instance.UsersWithRights.Clear();
+                instance.UsersWithRights.Clear();
             }
         }
     }

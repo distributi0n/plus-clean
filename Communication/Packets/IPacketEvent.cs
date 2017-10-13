@@ -3,7 +3,7 @@
     using HabboHotel.GameClients;
     using Incoming;
 
-    public interface IPacketEvent
+    internal interface IPacketEvent
     {
         void Parse(GameClient session, ClientPacket packet);
     }

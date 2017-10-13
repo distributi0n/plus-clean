@@ -7,109 +7,111 @@
     {
         public delegate void ConnectionChange(ConnectionInformation information, ConnectionState state);
 
-        private static readonly bool disableSend = false;
-        private static readonly bool disableReceive = false;
+        private static readonly bool DisableSend = false;
+        private static readonly bool DisableReceive = false;
 
-        private readonly byte[] buffer;
+        private readonly byte[] _buffer;
 
-        private readonly int connectionID;
+        private readonly int _connectionId;
 
-        private readonly Socket dataSocket;
+        private readonly Socket _dataSocket;
 
-        private readonly string ip;
+        private readonly string _ip;
 
-        private readonly AsyncCallback sendCallback;
+        private readonly AsyncCallback _sendCallback;
 
-        private bool isConnected;
+        private bool _isConnected;
 
-        private SocketManager _manager;
-
-        public ConnectionInformation(int connectionID, Socket dataStream, SocketManager manager, IDataParser parser, string ip)
+        internal ConnectionInformation(int connectionId, Socket dataStream, IDataParser parser, string ip)
         {
-            this.parser = parser;
-            buffer = new byte[GameSocketManagerStatics.BUFFER_SIZE];
-            _manager = manager;
-            dataSocket = dataStream;
-            dataSocket.SendBufferSize = GameSocketManagerStatics.BUFFER_SIZE;
-            this.ip = ip;
-            sendCallback = SentData;
-            this.connectionID = connectionID;
+            Parser = parser;
+            _buffer = new byte[GameSocketManagerStatics.BufferSize];
+            _dataSocket = dataStream;
+            _dataSocket.SendBufferSize = GameSocketManagerStatics.BufferSize;
+            _ip = ip;
+            _sendCallback = SentData;
+            _connectionId = connectionId;
 
-            if (connectionChanged != null)
-            {
-                connectionChanged.Invoke(this, ConnectionState.OPEN);
-            }
+            ConnectionChanged?.Invoke(this, ConnectionState.Open);
         }
 
-        public IDataParser parser { get; set; }
+        internal IDataParser Parser { get; set; }
 
         public void Dispose()
         {
-            if (isConnected)
+            if (_isConnected)
             {
-                disconnect();
+                Disconnect();
             }
+
             GC.SuppressFinalize(this);
         }
 
-        public event ConnectionChange connectionChanged;
+        public event ConnectionChange ConnectionChanged;
 
-        public void startPacketProcessing()
+        internal void StartPacketProcessing()
         {
-            if (!isConnected)
+            if (_isConnected)
             {
-                isConnected = true;
-                try
-                {
-                    dataSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, IncomingDataPacket, dataSocket);
-                }
-                catch
-                {
-                    disconnect();
-                }
+                return;
             }
-        }
 
-        public string GetIp() => ip;
+            _isConnected = true;
 
-        public int getConnectionID() => connectionID;
-
-        public void disconnect()
-        {
             try
             {
-                if (isConnected)
-                {
-                    isConnected = false;
-                    try
-                    {
-                        if (dataSocket != null && dataSocket.Connected)
-                        {
-                            dataSocket.Shutdown(SocketShutdown.Both);
-                            dataSocket.Close();
-                        }
-                    }
-                    catch
-                    {
-                    }
-                    dataSocket.Dispose();
-                    parser.Dispose();
-                    try
-                    {
-                        if (connectionChanged != null)
-                        {
-                            connectionChanged.Invoke(this, ConnectionState.CLOSED);
-                        }
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                    connectionChanged = null;
-                }
+                _dataSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, IncomingDataPacket, _dataSocket);
             }
             catch
             {
+                Disconnect();
+            }
+        }
+
+        internal string GetIp() => _ip;
+        internal int GetConnectionId() => _connectionId;
+
+        private void Disconnect()
+        {
+            try
+            {
+                if (!_isConnected)
+                {
+                    return;
+                }
+
+                _isConnected = false;
+
+                try
+                {
+                    if (_dataSocket != null && _dataSocket.Connected)
+                    {
+                        _dataSocket.Shutdown(SocketShutdown.Both);
+                        _dataSocket.Close();
+                    }
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                _dataSocket?.Dispose();
+
+                Parser.Dispose();
+                try
+                {
+                    ConnectionChanged?.Invoke(this, ConnectionState.Closed);
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                ConnectionChanged = null;
+            }
+            catch
+            {
+                // ignored
             }
         }
 
@@ -119,66 +121,67 @@
             try
             {
                 //The amount of bytes received in the packet
-                bytesReceived = dataSocket.EndReceive(iAr);
+                bytesReceived = _dataSocket.EndReceive(iAr);
             }
             catch //(Exception e)
             {
-                disconnect();
+                Disconnect();
                 return;
             }
 
             if (bytesReceived == 0)
             {
-                disconnect();
+                Disconnect();
                 return;
             }
 
             try
             {
-                if (!disableReceive)
+                if (DisableReceive)
                 {
-                    var packet = new byte[bytesReceived];
-                    Array.Copy(buffer, packet, bytesReceived);
-                    HandlePacketData(packet);
+                    return;
                 }
+
+                var packet = new byte[bytesReceived];
+                Array.Copy(_buffer, packet, bytesReceived);
+                HandlePacketData(packet);
             }
             catch //(Exception e)
             {
-                disconnect();
+                Disconnect();
             }
             finally
             {
                 try
                 {
-                    //and we keep looking for the next packet
-                    dataSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, IncomingDataPacket, dataSocket);
+                    _dataSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, IncomingDataPacket, _dataSocket);
                 }
-                catch //(Exception e)
+                catch
                 {
-                    disconnect();
+                    Disconnect();
                 }
             }
         }
 
         private void HandlePacketData(byte[] packet)
         {
-            parser?.handlePacketData(packet);
+            Parser?.HandlePacketData(packet);
         }
 
         internal void SendData(byte[] packet)
         {
             try
             {
-                if (!isConnected || disableSend)
+                if (!_isConnected || DisableSend)
                 {
                     return;
                 }
 
-                dataSocket.BeginSend(packet, 0, packet.Length, 0, sendCallback, null);
+                _dataSocket.BeginSend(packet, 0, packet.Length, 0, _sendCallback, null);
             }
             catch
             {
-                disconnect();
+                Disconnect();
             }
         }
 
@@ -186,11 +189,11 @@
         {
             try
             {
-                dataSocket.EndSend(iAr);
+                _dataSocket.EndSend(iAr);
             }
             catch
             {
-                disconnect();
+                Disconnect();
             }
         }
     }

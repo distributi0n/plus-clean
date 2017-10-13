@@ -8,10 +8,10 @@
 
     internal class IsNotWearingBadgeBox : IWiredItem
     {
-        public IsNotWearingBadgeBox(Room Instance, Item Item)
+        public IsNotWearingBadgeBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -23,11 +23,11 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var BadgeCode = Packet.PopString();
-            StringData = BadgeCode;
+            var unknown = packet.PopInt();
+            var badgeCode = packet.PopString();
+            StringData = badgeCode;
         }
 
         public bool Execute(params object[] Params)
@@ -41,24 +41,24 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
-            if (!Player.GetBadgeComponent().GetBadges().Contains(Player.GetBadgeComponent().GetBadge(StringData)))
+            if (!player.GetBadgeComponent().GetBadges().Contains(player.GetBadgeComponent().GetBadge(StringData)))
             {
                 return true;
             }
 
-            foreach (var Badge in Player.GetBadgeComponent().GetBadges().ToList())
+            foreach (var badge in player.GetBadgeComponent().GetBadges().ToList())
             {
-                if (Badge.Slot <= 0)
+                if (badge.Slot <= 0)
                 {
                     continue;
                 }
 
-                if (Badge.Code == StringData)
+                if (badge.Code == StringData)
                 {
                     return false;
                 }

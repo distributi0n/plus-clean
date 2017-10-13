@@ -6,16 +6,16 @@
 
     internal class GetYouTubePlaylistComposer : ServerPacket
     {
-        public GetYouTubePlaylistComposer(int ItemId, ICollection<TelevisionItem> Videos) : base(ServerPacketHeader
-            .GetYouTubePlaylistMessageComposer)
+        public GetYouTubePlaylistComposer(int itemId, ICollection<TelevisionItem> videos)
+            : base(ServerPacketHeader.GetYouTubePlaylistMessageComposer)
         {
-            WriteInteger(ItemId);
-            WriteInteger(Videos.Count);
-            foreach (var Video in Videos.ToList())
+            WriteInteger(itemId);
+            WriteInteger(videos.Count);
+            foreach (var video in videos.ToList())
             {
-                WriteString(Video.YouTubeId);
-                WriteString(Video.Title); //Title
-                WriteString(Video.Description); //Description
+                WriteString(video.YouTubeId);
+                WriteString(video.Title); //Title
+                WriteString(video.Description); //Description
             }
 
             WriteString("");

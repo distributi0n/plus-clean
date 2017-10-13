@@ -5,10 +5,11 @@
 
     internal class GetUserTagsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var UserId = Packet.PopInt();
-            Session.SendPacket(new UserTagsComposer(UserId));
+            var userId = packet.PopInt();
+
+            session.SendPacket(new UserTagsComposer(userId));
         }
     }
 }

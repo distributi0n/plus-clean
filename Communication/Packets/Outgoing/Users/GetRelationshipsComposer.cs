@@ -4,15 +4,15 @@
 
     internal class GetRelationshipsComposer : ServerPacket
     {
-        public GetRelationshipsComposer(Habbo Habbo, int Loves, int Likes, int Hates) : base(ServerPacketHeader
-            .GetRelationshipsMessageComposer)
+        public GetRelationshipsComposer(Habbo habbo, int loves, int likes, int hates)
+            : base(ServerPacketHeader.GetRelationshipsMessageComposer)
         {
-            WriteInteger(Habbo.Id);
-            WriteInteger(Habbo.Relationships.Count); // Count
-            foreach (var Rel in Habbo.Relationships.Values)
+            WriteInteger(habbo.Id);
+            WriteInteger(habbo.Relationships.Count); // Count
+            foreach (var rel in habbo.Relationships.Values)
             {
-                var HHab = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Rel.UserId);
-                if (HHab == null)
+                var hHab = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(rel.UserId);
+                if (hHab == null)
                 {
                     WriteInteger(0);
                     WriteInteger(0);
@@ -22,11 +22,11 @@
                 }
                 else
                 {
-                    WriteInteger(Rel.Type);
-                    WriteInteger(Rel.Type == 1 ? Loves : Rel.Type == 2 ? Likes : Hates);
-                    WriteInteger(Rel.UserId); // Their ID
-                    WriteString(HHab.Username);
-                    WriteString(HHab.Look);
+                    WriteInteger(rel.Type);
+                    WriteInteger(rel.Type == 1 ? loves : rel.Type == 2 ? likes : hates);
+                    WriteInteger(rel.UserId); // Their ID
+                    WriteString(hHab.Username);
+                    WriteString(hHab.Look);
                 }
             }
         }

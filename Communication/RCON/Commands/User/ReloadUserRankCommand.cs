@@ -2,7 +2,7 @@
 {
     using Packets.Outgoing.Moderation;
 
-    internal class ReloadUserRankCommand : IRCONCommand
+    internal class ReloadUserRankCommand : IRconCommand
     {
         public string Description => "This command is used to reload a users rank and permissions.";
 

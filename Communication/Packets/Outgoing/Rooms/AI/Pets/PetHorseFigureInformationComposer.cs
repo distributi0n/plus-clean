@@ -4,26 +4,26 @@
 
     internal class PetHorseFigureInformationComposer : ServerPacket
     {
-        public PetHorseFigureInformationComposer(RoomUser PetUser) : base(ServerPacketHeader
-            .PetHorseFigureInformationMessageComposer)
+        public PetHorseFigureInformationComposer(RoomUser petUser)
+            : base(ServerPacketHeader.PetHorseFigureInformationMessageComposer)
         {
-            WriteInteger(PetUser.PetData.VirtualId);
-            WriteInteger(PetUser.PetData.PetId);
-            WriteInteger(PetUser.PetData.Type);
-            WriteInteger(int.Parse(PetUser.PetData.Race));
-            WriteString(PetUser.PetData.Color.ToLower());
-            if (PetUser.PetData.Saddle > 0)
+            WriteInteger(petUser.PetData.VirtualId);
+            WriteInteger(petUser.PetData.PetId);
+            WriteInteger(petUser.PetData.Type);
+            WriteInteger(int.Parse(petUser.PetData.Race));
+            WriteString(petUser.PetData.Color.ToLower());
+            if (petUser.PetData.Saddle > 0)
             {
                 WriteInteger(4);
                 WriteInteger(3);
                 WriteInteger(3);
-                WriteInteger(PetUser.PetData.PetHair);
-                WriteInteger(PetUser.PetData.HairDye);
+                WriteInteger(petUser.PetData.PetHair);
+                WriteInteger(petUser.PetData.HairDye);
                 WriteInteger(2);
-                WriteInteger(PetUser.PetData.PetHair);
-                WriteInteger(PetUser.PetData.HairDye);
+                WriteInteger(petUser.PetData.PetHair);
+                WriteInteger(petUser.PetData.HairDye);
                 WriteInteger(4);
-                WriteInteger(PetUser.PetData.Saddle);
+                WriteInteger(petUser.PetData.Saddle);
                 WriteInteger(0);
             }
             else
@@ -31,14 +31,14 @@
                 WriteInteger(1);
                 WriteInteger(2);
                 WriteInteger(2);
-                WriteInteger(PetUser.PetData.PetHair);
-                WriteInteger(PetUser.PetData.HairDye);
+                WriteInteger(petUser.PetData.PetHair);
+                WriteInteger(petUser.PetData.HairDye);
                 WriteInteger(3);
-                WriteInteger(PetUser.PetData.PetHair);
-                WriteInteger(PetUser.PetData.HairDye);
+                WriteInteger(petUser.PetData.PetHair);
+                WriteInteger(petUser.PetData.HairDye);
             }
-            WriteBoolean(PetUser.PetData.Saddle > 0);
-            WriteBoolean(PetUser.RidingHorse);
+            WriteBoolean(petUser.PetData.Saddle > 0);
+            WriteBoolean(petUser.RidingHorse);
         }
     }
 }

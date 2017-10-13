@@ -8,54 +8,59 @@
 
     internal class CreditFurniRedeemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
-            if (!Room.CheckRights(Session, true))
+
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
             if (PlusEnvironment.GetSettingsManager().TryGetValue("room.item.exchangeables.enabled") != "1")
             {
-                Session.SendNotification("The hotel managers have temporarilly disabled exchanging!");
+                session.SendNotification("The hotel managers have temporarilly disabled exchanging!");
                 return;
             }
 
-            var Exchange = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
-            if (Exchange == null)
-            {
-                return;
-            }
-            if (Exchange.Data.InteractionType != InteractionType.EXCHANGE)
+            var exchange = room.GetRoomItemHandler().GetItem(packet.PopInt());
+            if (exchange == null)
             {
                 return;
             }
 
-            var Value = Exchange.Data.BehaviourData;
-            if (Value > 0)
+            if (exchange.Data.InteractionType != InteractionType.Exchange)
             {
-                Session.GetHabbo().Credits += Value;
-                Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
+                return;
             }
+
+            var value = exchange.Data.BehaviourData;
+
+            if (value > 0)
+            {
+                session.GetHabbo().Credits += value;
+                session.SendPacket(new CreditBalanceComposer(session.GetHabbo().Credits));
+            }
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("DELETE FROM `items` WHERE `id` = @exchangeId LIMIT 1");
-                dbClient.AddParameter("exchangeId", Exchange.Id);
+                dbClient.AddParameter("exchangeId", exchange.Id);
                 dbClient.RunQuery();
             }
-            Session.SendPacket(new FurniListUpdateComposer());
-            Room.GetRoomItemHandler().RemoveFurniture(null, Exchange.Id, false);
-            Session.GetHabbo().GetInventoryComponent().RemoveItem(Exchange.Id);
+
+            session.SendPacket(new FurniListUpdateComposer());
+            room.GetRoomItemHandler().RemoveFurniture(null, exchange.Id, false);
+            session.GetHabbo().GetInventoryComponent().RemoveItem(exchange.Id);
         }
     }
 }

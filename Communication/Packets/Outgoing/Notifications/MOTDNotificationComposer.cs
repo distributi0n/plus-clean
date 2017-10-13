@@ -1,11 +1,12 @@
 ﻿namespace Plus.Communication.Packets.Outgoing.Notifications
 {
-    internal class MOTDNotificationComposer : ServerPacket
+    internal class MotdNotificationComposer : ServerPacket
     {
-        public MOTDNotificationComposer(string Message) : base(ServerPacketHeader.MOTDNotificationMessageComposer)
+        public MotdNotificationComposer(string message)
+            : base(ServerPacketHeader.MotdNotificationMessageComposer)
         {
             WriteInteger(1);
-            WriteString(Message);
+            WriteString(message);
         }
     }
 }

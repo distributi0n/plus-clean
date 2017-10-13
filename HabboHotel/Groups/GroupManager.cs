@@ -114,8 +114,7 @@
                             Convert.ToInt32(Row["state"]),
                             Convert.ToInt32(Row["colour1"]),
                             Convert.ToInt32(Row["colour2"]),
-                            Convert.ToInt32(Row["admindeco"]),
-                            Convert.ToInt32(Row["forum_enabled"]) == 1);
+                            Convert.ToInt32(Row["admindeco"]));
                         _groups.TryAdd(Group.Id, Group);
                         return true;
                     }
@@ -126,10 +125,10 @@
         }
 
         public bool TryCreateGroup(Habbo Player, string Name, string Description, int RoomId, string Badge, int Colour1,
-            int Colour2, out Group Group)
+                                   int Colour2, out Group Group)
         {
             Group = new Group(0, Name, Description, Badge, RoomId, Player.Id, (int) PlusEnvironment.GetUnixTimestamp(), 0,
-                Colour1, Colour2, 0, false);
+                Colour1, Colour2, 0);
             if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Badge))
             {
                 return false;

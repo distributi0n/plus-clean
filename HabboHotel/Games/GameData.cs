@@ -3,17 +3,17 @@
     public class GameData
     {
         public GameData(int GameId,
-            string GameName,
-            string ColourOne,
-            string ColourTwo,
-            string ResourcePath,
-            string StringThree,
-            string GameSWF,
-            string GameAssets,
-            string GameServerHost,
-            string GameServerPort,
-            string SocketPolicyPort,
-            bool GameEnabled)
+                        string GameName,
+                        string ColourOne,
+                        string ColourTwo,
+                        string ResourcePath,
+                        string StringThree,
+                        string GameSWF,
+                        string GameAssets,
+                        string GameServerHost,
+                        string GameServerPort,
+                        string SocketPolicyPort,
+                        bool GameEnabled)
         {
             this.GameId = GameId;
             this.GameName = GameName;

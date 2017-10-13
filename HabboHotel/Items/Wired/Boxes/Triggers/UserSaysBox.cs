@@ -10,10 +10,10 @@
 
     internal class UserSaysBox : IWiredItem
     {
-        public UserSaysBox(Room Instance, Item Item)
+        public UserSaysBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             StringData = "";
             SetItems = new ConcurrentDictionary<int, Item>();
         }
@@ -26,69 +26,69 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var OwnerOnly = Packet.PopInt();
-            var Message = Packet.PopString();
-            BoolData = OwnerOnly == 1;
-            StringData = Message;
+            var unknown = packet.PopInt();
+            var ownerOnly = packet.PopInt();
+            var message = packet.PopString();
+            BoolData = ownerOnly == 1;
+            StringData = message;
         }
 
         public bool Execute(params object[] Params)
         {
-            var Player = (Habbo) Params[0];
-            if (Player == null || Player.CurrentRoom == null || !Player.InRoom)
+            var player = (Habbo) Params[0];
+            if (player == null || player.CurrentRoom == null || !player.InRoom)
             {
                 return false;
             }
 
-            var User = Player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Player.Username);
-            if (User == null)
+            var user = player.CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(player.Username);
+            if (user == null)
             {
                 return false;
             }
 
-            var Message = Convert.ToString(Params[1]);
-            if (BoolData && Instance.OwnerId != Player.Id ||
-                Player == null ||
-                string.IsNullOrWhiteSpace(Message) ||
+            var message = Convert.ToString(Params[1]);
+            if (BoolData && Instance.OwnerId != player.Id ||
+                player == null ||
+                string.IsNullOrWhiteSpace(message) ||
                 string.IsNullOrWhiteSpace(StringData))
             {
                 return false;
             }
 
-            if (Message.Contains(" " + StringData) || Message.Contains(StringData + " ") || Message == StringData)
+            if (message.Contains(" " + StringData) || message.Contains(StringData + " ") || message == StringData)
             {
-                Player.WiredInteraction = true;
-                var Effects = Instance.GetWired().GetEffects(this);
-                var Conditions = Instance.GetWired().GetConditions(this);
-                foreach (var Condition in Conditions.ToList())
+                player.WiredInteraction = true;
+                var effects = Instance.GetWired().GetEffects(this);
+                var conditions = Instance.GetWired().GetConditions(this);
+                foreach (var condition in conditions.ToList())
                 {
-                    if (!Condition.Execute(Player))
+                    if (!condition.Execute(player))
                     {
                         return false;
                     }
 
-                    Instance.GetWired().OnEvent(Condition.Item);
+                    Instance.GetWired().OnEvent(condition.Item);
                 }
 
-                Player.GetClient().SendPacket(new WhisperComposer(User.VirtualId, Message, 0, 0));
+                player.GetClient().SendPacket(new WhisperComposer(user.VirtualId, message, 0, 0));
 
                 //Check the ICollection to find the random addon effect.
-                var HasRandomEffectAddon = Effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
-                if (HasRandomEffectAddon)
+                var hasRandomEffectAddon = effects.Count(x => x.Type == WiredBoxType.AddonRandomEffect) > 0;
+                if (hasRandomEffectAddon)
                 {
                     //Okay, so we have a random addon effect, now lets get the IWiredItem and attempt to execute it.
-                    var RandomBox = Effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
-                    if (!RandomBox.Execute())
+                    var randomBox = effects.FirstOrDefault(x => x.Type == WiredBoxType.AddonRandomEffect);
+                    if (!randomBox.Execute())
                     {
                         return false;
                     }
 
                     //Success! Let's get our selected box and continue.
-                    var SelectedBox = Instance.GetWired().GetRandomEffect(Effects.ToList());
-                    if (!SelectedBox.Execute())
+                    var selectedBox = Instance.GetWired().GetRandomEffect(effects.ToList());
+                    if (!selectedBox.Execute())
                     {
                         return false;
                     }
@@ -96,20 +96,20 @@
                     //Woo! Almost there captain, now lets broadcast the update to the room instance.
                     if (Instance != null)
                     {
-                        Instance.GetWired().OnEvent(RandomBox.Item);
-                        Instance.GetWired().OnEvent(SelectedBox.Item);
+                        Instance.GetWired().OnEvent(randomBox.Item);
+                        Instance.GetWired().OnEvent(selectedBox.Item);
                     }
                 }
                 else
                 {
-                    foreach (var Effect in Effects.ToList())
+                    foreach (var effect in effects.ToList())
                     {
-                        if (!Effect.Execute(Player))
+                        if (!effect.Execute(player))
                         {
                             return false;
                         }
 
-                        Instance.GetWired().OnEvent(Effect.Item);
+                        Instance.GetWired().OnEvent(effect.Item);
                     }
                 }
 

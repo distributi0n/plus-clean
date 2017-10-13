@@ -4,7 +4,7 @@
 
     internal class OnBullyClickEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
             //I am a very boring packet.
         }

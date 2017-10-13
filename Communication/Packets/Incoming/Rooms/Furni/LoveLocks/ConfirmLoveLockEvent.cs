@@ -7,131 +7,110 @@
 
     internal class ConfirmLoveLockEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var pId = Packet.PopInt();
-            var isConfirmed = Packet.PopBoolean();
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var pId = packet.PopInt();
+            var isConfirmed = packet.PopBoolean();
+
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(pId);
-            if (Item == null || Item.GetBaseItem() == null || Item.GetBaseItem().InteractionType != InteractionType.LOVELOCK)
+            var item = room.GetRoomItemHandler().GetItem(pId);
+
+            if (item?.GetBaseItem() == null || item.GetBaseItem().InteractionType != InteractionType.Lovelock)
             {
                 return;
             }
 
-            var UserOneId = Item.InteractingUser;
-            var UserTwoId = Item.InteractingUser2;
-            var UserOne = Room.GetRoomUserManager().GetRoomUserByHabbo(UserOneId);
-            var UserTwo = Room.GetRoomUserManager().GetRoomUserByHabbo(UserTwoId);
-            if (UserOne == null && UserTwo == null)
-            {
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                Session.SendNotification("Your partner has left the room or has cancelled the love lock.");
-                return;
-            }
+            var userOneId = item.InteractingUser;
+            var userTwoId = item.InteractingUser2;
 
-            if (UserOne.GetClient() == null || UserTwo.GetClient() == null)
-            {
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                Session.SendNotification("Your partner has left the room or has cancelled the love lock.");
-                return;
-            }
+            var userOne = room.GetRoomUserManager().GetRoomUserByHabbo(userOneId);
+            var userTwo = room.GetRoomUserManager().GetRoomUserByHabbo(userTwoId);
 
-            if (UserOne == null)
+            if (userOne == null && userTwo == null)
             {
-                UserTwo.CanWalk = true;
-                UserTwo.GetClient().SendNotification("Your partner has left the room or has cancelled the love lock.");
-                UserTwo.LLPartner = 0;
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                return;
+                item.InteractingUser = 0;
+                item.InteractingUser2 = 0;
+                session.SendNotification("Your partner has left the room or has cancelled the love lock.");
             }
+            else if (userOne != null && (userOne.GetClient() == null || userTwo.GetClient() == null))
+            {
+                item.InteractingUser = 0;
+                item.InteractingUser2 = 0;
+                session.SendNotification("Your partner has left the room or has cancelled the love lock.");
+            }
+            else if (item.ExtraData.Contains(Convert.ToChar(5).ToString()))
+            {
+                userTwo.CanWalk = true;
+                userTwo.GetClient().SendNotification("It appears this love lock has already been locked.");
+                userTwo.LLPartner = 0;
 
-            if (UserTwo == null)
-            {
-                UserOne.CanWalk = true;
-                UserOne.GetClient().SendNotification("Your partner has left the room or has cancelled the love lock.");
-                UserOne.LLPartner = 0;
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                return;
-            }
+                userOne.CanWalk = true;
+                userOne.GetClient().SendNotification("It appears this love lock has already been locked.");
+                userOne.LLPartner = 0;
 
-            if (Item.ExtraData.Contains(Convert.ToChar(5).ToString()))
-            {
-                UserTwo.CanWalk = true;
-                UserTwo.GetClient().SendNotification("It appears this love lock has already been locked.");
-                UserTwo.LLPartner = 0;
-                UserOne.CanWalk = true;
-                UserOne.GetClient().SendNotification("It appears this love lock has already been locked.");
-                UserOne.LLPartner = 0;
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                return;
+                item.InteractingUser = 0;
+                item.InteractingUser2 = 0;
             }
+            else if (!isConfirmed)
+            {
+                item.InteractingUser = 0;
+                item.InteractingUser2 = 0;
 
-            if (!isConfirmed)
-            {
-                Item.InteractingUser = 0;
-                Item.InteractingUser2 = 0;
-                UserOne.LLPartner = 0;
-                UserTwo.LLPartner = 0;
-                UserOne.CanWalk = true;
-                UserTwo.CanWalk = true;
-                return;
-            }
+                userOne.LLPartner = 0;
+                userTwo.LLPartner = 0;
 
-            if (UserOneId == Session.GetHabbo().Id)
-            {
-                Session.SendPacket(new LoveLockDialogueSetLockedMessageComposer(pId));
-                UserOne.LLPartner = UserTwoId;
+                userOne.CanWalk = true;
+                userTwo.CanWalk = true;
             }
-            else if (UserTwoId == Session.GetHabbo().Id)
+            else
             {
-                Session.SendPacket(new LoveLockDialogueSetLockedMessageComposer(pId));
-                UserTwo.LLPartner = UserOneId;
-            }
-            if (UserOne.LLPartner == 0 || UserTwo.LLPartner == 0)
-            {
-                return;
-            }
+                if (userOneId == session.GetHabbo().Id)
+                {
+                    session.SendPacket(new LoveLockDialogueSetLockedMessageComposer(pId));
+                    userOne.LLPartner = userTwoId;
+                }
+                else if (userTwoId == session.GetHabbo().Id)
+                {
+                    session.SendPacket(new LoveLockDialogueSetLockedMessageComposer(pId));
+                    userTwo.LLPartner = userOneId;
+                }
 
-            Item.ExtraData =
-                "1" +
-                (char) 5 +
-                UserOne.GetUsername() +
-                (char) 5 +
-                UserTwo.GetUsername() +
-                (char) 5 +
-                UserOne.GetClient().GetHabbo().Look +
-                (char) 5 +
-                UserTwo.GetClient().GetHabbo().Look +
-                (char) 5 +
-                DateTime.Now.ToString("dd/MM/yyyy");
-            Item.InteractingUser = 0;
-            Item.InteractingUser2 = 0;
-            UserOne.LLPartner = 0;
-            UserTwo.LLPartner = 0;
-            Item.UpdateState(true, true);
-            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-            {
-                dbClient.SetQuery("UPDATE `items` SET `extra_data` = @extraData WHERE `id` = @ID LIMIT 1");
-                dbClient.AddParameter("extraData", Item.ExtraData);
-                dbClient.AddParameter("ID", Item.Id);
-                dbClient.RunQuery();
+                if (userOne.LLPartner == 0 || userTwo.LLPartner == 0)
+                {
+                }
+                else
+                {
+                    item.ExtraData = "1" + (char) 5 + userOne.GetUsername() + (char) 5 + userTwo.GetUsername() + (char) 5 + userOne.GetClient().GetHabbo().Look + (char) 5 +
+                                     userTwo.GetClient().GetHabbo().Look + (char) 5 + DateTime.Now.ToString("dd/MM/yyyy");
+
+                    item.InteractingUser = 0;
+                    item.InteractingUser2 = 0;
+
+                    userOne.LLPartner = 0;
+                    userTwo.LLPartner = 0;
+
+                    item.UpdateState(true, true);
+
+                    using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+                    {
+                        dbClient.SetQuery("UPDATE `items` SET `extra_data` = @extraData WHERE `id` = @ID LIMIT 1");
+                        dbClient.AddParameter("extraData", item.ExtraData);
+                        dbClient.AddParameter("ID", item.Id);
+                        dbClient.RunQuery();
+                    }
+
+                    userOne.GetClient().SendPacket(new LoveLockDialogueCloseMessageComposer(pId));
+                    userTwo.GetClient().SendPacket(new LoveLockDialogueCloseMessageComposer(pId));
+
+                    userOne.CanWalk = true;
+                    userTwo.CanWalk = true;
+                }
             }
-            UserOne.GetClient().SendPacket(new LoveLockDialogueCloseMessageComposer(pId));
-            UserTwo.GetClient().SendPacket(new LoveLockDialogueCloseMessageComposer(pId));
-            UserOne.CanWalk = true;
-            UserTwo.CanWalk = true;
-            UserOne = null;
-            UserTwo = null;
         }
     }
 }

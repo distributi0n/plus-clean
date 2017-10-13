@@ -6,44 +6,46 @@
 
     internal class SetMannequinFigureEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null || !Room.CheckRights(Session, true))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null || !room.CheckRights(session, true))
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var Item = Session.GetHabbo().CurrentRoom.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null)
+            var itemId = packet.PopInt();
+            var item = session.GetHabbo().CurrentRoom.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            var Gender = Session.GetHabbo().Gender.ToLower();
-            var Figure = "";
-            foreach (var Str in Session.GetHabbo().Look.Split('.'))
+            var gender = session.GetHabbo().Gender.ToLower();
+            var figure = "";
+
+            foreach (var str in session.GetHabbo().Look.Split('.'))
             {
-                if (Str.Contains("hr") || Str.Contains("hd") || Str.Contains("he") || Str.Contains("ea") || Str.Contains("ha"))
+                if (str.Contains("hr") || str.Contains("hd") || str.Contains("he") || str.Contains("ea") || str.Contains("ha"))
                 {
                     continue;
                 }
 
-                Figure += Str + ".";
+                figure += str + ".";
             }
 
-            Figure = Figure.TrimEnd('.');
-            if (Item.ExtraData.Contains(Convert.ToChar(5)))
+            figure = figure.TrimEnd('.');
+            if (item.ExtraData.Contains(Convert.ToChar(5)))
             {
-                var Flags = Item.ExtraData.Split(Convert.ToChar(5));
-                Item.ExtraData = Gender + Convert.ToChar(5) + Figure + Convert.ToChar(5) + Flags[2];
+                var flags = item.ExtraData.Split(Convert.ToChar(5));
+                item.ExtraData = gender + Convert.ToChar(5) + figure + Convert.ToChar(5) + flags[2];
             }
             else
             {
-                Item.ExtraData = Gender + Convert.ToChar(5) + Figure + Convert.ToChar(5) + "Default";
+                item.ExtraData = gender + Convert.ToChar(5) + figure + Convert.ToChar(5) + "Default";
             }
-            Item.UpdateState(true, true);
+
+            item.UpdateState(true, true);
         }
     }
 }

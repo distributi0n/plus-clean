@@ -2,10 +2,11 @@
 {
     internal class UnbanUserFromRoomComposer : ServerPacket
     {
-        public UnbanUserFromRoomComposer(int RoomId, int UserId) : base(ServerPacketHeader.UnbanUserFromRoomMessageComposer)
+        public UnbanUserFromRoomComposer(int roomId, int userId)
+            : base(ServerPacketHeader.UnbanUserFromRoomMessageComposer)
         {
-            WriteInteger(RoomId);
-            WriteInteger(UserId);
+            WriteInteger(roomId);
+            WriteInteger(userId);
         }
     }
 }

@@ -10,16 +10,16 @@
 
         public string Description => "Is the game map of your room broken? Fix it with this command!";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
-                Session.SendWhisper("Oops, only the owner of this room can run this command!");
+                session.SendWhisper("Oops, only the owner of this room can run this command!");
                 return;
             }
 
-            Room.GetGameMap().GenerateMaps();
-            Session.SendWhisper("Game map of this room successfully re-generated.");
+            room.GetGameMap().GenerateMaps();
+            session.SendWhisper("Game map of this room successfully re-generated.");
         }
     }
 }

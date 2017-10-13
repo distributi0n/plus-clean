@@ -9,7 +9,7 @@
         private readonly WeakReference _roomReference;
 
         public ChatlogEntry(int PlayerId, int RoomId, string Message, double Timestamp, Habbo Player = null,
-            RoomData Instance = null)
+                            RoomData Instance = null)
         {
             this.PlayerId = PlayerId;
             this.RoomId = RoomId;

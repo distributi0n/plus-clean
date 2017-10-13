@@ -7,54 +7,59 @@
 
     public class CatalogPageComposer : ServerPacket
     {
-        public CatalogPageComposer(CatalogPage Page, string CataMode) : base(ServerPacketHeader.CatalogPageMessageComposer)
+        public CatalogPageComposer(CatalogPage page, string cataMode)
+            : base(ServerPacketHeader.CatalogPageMessageComposer)
         {
-            WriteInteger(Page.Id);
-            WriteString(CataMode);
-            WriteString(Page.Template);
-            WriteInteger(Page.PageStrings1.Count);
-            foreach (var s in Page.PageStrings1)
+            WriteInteger(page.Id);
+            WriteString(cataMode);
+            WriteString(page.Template);
+
+            WriteInteger(page.PageStrings1.Count);
+            foreach (var s in page.PageStrings1)
             {
                 WriteString(s);
             }
 
-            WriteInteger(Page.PageStrings2.Count);
-            foreach (var s in Page.PageStrings2)
+            WriteInteger(page.PageStrings2.Count);
+            foreach (var s in page.PageStrings2)
             {
                 WriteString(s);
             }
 
-            if (!Page.Template.Equals("frontpage") && !Page.Template.Equals("club_buy"))
+            if (!page.Template.Equals("frontpage") && !page.Template.Equals("club_buy"))
             {
-                WriteInteger(Page.Items.Count);
-                foreach (var Item in Page.Items.Values)
+                WriteInteger(page.Items.Count);
+                foreach (var item in page.Items.Values)
                 {
-                    WriteInteger(Item.Id);
-                    WriteString(Item.Name);
+                    WriteInteger(item.Id);
+                    WriteString(item.Name);
                     WriteBoolean(false); //IsRentable
-                    WriteInteger(Item.CostCredits);
-                    if (Item.CostDiamonds > 0)
+                    WriteInteger(item.CostCredits);
+
+                    if (item.CostDiamonds > 0)
                     {
-                        WriteInteger(Item.CostDiamonds);
+                        WriteInteger(item.CostDiamonds);
                         WriteInteger(5); // Diamonds
                     }
                     else
                     {
-                        WriteInteger(Item.CostPixels);
+                        WriteInteger(item.CostPixels);
                         WriteInteger(0); // Type of PixelCost
                     }
-                    WriteBoolean(ItemUtility.CanGiftItem(Item));
-                    if (Item.Data.InteractionType == InteractionType.DEAL ||
-                        Item.Data.InteractionType == InteractionType.ROOMDEAL)
+
+                    WriteBoolean(ItemUtility.CanGiftItem(item));
+
+                    if (item.Data.InteractionType == InteractionType.Deal || item.Data.InteractionType == InteractionType.Roomdeal)
                     {
                         CatalogDeal deal = null;
-                        if (!PlusEnvironment.GetGame().GetCatalog().TryGetDeal(Item.Data.BehaviourData, out deal))
+                        if (!PlusEnvironment.GetGame().GetCatalog().TryGetDeal(item.Data.BehaviourData, out deal))
                         {
                             WriteInteger(0); //Count
                         }
                         else
                         {
                             WriteInteger(deal.ItemDataList.Count);
+
                             foreach (var dealItem in deal.ItemDataList.ToList())
                             {
                                 WriteString(dealItem.Data.Type.ToString());
@@ -67,57 +72,57 @@
                     }
                     else
                     {
-                        WriteInteger(string.IsNullOrEmpty(Item.Badge)
-                            ? 1
-                            : 2); //Count 1 item if there is no badge, otherwise count as 2.
-                        if (!string.IsNullOrEmpty(Item.Badge))
+                        WriteInteger(string.IsNullOrEmpty(item.Badge) ? 1 : 2); //Count 1 item if there is no badge, otherwise count as 2.
+
+                        if (!string.IsNullOrEmpty(item.Badge))
                         {
                             WriteString("b");
-                            WriteString(Item.Badge);
+                            WriteString(item.Badge);
                         }
-                        WriteString(Item.Data.Type.ToString());
-                        if (Item.Data.Type.ToString().ToLower() == "b")
+
+                        WriteString(item.Data.Type.ToString());
+                        if (item.Data.Type.ToString().ToLower() == "b")
                         {
                             //This is just a badge, append the name.
-                            WriteString(Item.Data.ItemName);
+                            WriteString(item.Data.ItemName);
                         }
                         else
                         {
-                            WriteInteger(Item.Data.SpriteId);
-                            if (Item.Data.InteractionType == InteractionType.WALLPAPER ||
-                                Item.Data.InteractionType == InteractionType.FLOOR ||
-                                Item.Data.InteractionType == InteractionType.LANDSCAPE)
+                            WriteInteger(item.Data.SpriteId);
+                            if (item.Data.InteractionType == InteractionType.Wallpaper || item.Data.InteractionType == InteractionType.Floor ||
+                                item.Data.InteractionType == InteractionType.Landscape)
                             {
-                                WriteString(Item.Name.Split('_')[2]);
+                                WriteString(item.Name.Split('_')[2]);
                             }
-                            else if (Item.Data.InteractionType == InteractionType.BOT) //Bots
+                            else if (item.Data.InteractionType == InteractionType.Bot) //Bots
                             {
-                                CatalogBot CatalogBot = null;
-                                if (!PlusEnvironment.GetGame().GetCatalog().TryGetBot(Item.ItemId, out CatalogBot))
+                                CatalogBot catalogBot = null;
+                                if (!PlusEnvironment.GetGame().GetCatalog().TryGetBot(item.ItemId, out catalogBot))
                                 {
                                     WriteString("hd-180-7.ea-1406-62.ch-210-1321.hr-831-49.ca-1813-62.sh-295-1321.lg-285-92");
                                 }
                                 else
                                 {
-                                    WriteString(CatalogBot.Figure);
+                                    WriteString(catalogBot.Figure);
                                 }
                             }
-                            else if (Item.ExtraData != null)
+                            else if (item.ExtraData != null)
                             {
-                                WriteString(Item.ExtraData != null ? Item.ExtraData : string.Empty);
+                                WriteString(item.ExtraData != null ? item.ExtraData : string.Empty);
                             }
-                            WriteInteger(Item.Amount);
-                            WriteBoolean(Item.IsLimited); // IsLimited
-                            if (Item.IsLimited)
+                            WriteInteger(item.Amount);
+                            WriteBoolean(item.IsLimited); // IsLimited
+                            if (item.IsLimited)
                             {
-                                WriteInteger(Item.LimitedEditionStack);
-                                WriteInteger(Item.LimitedEditionStack - Item.LimitedEditionSells);
+                                WriteInteger(item.LimitedEditionStack);
+                                WriteInteger(item.LimitedEditionStack - item.LimitedEditionSells);
                             }
                         }
                     }
 
                     WriteInteger(0); //club_level
-                    WriteBoolean(ItemUtility.CanSelectAmount(Item));
+                    WriteBoolean(ItemUtility.CanSelectAmount(item));
+
                     WriteBoolean(false); // TODO: Figure out
                     WriteString(""); //previewImage -> e.g; catalogue/pet_lion.png
                 }
@@ -129,15 +134,16 @@
 
             WriteInteger(-1);
             WriteBoolean(false);
+
             WriteInteger(PlusEnvironment.GetGame().GetCatalog().GetPromotions().ToList().Count); //Count
-            foreach (var Promotion in PlusEnvironment.GetGame().GetCatalog().GetPromotions().ToList())
+            foreach (var promotion in PlusEnvironment.GetGame().GetCatalog().GetPromotions().ToList())
             {
-                WriteInteger(Promotion.Id);
-                WriteString(Promotion.Title);
-                WriteString(Promotion.Image);
-                WriteInteger(Promotion.Unknown);
-                WriteString(Promotion.PageLink);
-                WriteInteger(Promotion.ParentId);
+                WriteInteger(promotion.Id);
+                WriteString(promotion.Title);
+                WriteString(promotion.Image);
+                WriteInteger(promotion.Unknown);
+                WriteString(promotion.PageLink);
+                WriteInteger(promotion.ParentId);
             }
         }
     }

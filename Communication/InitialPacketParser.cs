@@ -7,9 +7,9 @@
     {
         public delegate void NoParamDelegate();
 
-        public byte[] currentData;
+        internal byte[] CurrentData;
 
-        public void handlePacketData(byte[] packet)
+        public void HandlePacketData(byte[] packet)
         {
             if (packet[0] == 60 && PolicyRequest != null)
             {
@@ -17,7 +17,7 @@
             }
             else if (packet[0] != 67 && SwitchParserRequest != null)
             {
-                currentData = packet;
+                CurrentData = packet;
                 SwitchParserRequest.Invoke();
             }
         }

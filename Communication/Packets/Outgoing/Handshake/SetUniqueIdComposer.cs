@@ -2,9 +2,10 @@
 {
     internal class SetUniqueIdComposer : ServerPacket
     {
-        public SetUniqueIdComposer(string Id) : base(ServerPacketHeader.SetUniqueIdMessageComposer)
+        public SetUniqueIdComposer(string id)
+            : base(ServerPacketHeader.SetUniqueIdMessageComposer)
         {
-            WriteString(Id);
+            WriteString(id);
         }
     }
 }

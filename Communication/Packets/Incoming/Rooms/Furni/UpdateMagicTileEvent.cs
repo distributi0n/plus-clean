@@ -7,35 +7,37 @@
 
     internal class UpdateMagicTileEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, false, true) &&
-                !Session.GetHabbo().GetPermissions().HasRight("room_item_use_any_stack_tile"))
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var DecimalHeight = Packet.PopInt();
-            var Item = Room.GetRoomItemHandler().GetItem(ItemId);
-            if (Item == null)
+            if (!room.CheckRights(session, false, true) && !session.GetHabbo().GetPermissions().HasRight("room_item_use_any_stack_tile"))
             {
                 return;
             }
 
-            Item.GetZ = DecimalHeight / 100.0;
-            Room.SendPacket(new ObjectUpdateComposer(Item, Convert.ToInt32(Session.GetHabbo().Id)));
-            Room.SendPacket(new UpdateMagicTileComposer(ItemId, DecimalHeight));
+            var itemId = packet.PopInt();
+            var decimalHeight = packet.PopInt();
+
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
+            {
+                return;
+            }
+
+            item.GetZ = decimalHeight / 100.0;
+
+            room.SendPacket(new ObjectUpdateComposer(item, Convert.ToInt32(session.GetHabbo().Id)));
+            room.SendPacket(new UpdateMagicTileComposer(itemId, decimalHeight));
         }
     }
 }

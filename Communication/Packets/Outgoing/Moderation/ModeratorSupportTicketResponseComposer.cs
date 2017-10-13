@@ -2,8 +2,8 @@
 {
     internal class ModeratorSupportTicketResponseComposer : ServerPacket
     {
-        public ModeratorSupportTicketResponseComposer(int result) : base(ServerPacketHeader
-            .ModeratorSupportTicketResponseMessageComposer)
+        public ModeratorSupportTicketResponseComposer(int result)
+            : base(ServerPacketHeader.ModeratorSupportTicketResponseMessageComposer)
         {
             WriteInteger(result);
             WriteString("");

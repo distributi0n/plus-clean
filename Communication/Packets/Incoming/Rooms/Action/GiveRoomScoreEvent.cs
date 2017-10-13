@@ -6,45 +6,52 @@
 
     internal class GiveRoomScoreEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (Session.GetHabbo().RatedRooms.Contains(Room.RoomId) || Room.CheckRights(Session, true))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Rating = Packet.PopInt();
-            switch (Rating)
+            if (session.GetHabbo().RatedRooms.Contains(room.RoomId) || room.CheckRights(session, true))
+            {
+                return;
+            }
+
+            var rating = packet.PopInt();
+            switch (rating)
             {
                 case -1:
-                    Room.Score--;
-                    Room.RoomData.Score--;
+
+                    room.Score--;
+                    room.RoomData.Score--;
                     break;
+
                 case 1:
-                    Room.Score++;
-                    Room.RoomData.Score++;
+
+                    room.Score++;
+                    room.RoomData.Score++;
                     break;
+
                 default:
+
                     return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE rooms SET score = '" + Room.Score + "' WHERE id = '" + Room.RoomId + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE rooms SET score = '" + room.Score + "' WHERE id = '" + room.RoomId + "' LIMIT 1");
             }
-            Session.GetHabbo().RatedRooms.Add(Room.RoomId);
-            Session.SendPacket(new RoomRatingComposer(Room.Score,
-                !(Session.GetHabbo().RatedRooms.Contains(Room.RoomId) || Room.CheckRights(Session, true))));
+
+            session.GetHabbo().RatedRooms.Add(room.RoomId);
+            session.SendPacket(new RoomRatingComposer(room.Score, !(session.GetHabbo().RatedRooms.Contains(room.RoomId) || room.CheckRights(session, true))));
         }
     }
 }

@@ -7,25 +7,28 @@
 
     internal class BadgesComposer : ServerPacket
     {
-        public BadgesComposer(GameClient Session) : base(ServerPacketHeader.BadgesMessageComposer)
+        public BadgesComposer(GameClient session)
+            : base(ServerPacketHeader.BadgesMessageComposer)
         {
-            var EquippedBadges = new List<Badge>();
-            WriteInteger(Session.GetHabbo().GetBadgeComponent().Count);
-            foreach (var Badge in Session.GetHabbo().GetBadgeComponent().GetBadges().ToList())
+            var equippedBadges = new List<Badge>();
+
+            WriteInteger(session.GetHabbo().GetBadgeComponent().Count);
+            foreach (var badge in session.GetHabbo().GetBadgeComponent().GetBadges().ToList())
             {
                 WriteInteger(1);
-                WriteString(Badge.Code);
-                if (Badge.Slot > 0)
+                WriteString(badge.Code);
+
+                if (badge.Slot > 0)
                 {
-                    EquippedBadges.Add(Badge);
+                    equippedBadges.Add(badge);
                 }
             }
 
-            WriteInteger(EquippedBadges.Count);
-            foreach (var Badge in EquippedBadges)
+            WriteInteger(equippedBadges.Count);
+            foreach (var badge in equippedBadges)
             {
-                WriteInteger(Badge.Slot);
-                WriteString(Badge.Code);
+                WriteInteger(badge.Slot);
+                WriteString(badge.Code);
             }
         }
     }

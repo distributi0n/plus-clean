@@ -10,23 +10,23 @@
 
         public string Description => "Unload the current room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (Session.GetHabbo().GetPermissions().HasRight("room_unload_any"))
+            if (session.GetHabbo().GetPermissions().HasRight("room_unload_any"))
             {
-                Room R = null;
-                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Room.Id, out R))
+                Room r = null;
+                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(room.Id, out r))
                 {
                     return;
                 }
 
-                PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(R, true);
+                PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(r, true);
             }
             else
             {
-                if (Room.CheckRights(Session, true))
+                if (room.CheckRights(session, true))
                 {
-                    PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(Room);
+                    PlusEnvironment.GetGame().GetRoomManager().UnloadRoom(room);
                 }
             }
         }

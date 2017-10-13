@@ -5,11 +5,10 @@
 
     internal class BadgeEditorPartsComposer : ServerPacket
     {
-        public BadgeEditorPartsComposer(ICollection<GroupBadgeParts> bases,
-            ICollection<GroupBadgeParts> symbols,
-            ICollection<GroupColours> baseColours,
-            ICollection<GroupColours> symbolColours,
-            ICollection<GroupColours> backgroundColours) : base(ServerPacketHeader.BadgeEditorPartsMessageComposer)
+        public BadgeEditorPartsComposer(ICollection<GroupBadgeParts> bases, ICollection<GroupBadgeParts> symbols, ICollection<GroupColours> baseColours,
+                                        ICollection<GroupColours> symbolColours,
+                                        ICollection<GroupColours> backgroundColours)
+            : base(ServerPacketHeader.BadgeEditorPartsMessageComposer)
         {
             WriteInteger(bases.Count);
             foreach (var part in bases)

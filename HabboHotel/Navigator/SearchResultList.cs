@@ -3,16 +3,16 @@
     public class SearchResultList
     {
         public SearchResultList(int Id,
-            string Category,
-            string CategoryIdentifier,
-            string PublicName,
-            bool CanDoActions,
-            int Colour,
-            int RequiredRank,
-            NavigatorViewMode ViewMode,
-            string CategoryType,
-            string SearchAllowance,
-            int OrderId)
+                                string Category,
+                                string CategoryIdentifier,
+                                string PublicName,
+                                bool CanDoActions,
+                                int Colour,
+                                int RequiredRank,
+                                NavigatorViewMode ViewMode,
+                                string CategoryType,
+                                string SearchAllowance,
+                                int OrderId)
         {
             this.Id = Id;
             this.Category = Category;

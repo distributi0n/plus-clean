@@ -5,22 +5,24 @@
 
     internal class HabboGroupBadgesComposer : ServerPacket
     {
-        public HabboGroupBadgesComposer(Dictionary<int, string> Badges) : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
+        public HabboGroupBadgesComposer(Dictionary<int, string> badges)
+            : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
         {
-            WriteInteger(Badges.Count);
-            foreach (var Badge in Badges)
+            WriteInteger(badges.Count);
+            foreach (var badge in badges)
             {
-                WriteInteger(Badge.Key);
-                WriteString(Badge.Value);
+                WriteInteger(badge.Key);
+                WriteString(badge.Value);
             }
         }
 
-        public HabboGroupBadgesComposer(Group Group) : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
+        public HabboGroupBadgesComposer(Group group)
+            : base(ServerPacketHeader.HabboGroupBadgesMessageComposer)
         {
             WriteInteger(1); //count
             {
-                WriteInteger(Group.Id);
-                WriteString(Group.Badge);
+                WriteInteger(group.Id);
+                WriteString(group.Badge);
             }
         }
     }

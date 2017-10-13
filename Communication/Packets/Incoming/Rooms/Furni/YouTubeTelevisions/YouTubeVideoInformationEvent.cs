@@ -6,18 +6,19 @@
 
     internal class YouTubeVideoInformationEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var ItemId = Packet.PopInt();
-            var VideoId = Packet.PopString();
-            foreach (var Tele in PlusEnvironment.GetGame().GetTelevisionManager().TelevisionList.ToList())
+            var itemId = packet.PopInt();
+            var videoId = packet.PopString();
+
+            foreach (var tele in PlusEnvironment.GetGame().GetTelevisionManager().TelevisionList.ToList())
             {
-                if (Tele.YouTubeId != VideoId)
+                if (tele.YouTubeId != videoId)
                 {
                     continue;
                 }
 
-                Session.SendPacket(new GetYouTubeVideoComposer(ItemId, Tele.YouTubeId));
+                session.SendPacket(new GetYouTubeVideoComposer(itemId, tele.YouTubeId));
             }
         }
     }

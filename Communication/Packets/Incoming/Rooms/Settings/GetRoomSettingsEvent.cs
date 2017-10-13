@@ -5,15 +5,15 @@
 
     internal class GetRoomSettingsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(Packet.PopInt());
-            if (Room == null || !Room.CheckRights(Session, true))
+            var room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(packet.PopInt());
+            if (room == null || !room.CheckRights(session, true))
             {
                 return;
             }
 
-            Session.SendPacket(new RoomSettingsDataComposer(Room));
+            session.SendPacket(new RoomSettingsDataComposer(room));
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     using System.Linq;
 
-    internal class ReloadRanksCommand : IRCONCommand
+    internal class ReloadRanksCommand : IRconCommand
     {
         public string Description => "This command is used to reload user permissions.";
 

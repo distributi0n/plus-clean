@@ -9,47 +9,47 @@
 
     internal class GetModeratorUserRoomVisitsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var Target = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(UserId);
-            if (Target == null)
+            var userId = packet.PopInt();
+            var target = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
+            if (target == null)
             {
                 return;
             }
 
-            DataTable Table = null;
-            var Visits = new Dictionary<double, RoomData>();
+            DataTable table;
+            var visits = new Dictionary<double, RoomData>();
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "SELECT `room_id`, `entry_timestamp` FROM `user_roomvisits` WHERE `user_id` = @id ORDER BY `entry_timestamp` DESC LIMIT 50");
-                dbClient.AddParameter("id", UserId);
-                Table = dbClient.GetTable();
-                if (Table != null)
+                dbClient.SetQuery("SELECT `room_id`, `entry_timestamp` FROM `user_roomvisits` WHERE `user_id` = @id ORDER BY `entry_timestamp` DESC LIMIT 50");
+                dbClient.AddParameter("id", userId);
+                table = dbClient.GetTable();
+
+                if (table != null)
                 {
-                    foreach (DataRow Row in Table.Rows)
+                    foreach (DataRow row in table.Rows)
                     {
-                        var RData = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(Convert.ToInt32(Row["room_id"]));
-                        if (RData == null)
+                        var rData = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(Convert.ToInt32(row["room_id"]));
+                        if (rData == null)
                         {
                             return;
                         }
 
-                        if (!Visits.ContainsKey(Convert.ToDouble(Row["entry_timestamp"])))
+                        if (!visits.ContainsKey(Convert.ToDouble(row["entry_timestamp"])))
                         {
-                            Visits.Add(Convert.ToDouble(Row["entry_timestamp"]), RData);
+                            visits.Add(Convert.ToDouble(row["entry_timestamp"]), rData);
                         }
                     }
                 }
             }
 
-            Session.SendPacket(new ModeratorUserRoomVisitsComposer(Target.GetHabbo(), Visits));
+            session.SendPacket(new ModeratorUserRoomVisitsComposer(target.GetHabbo(), visits));
         }
     }
 }

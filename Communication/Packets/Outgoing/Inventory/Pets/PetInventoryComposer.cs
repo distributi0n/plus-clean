@@ -6,18 +6,19 @@
 
     internal class PetInventoryComposer : ServerPacket
     {
-        public PetInventoryComposer(ICollection<Pet> Pets) : base(ServerPacketHeader.PetInventoryMessageComposer)
+        public PetInventoryComposer(ICollection<Pet> pets)
+            : base(ServerPacketHeader.PetInventoryMessageComposer)
         {
             WriteInteger(1);
             WriteInteger(1);
-            WriteInteger(Pets.Count);
-            foreach (var Pet in Pets.ToList())
+            WriteInteger(pets.Count);
+            foreach (var pet in pets.ToList())
             {
-                WriteInteger(Pet.PetId);
-                WriteString(Pet.Name);
-                WriteInteger(Pet.Type);
-                WriteInteger(int.Parse(Pet.Race));
-                WriteString(Pet.Color);
+                WriteInteger(pet.PetId);
+                WriteString(pet.Name);
+                WriteInteger(pet.Type);
+                WriteInteger(int.Parse(pet.Race));
+                WriteString(pet.Color);
                 WriteInteger(0);
                 WriteInteger(0);
                 WriteInteger(0);

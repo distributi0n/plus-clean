@@ -1,7 +1,6 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Catalog
 {
     using System;
-    using HabboHotel.Catalog;
     using HabboHotel.Catalog.Utilities;
     using HabboHotel.GameClients;
     using HabboHotel.Items;
@@ -12,52 +11,43 @@
     using Outgoing.Moderation;
     using Utilities;
 
-    public class PurchaseFromCatalogAsGiftEvent : IPacketEvent
+    internal class PurchaseFromCatalogAsGiftEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var PageId = Packet.PopInt();
-            var ItemId = Packet.PopInt();
-            var Data = Packet.PopString();
-            var GiftUser = StringCharFilter.Escape(Packet.PopString());
-            var GiftMessage = StringCharFilter.Escape(Packet.PopString().Replace(Convert.ToChar(5), ' '));
-            var SpriteId = Packet.PopInt();
-            var Ribbon = Packet.PopInt();
-            var Colour = Packet.PopInt();
-            var dnow = Packet.PopBoolean();
+            var pageId = packet.PopInt();
+            var itemId = packet.PopInt();
+            var data = packet.PopString();
+            var giftUser = StringCharFilter.Escape(packet.PopString());
+            var giftMessage = StringCharFilter.Escape(packet.PopString().Replace(Convert.ToChar(5), ' '));
+            var spriteId = packet.PopInt();
+            var ribbon = packet.PopInt();
+            var colour = packet.PopInt();
+
+            packet.PopBoolean(); // @distributi0n junk
+
             if (PlusEnvironment.GetSettingsManager().TryGetValue("room.item.gifts.enabled") != "1")
             {
-                Session.SendNotification("The hotel managers have disabled gifting");
+                session.SendNotification("The hotel managers have disabled gifting");
                 return;
             }
-            /*if (PlusEnvironment.GetGame().GetCatalog().CatalogFlatOffers.ContainsKey(ItemId) && PageId < 0)
-            {
-                PageId = PlusEnvironment.GetGame().GetCatalog().CatalogFlatOffers[ItemId];
 
-                CatalogPage P = null;
-                if (!PlusEnvironment.GetGame().GetCatalog().Pages.TryGetValue(PageId, out P))
-                    PageId = 0;
-            }*/
-            CatalogPage Page = null;
-            if (!PlusEnvironment.GetGame().GetCatalog().TryGetPage(PageId, out Page))
-            {
-                return;
-            }
-            if (!Page.Enabled ||
-                !Page.Visible ||
-                Page.MinimumRank > Session.GetHabbo().Rank ||
-                Page.MinimumVIP > Session.GetHabbo().VIPRank && Session.GetHabbo().Rank == 1)
+            if (!PlusEnvironment.GetGame().GetCatalog().TryGetPage(pageId, out var page))
             {
                 return;
             }
 
-            CatalogItem Item = null;
-            if (!Page.Items.TryGetValue(ItemId, out Item))
+            if (!page.Enabled || !page.Visible || page.MinimumRank > session.GetHabbo().Rank || page.MinimumVip > session.GetHabbo().VipRank && session.GetHabbo().Rank == 1)
             {
-                if (Page.ItemOffers.ContainsKey(ItemId))
+                return;
+            }
+
+            if (!page.Items.TryGetValue(itemId, out var item))
+            {
+                if (page.ItemOffers.ContainsKey(itemId))
                 {
-                    Item = Page.ItemOffers[ItemId];
-                    if (Item == null)
+                    item = page.ItemOffers[itemId];
+                    if (item == null)
                     {
                         return;
                     }
@@ -68,110 +58,108 @@
                 }
             }
 
-            if (!ItemUtility.CanGiftItem(Item))
+            if (!ItemUtility.CanGiftItem(item))
             {
                 return;
             }
 
-            ItemData PresentData = null;
-            if (!PlusEnvironment.GetGame().GetItemManager().GetGift(SpriteId, out PresentData) ||
-                PresentData.InteractionType != InteractionType.GIFT)
+            ItemData presentData = null;
+            if (!PlusEnvironment.GetGame().GetItemManager().GetGift(spriteId, out presentData) || presentData.InteractionType != InteractionType.Gift)
             {
                 return;
             }
 
-            if (Session.GetHabbo().Credits < Item.CostCredits)
+            if (session.GetHabbo().Credits < item.CostCredits)
             {
-                Session.SendPacket(new PresentDeliverErrorMessageComposer(true, false));
+                session.SendPacket(new PresentDeliverErrorMessageComposer(true, false));
                 return;
             }
 
-            if (Session.GetHabbo().Duckets < Item.CostPixels)
+            if (session.GetHabbo().Duckets < item.CostPixels)
             {
-                Session.SendPacket(new PresentDeliverErrorMessageComposer(false, true));
+                session.SendPacket(new PresentDeliverErrorMessageComposer(false, true));
                 return;
             }
 
-            var Habbo = PlusEnvironment.GetHabboByUsername(GiftUser);
-            if (Habbo == null)
+            var habbo = PlusEnvironment.GetHabboByUsername(giftUser);
+            if (habbo == null)
             {
-                Session.SendPacket(new GiftWrappingErrorComposer());
+                session.SendPacket(new GiftWrappingErrorComposer());
                 return;
             }
 
-            if (!Habbo.AllowGifts)
+            if (!habbo.AllowGifts)
             {
-                Session.SendNotification("Oops, this user doesn't allow gifts to be sent to them!");
+                session.SendNotification("Oops, this user doesn't allow gifts to be sent to them!");
                 return;
             }
 
-            if ((DateTime.Now - Session.GetHabbo().LastGiftPurchaseTime).TotalSeconds <= 15.0)
+            if ((DateTime.Now - session.GetHabbo().LastGiftPurchaseTime).TotalSeconds <= 15.0)
             {
-                Session.SendNotification("You're purchasing gifts too fast! Please wait 15 seconds!");
-                Session.GetHabbo().GiftPurchasingWarnings += 1;
-                if (Session.GetHabbo().GiftPurchasingWarnings >= 25)
+                session.SendNotification("You're purchasing gifts too fast! Please wait 15 seconds!");
+
+                session.GetHabbo().GiftPurchasingWarnings += 1;
+                if (session.GetHabbo().GiftPurchasingWarnings >= 25)
                 {
-                    Session.GetHabbo().SessionGiftBlocked = true;
+                    session.GetHabbo().SessionGiftBlocked = true;
                 }
                 return;
             }
 
-            if (Session.GetHabbo().SessionGiftBlocked)
+            if (session.GetHabbo().SessionGiftBlocked)
             {
                 return;
             }
 
-            var ED = GiftUser +
-                     Convert.ToChar(5) +
-                     GiftMessage +
-                     Convert.ToChar(5) +
-                     Session.GetHabbo().Id +
-                     Convert.ToChar(5) +
-                     Item.Data.Id +
-                     Convert.ToChar(5) +
-                     SpriteId +
-                     Convert.ToChar(5) +
-                     Ribbon +
-                     Convert.ToChar(5) +
-                     Colour;
-            var NewItemId = 0;
+            var ed = giftUser + Convert.ToChar(5) + giftMessage + Convert.ToChar(5) + session.GetHabbo().Id + Convert.ToChar(5) + item.Data.Id + Convert.ToChar(5) + spriteId +
+                     Convert.ToChar(5) + ribbon + Convert.ToChar(5) + colour;
+
+            var newItemId = 0;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 //Insert the dummy item.
-                dbClient.SetQuery(
-                    "INSERT INTO `items` (`base_item`,`user_id`,`extra_data`) VALUES (@baseId, @habboId, @extra_data)");
-                dbClient.AddParameter("baseId", PresentData.Id);
-                dbClient.AddParameter("habboId", Habbo.Id);
-                dbClient.AddParameter("extra_data", ED);
-                NewItemId = Convert.ToInt32(dbClient.InsertQuery());
-                string ItemExtraData = null;
-                switch (Item.Data.InteractionType)
+                dbClient.SetQuery("INSERT INTO `items` (`base_item`,`user_id`,`extra_data`) VALUES (@baseId, @habboId, @extra_data)");
+                dbClient.AddParameter("baseId", presentData.Id);
+                dbClient.AddParameter("habboId", habbo.Id);
+                dbClient.AddParameter("extra_data", ed);
+                newItemId = Convert.ToInt32(dbClient.InsertQuery());
+
+                string itemExtraData = null;
+                switch (item.Data.InteractionType)
                 {
-                    case InteractionType.NONE:
-                        ItemExtraData = "";
+                    case InteractionType.None:
+                        itemExtraData = "";
                         break;
-                    case InteractionType.PET:
+
+                    #region Pet handling
+
+                    case InteractionType.Pet:
+
                         try
                         {
-                            var Bits = Data.Split('\n');
-                            var PetName = Bits[0];
-                            var Race = Bits[1];
-                            var Color = Bits[2];
-                            int.Parse(Race); // to trigger any possible errors
-                            if (PetUtility.CheckPetName(PetName))
-                            {
-                                return;
-                            }
-                            if (Race.Length > 2)
-                            {
-                                return;
-                            }
-                            if (Color.Length != 6)
+                            var bits = data.Split('\n');
+                            var petName = bits[0];
+                            var race = bits[1];
+                            var color = bits[2];
+
+                            int.Parse(race); // to trigger any possible errors
+
+                            if (PetUtility.CheckPetName(petName))
                             {
                                 return;
                             }
 
-                            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_PetLover", 1);
+                            if (race.Length > 2)
+                            {
+                                return;
+                            }
+
+                            if (color.Length != 6)
+                            {
+                                return;
+                            }
+
+                            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_PetLover", 1);
                         }
                         catch
                         {
@@ -179,119 +167,117 @@
                         }
 
                         break;
-                    case InteractionType.FLOOR:
-                    case InteractionType.WALLPAPER:
-                    case InteractionType.LANDSCAPE:
-                        double Number = 0;
+
+                    #endregion
+
+                    case InteractionType.Floor:
+                    case InteractionType.Wallpaper:
+                    case InteractionType.Landscape:
+
+                        double number = 0;
                         try
                         {
-                            if (string.IsNullOrEmpty(Data))
+                            if (string.IsNullOrEmpty(data))
                             {
-                                Number = 0;
+                                number = 0;
                             }
                             else
                             {
-                                Number = double.Parse(Data, PlusEnvironment.CultureInfo);
+                                number = double.Parse(data, PlusEnvironment.CultureInfo);
                             }
                         }
                         catch
                         {
                         }
-                        ItemExtraData = Number.ToString().Replace(',', '.');
+
+                        itemExtraData = number.ToString().Replace(',', '.');
                         break; // maintain extra data // todo: validate
-                    case InteractionType.POSTIT:
-                        ItemExtraData = "FFFF33";
+
+                    case InteractionType.Postit:
+                        itemExtraData = "FFFF33";
                         break;
-                    case InteractionType.MOODLIGHT:
-                        ItemExtraData = "1,1,1,#000000,255";
+
+                    case InteractionType.Moodlight:
+                        itemExtraData = "1,1,1,#000000,255";
                         break;
-                    case InteractionType.TROPHY:
-                        ItemExtraData = Session.GetHabbo().Username +
-                                        Convert.ToChar(9) +
-                                        DateTime.Now.Day +
-                                        "-" +
-                                        DateTime.Now.Month +
-                                        "-" +
-                                        DateTime.Now.Year +
-                                        Convert.ToChar(9) +
-                                        Data;
+
+                    case InteractionType.Trophy:
+                        itemExtraData = session.GetHabbo().Username + Convert.ToChar(9) + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year +
+                                        Convert.ToChar(9) + data;
                         break;
-                    case InteractionType.MANNEQUIN:
-                        ItemExtraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) +
-                                        "Default Mannequin";
+
+                    case InteractionType.Mannequin:
+                        itemExtraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) + "Default Mannequin";
                         break;
-                    case InteractionType.BADGE_DISPLAY:
-                        if (!Session.GetHabbo().GetBadgeComponent().HasBadge(Data))
+
+                    case InteractionType.BadgeDisplay:
+                        if (!session.GetHabbo().GetBadgeComponent().HasBadge(data))
                         {
-                            Session.SendPacket(
-                                new BroadcastMessageAlertComposer("Oops, it appears that you do not own this badge."));
+                            session.SendPacket(new BroadcastMessageAlertComposer("Oops, it appears that you do not own this badge."));
                             return;
                         }
 
-                        ItemExtraData = Data +
-                                        Convert.ToChar(9) +
-                                        Session.GetHabbo().Username +
-                                        Convert.ToChar(9) +
-                                        DateTime.Now.Day +
-                                        "-" +
-                                        DateTime.Now.Month +
-                                        "-" +
+                        itemExtraData = data + Convert.ToChar(9) + session.GetHabbo().Username + Convert.ToChar(9) + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" +
                                         DateTime.Now.Year;
                         break;
+
                     default:
-                        ItemExtraData = Data;
+                        itemExtraData = data;
                         break;
                 }
 
                 //Insert the present, forever.
-                dbClient.SetQuery(
-                    "INSERT INTO `user_presents` (`item_id`,`base_id`,`extra_data`) VALUES (@itemId, @baseId, @extra_data)");
-                dbClient.AddParameter("itemId", NewItemId);
-                dbClient.AddParameter("baseId", Item.Data.Id);
-                dbClient.AddParameter("extra_data", string.IsNullOrEmpty(ItemExtraData) ? "" : ItemExtraData);
+                dbClient.SetQuery("INSERT INTO `user_presents` (`item_id`,`base_id`,`extra_data`) VALUES (@itemId, @baseId, @extra_data)");
+                dbClient.AddParameter("itemId", newItemId);
+                dbClient.AddParameter("baseId", item.Data.Id);
+                dbClient.AddParameter("extra_data", string.IsNullOrEmpty(itemExtraData) ? "" : itemExtraData);
                 dbClient.RunQuery();
 
                 //Here we're clearing up a record, this is dumb, but okay.
                 dbClient.SetQuery("DELETE FROM `items` WHERE `id` = @deleteId LIMIT 1");
-                dbClient.AddParameter("deleteId", NewItemId);
+                dbClient.AddParameter("deleteId", newItemId);
                 dbClient.RunQuery();
             }
 
-            var GiveItem = ItemFactory.CreateGiftItem(PresentData, Habbo, ED, ED, NewItemId, 0, 0);
-            if (GiveItem != null)
+            var giveItem = ItemFactory.CreateGiftItem(presentData, habbo, ed, newItemId);
+            if (giveItem != null)
             {
-                var Receiver = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Habbo.Id);
-                if (Receiver != null)
+                var receiver = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(habbo.Id);
+                if (receiver != null)
                 {
-                    Receiver.GetHabbo().GetInventoryComponent().TryAddItem(GiveItem);
-                    Receiver.SendPacket(new FurniListNotificationComposer(GiveItem.Id, 1));
-                    Receiver.SendPacket(new PurchaseOKComposer());
-                    Receiver.SendPacket(new FurniListAddComposer(GiveItem));
-                    Receiver.SendPacket(new FurniListUpdateComposer());
+                    receiver.GetHabbo().GetInventoryComponent().TryAddItem(giveItem);
+                    receiver.SendPacket(new FurniListNotificationComposer(giveItem.Id, 1));
+                    receiver.SendPacket(new PurchaseOkComposer());
+                    receiver.SendPacket(new FurniListAddComposer(giveItem));
+                    receiver.SendPacket(new FurniListUpdateComposer());
                 }
-                if (Habbo.Id != Session.GetHabbo().Id && !string.IsNullOrWhiteSpace(GiftMessage))
+
+                if (habbo.Id != session.GetHabbo().Id && !string.IsNullOrWhiteSpace(giftMessage))
                 {
-                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_GiftGiver", 1);
-                    if (Receiver != null)
+                    PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_GiftGiver", 1);
+                    if (receiver != null)
                     {
-                        PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Receiver, "ACH_GiftReceiver", 1);
+                        PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(receiver, "ACH_GiftReceiver", 1);
                     }
-                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(Session, QuestType.GIFT_OTHERS);
+                    PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.GiftOthers);
                 }
             }
-            Session.SendPacket(new PurchaseOKComposer(Item, PresentData));
-            if (Item.CostCredits > 0)
+
+            session.SendPacket(new PurchaseOkComposer(item, presentData));
+
+            if (item.CostCredits > 0)
             {
-                Session.GetHabbo().Credits -= Item.CostCredits;
-                Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
+                session.GetHabbo().Credits -= item.CostCredits;
+                session.SendPacket(new CreditBalanceComposer(session.GetHabbo().Credits));
             }
-            if (Item.CostPixels > 0)
+
+            if (item.CostPixels > 0)
             {
-                Session.GetHabbo().Duckets -= Item.CostPixels;
-                Session.SendPacket(
-                    new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets, Session.GetHabbo().Duckets));
+                session.GetHabbo().Duckets -= item.CostPixels;
+                session.SendPacket(new HabboActivityPointNotificationComposer(session.GetHabbo().Duckets, session.GetHabbo().Duckets));
             }
-            Session.GetHabbo().LastGiftPurchaseTime = DateTime.Now;
+
+            session.GetHabbo().LastGiftPurchaseTime = DateTime.Now;
         }
     }
 }

@@ -3,34 +3,35 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Linq;
     using Algorithm;
     using Astar.Algorithm;
 
-    public class GameField : IPathNode
+    internal class GameField : IPathNode
     {
+        private readonly AStarSolver<GameField> _astarSolver;
+        private readonly bool _diagonal;
         private readonly Queue<GametileUpdate> _newEntries; // = new Queue<GametileUpdate>();
-        private readonly AStarSolver<GameField> astarSolver;
-        private readonly bool diagonal;
-        private byte[,] currentField;
-        private GametileUpdate currentlyChecking;
+        private byte[,] _currentField;
+        private GametileUpdate _currentlyChecking;
 
-        public GameField(byte[,] theArray, bool diagonalAllowed)
+        internal GameField(byte[,] theArray, bool diagonalAllowed)
         {
-            currentField = theArray;
-            diagonal = diagonalAllowed;
+            _currentField = theArray;
+            _diagonal = diagonalAllowed;
             _newEntries = new Queue<GametileUpdate>();
-            astarSolver = new AStarSolver<GameField>(diagonalAllowed,
+            _astarSolver = new AStarSolver<GameField>(diagonalAllowed,
                 AStarHeuristicType.EXPERIMENTAL_SEARCH,
                 this,
                 theArray.GetUpperBound(1) + 1,
                 theArray.GetUpperBound(0) + 1);
         }
 
-        public bool this[int y, int x]
+        private bool this[int y, int x]
         {
             get
             {
-                if (currentField == null)
+                if (_currentField == null)
                 {
                     return false;
                 }
@@ -38,37 +39,33 @@
                 {
                     return false;
                 }
-                if (y > currentField.GetUpperBound(0) || x > currentField.GetUpperBound(1))
-                {
-                    return false;
-                }
 
-                return true;
+                return y <= _currentField.GetUpperBound(0) && x <= _currentField.GetUpperBound(1);
             }
         }
 
         public bool IsBlocked(int x, int y, bool lastTile)
         {
-            if (currentlyChecking.x == x && currentlyChecking.y == y)
+            if (_currentlyChecking.X == x && _currentlyChecking.Y == y)
             {
                 return true;
             }
 
-            return !(getValue(x, y) == currentlyChecking.value);
+            return GetValue(x, y) != _currentlyChecking.Value;
         }
 
-        public void updateLocation(int x, int y, byte value)
+        public void UpdateLocation(int x, int y, byte value)
         {
             _newEntries.Enqueue(new GametileUpdate(x, y, value));
         }
 
-        public List<PointField> doUpdate()
+        public IEnumerable<PointField> DoUpdate()
         {
             var returnList = new List<PointField>();
             while (_newEntries.Count > 0)
             {
-                currentlyChecking = _newEntries.Dequeue();
-                var pointList = getConnectedItems(currentlyChecking);
+                _currentlyChecking = _newEntries.Dequeue();
+                var pointList = GetConnectedItems(_currentlyChecking);
                 if (pointList == null)
                 {
                     return null;
@@ -76,29 +73,19 @@
 
                 if (pointList.Count > 1)
                 {
-                    var RouteList = handleListOfConnectedPoints(pointList);
-                    foreach (var nodeList in RouteList)
-                    {
-                        if (nodeList.Count >= 4)
-                        {
-                            var field = findClosed(nodeList);
-                            if (field != null)
-                            {
-                                returnList.Add(field);
-                            }
-                        }
-                    }
+                    var routeList = HandleListOfConnectedPoints(pointList);
+                    returnList.AddRange(from nodeList in routeList where nodeList.Count >= 4 select FindClosed(nodeList) into field where field != null select field);
                 }
 
-                currentField[currentlyChecking.y, currentlyChecking.x] = currentlyChecking.value;
+                _currentField[_currentlyChecking.Y, _currentlyChecking.X] = _currentlyChecking.Value;
             }
 
             return returnList;
         }
 
-        private PointField findClosed(LinkedList<AStarSolver<GameField>.PathNode> nodeList)
+        private PointField FindClosed(LinkedList<AStarSolver<GameField>.PathNode> nodeList)
         {
-            var returnList = new PointField(currentlyChecking.value);
+            var returnList = new PointField(_currentlyChecking.Value);
             var minX = int.MaxValue;
             var maxX = int.MinValue;
             var minY = int.MaxValue;
@@ -130,7 +117,7 @@
             Point current;
             var toFill = new List<Point>();
             var checkedItems = new List<Point>();
-            checkedItems.Add(new Point(currentlyChecking.x, currentlyChecking.y));
+            checkedItems.Add(new Point(_currentlyChecking.X, _currentlyChecking.Y));
             Point toAdd;
             toFill.Add(new Point(middleX, middleY));
             int x;
@@ -157,7 +144,7 @@
                     return null; //OOB
                 }
 
-                if (this[y - 1, x] && currentField[y - 1, x] == 0)
+                if (this[y - 1, x] && _currentField[y - 1, x] == 0)
                 {
                     toAdd = new Point(x, y - 1);
                     if (!toFill.Contains(toAdd) && !checkedItems.Contains(toAdd))
@@ -165,7 +152,7 @@
                         toFill.Add(toAdd);
                     }
                 }
-                if (this[y + 1, x] && currentField[y + 1, x] == 0)
+                if (this[y + 1, x] && _currentField[y + 1, x] == 0)
                 {
                     toAdd = new Point(x, y + 1);
                     if (!toFill.Contains(toAdd) && !checkedItems.Contains(toAdd))
@@ -173,7 +160,7 @@
                         toFill.Add(toAdd);
                     }
                 }
-                if (this[y, x - 1] && currentField[y, x - 1] == 0)
+                if (this[y, x - 1] && _currentField[y, x - 1] == 0)
                 {
                     toAdd = new Point(x - 1, y);
                     if (!toFill.Contains(toAdd) && !checkedItems.Contains(toAdd))
@@ -181,7 +168,7 @@
                         toFill.Add(toAdd);
                     }
                 }
-                if (this[y, x + 1] && currentField[y, x + 1] == 0)
+                if (this[y, x + 1] && _currentField[y, x + 1] == 0)
                 {
                     toAdd = new Point(x + 1, y);
                     if (!toFill.Contains(toAdd) && !checkedItems.Contains(toAdd))
@@ -189,7 +176,7 @@
                         toFill.Add(toAdd);
                     }
                 }
-                if (getValue(current) == 0)
+                if (GetValue(current) == 0)
                 {
                     returnList.add(current);
                 }
@@ -200,7 +187,7 @@
             return returnList;
         }
 
-        private List<LinkedList<AStarSolver<GameField>.PathNode>> handleListOfConnectedPoints(List<Point> pointList)
+        private List<LinkedList<AStarSolver<GameField>.PathNode>> HandleListOfConnectedPoints(List<Point> pointList)
         {
             var returnList = new List<LinkedList<AStarSolver<GameField>.PathNode>>();
             var amount = 0;
@@ -219,7 +206,7 @@
                         continue;
                     }
 
-                    var list = astarSolver.Search(end, begin);
+                    var list = _astarSolver.Search(end, begin);
                     if (list != null)
                     {
                         returnList.Add(list);
@@ -230,77 +217,70 @@
             return returnList;
         }
 
-        private List<Point> getConnectedItems(GametileUpdate update)
+        private List<Point> GetConnectedItems(GametileUpdate update)
         {
             if (update == null)
             {
                 return null;
             }
 
-            var ConnectedItems = new List<Point>();
-            var x = update.x;
-            var y = update.y;
-            if (diagonal)
+            var connectedItems = new List<Point>();
+
+            var x = update.X;
+            var y = update.Y;
+            if (_diagonal)
             {
-                if (this[y - 1, x - 1] && currentField[y - 1, x - 1] == update.value)
+                if (this[y - 1, x - 1] && _currentField[y - 1, x - 1] == update.Value)
                 {
-                    ConnectedItems.Add(new Point(x - 1, y - 1));
+                    connectedItems.Add(new Point(x - 1, y - 1));
                 }
-                if (this[y - 1, x + 1] && currentField[y - 1, x + 1] == update.value)
+                if (this[y - 1, x + 1] && _currentField[y - 1, x + 1] == update.Value)
                 {
-                    ConnectedItems.Add(new Point(x + 1, y - 1));
+                    connectedItems.Add(new Point(x + 1, y - 1));
                 }
-                if (this[y + 1, x - 1] && currentField[y + 1, x - 1] == update.value)
+                if (this[y + 1, x - 1] && _currentField[y + 1, x - 1] == update.Value)
                 {
-                    ConnectedItems.Add(new Point(x - 1, y + 1));
+                    connectedItems.Add(new Point(x - 1, y + 1));
                 }
-                if (this[y + 1, x + 1] && currentField[y + 1, x + 1] == update.value)
+                if (this[y + 1, x + 1] && _currentField[y + 1, x + 1] == update.Value)
                 {
-                    ConnectedItems.Add(new Point(x + 1, y + 1));
+                    connectedItems.Add(new Point(x + 1, y + 1));
                 }
             }
-            if (this[y - 1, x] && currentField[y - 1, x] == update.value)
+            if (this[y - 1, x] && _currentField[y - 1, x] == update.Value)
             {
-                ConnectedItems.Add(new Point(x, y - 1));
+                connectedItems.Add(new Point(x, y - 1));
             }
-            if (this[y + 1, x] && currentField[y + 1, x] == update.value)
+            if (this[y + 1, x] && _currentField[y + 1, x] == update.Value)
             {
-                ConnectedItems.Add(new Point(x, y + 1));
+                connectedItems.Add(new Point(x, y + 1));
             }
-            if (this[y, x - 1] && currentField[y, x - 1] == update.value)
+            if (this[y, x - 1] && _currentField[y, x - 1] == update.Value)
             {
-                ConnectedItems.Add(new Point(x - 1, y));
+                connectedItems.Add(new Point(x - 1, y));
             }
-            if (this[y, x + 1] && currentField[y, x + 1] == update.value)
+            if (this[y, x + 1] && _currentField[y, x + 1] == update.Value)
             {
-                ConnectedItems.Add(new Point(x + 1, y));
+                connectedItems.Add(new Point(x + 1, y));
             }
-            return ConnectedItems;
+            return connectedItems;
         }
 
-        private void setValue(int x, int y, byte value)
+        private byte GetValue(int x, int y)
         {
             if (this[y, x])
             {
-                currentField[y, x] = value;
-            }
-        }
-
-        public byte getValue(int x, int y)
-        {
-            if (this[y, x])
-            {
-                return currentField[y, x];
+                return _currentField[y, x];
             }
 
             return 0;
         }
 
-        public byte getValue(Point p)
+        private byte GetValue(Point p)
         {
             if (this[p.Y, p.X])
             {
-                return currentField[p.Y, p.X];
+                return _currentField[p.Y, p.X];
             }
 
             return 0;
@@ -308,11 +288,8 @@
 
         public void Dispose()
         {
-            currentField = null;
-            if (_newEntries != null)
-            {
-                _newEntries.Clear();
-            }
+            _currentField = null;
+            _newEntries?.Clear();
         }
     }
 }

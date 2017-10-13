@@ -7,10 +7,10 @@
 
     internal class FurniHasFurniBox : IWiredItem
     {
-        public FurniHasFurniBox(Room Instance, Item Item)
+        public FurniHasFurniBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -28,41 +28,41 @@
 
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
         }
 
         public bool Execute(params object[] Params)
         {
-            foreach (var Item in SetItems.Values.ToList())
+            foreach (var item in SetItems.Values.ToList())
             {
-                if (Item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                if (item == null || !Instance.GetRoomItemHandler().GetFloor.Contains(item))
                 {
                     continue;
                 }
 
-                var HasFurni = false;
-                var Items = Instance.GetGameMap().GetAllRoomItemForSquare(Item.GetX, Item.GetY);
-                if (Items.Count(x => x.GetZ >= Item.GetZ) > 1)
+                var hasFurni = false;
+                var items = Instance.GetGameMap().GetAllRoomItemForSquare(item.GetX, item.GetY);
+                if (items.Count(x => x.GetZ >= item.GetZ) > 1)
                 {
-                    HasFurni = true;
+                    hasFurni = true;
                 }
-                if (!HasFurni)
+                if (!hasFurni)
                 {
                     return false;
                 }

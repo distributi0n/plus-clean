@@ -2,9 +2,9 @@
 {
     using HabboHotel.GameClients;
 
-    internal sealed class EventTrackerEvent : IPacketEvent
+    internal class EventTrackerEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
         }
     }

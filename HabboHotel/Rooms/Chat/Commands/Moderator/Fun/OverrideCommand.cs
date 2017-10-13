@@ -10,16 +10,16 @@
 
         public string Description => "Gives you the ability to walk over anything.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.AllowOverride = !User.AllowOverride;
-            Session.SendWhisper("Override mode updated.");
+            user.AllowOverride = !user.AllowOverride;
+            session.SendWhisper("Override mode updated.");
         }
     }
 }

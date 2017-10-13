@@ -2,7 +2,8 @@
 {
     internal class FurniListUpdateComposer : ServerPacket
     {
-        public FurniListUpdateComposer() : base(ServerPacketHeader.FurniListUpdateMessageComposer)
+        public FurniListUpdateComposer()
+            : base(ServerPacketHeader.FurniListUpdateMessageComposer)
         {
         }
     }

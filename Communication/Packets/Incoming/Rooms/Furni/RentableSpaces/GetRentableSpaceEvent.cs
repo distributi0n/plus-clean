@@ -5,10 +5,10 @@
 
     internal class GetRentableSpaceEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Something = Packet.PopInt();
-            Session.SendPacket(new RentableSpaceComposer());
+            var something = packet.PopInt();
+            session.SendPacket(new RentableSpaceComposer());
         }
     }
 }

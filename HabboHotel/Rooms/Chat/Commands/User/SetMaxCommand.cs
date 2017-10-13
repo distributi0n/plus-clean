@@ -10,47 +10,47 @@
 
         public string Description => "Set the visitor limit to the room.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!Room.CheckRights(Session, true))
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter a value for the room visitor limit.");
+                session.SendWhisper("Please enter a value for the room visitor limit.");
                 return;
             }
 
-            int MaxAmount;
-            if (int.TryParse(Params[1], out MaxAmount))
+            int maxAmount;
+            if (int.TryParse(Params[1], out maxAmount))
             {
-                if (MaxAmount == 0)
+                if (maxAmount == 0)
                 {
-                    MaxAmount = 10;
-                    Session.SendWhisper("visitor amount too low, visitor amount has been set to 10.");
+                    maxAmount = 10;
+                    session.SendWhisper("visitor amount too low, visitor amount has been set to 10.");
                 }
-                else if (MaxAmount > 200 && !Session.GetHabbo().GetPermissions().HasRight("override_command_setmax_limit"))
+                else if (maxAmount > 200 && !session.GetHabbo().GetPermissions().HasRight("override_command_setmax_limit"))
                 {
-                    MaxAmount = 200;
-                    Session.SendWhisper("visitor amount too high for your rank, visitor amount has been set to 200.");
+                    maxAmount = 200;
+                    session.SendWhisper("visitor amount too high for your rank, visitor amount has been set to 200.");
                 }
                 else
                 {
-                    Session.SendWhisper("visitor amount set to " + MaxAmount + ".");
+                    session.SendWhisper("visitor amount set to " + maxAmount + ".");
                 }
-                Room.UsersMax = MaxAmount;
-                Room.RoomData.UsersMax = MaxAmount;
+                room.UsersMax = maxAmount;
+                room.RoomData.UsersMax = maxAmount;
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("UPDATE `rooms` SET `users_max` = " + MaxAmount + " WHERE `id` = '" + Room.Id +
+                    dbClient.RunQuery("UPDATE `rooms` SET `users_max` = " + maxAmount + " WHERE `id` = '" + room.Id +
                                       "' LIMIT 1");
                 }
             }
             else
             {
-                Session.SendWhisper("Invalid amount, please enter a valid number.");
+                session.SendWhisper("Invalid amount, please enter a valid number.");
             }
         }
     }

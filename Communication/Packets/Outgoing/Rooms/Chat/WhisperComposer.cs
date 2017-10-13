@@ -2,13 +2,14 @@
 {
     public class WhisperComposer : ServerPacket
     {
-        public WhisperComposer(int VirtualId, string Text, int Emotion, int Colour) : base(ServerPacketHeader
-            .WhisperMessageComposer)
+        public WhisperComposer(int virtualId, string text, int emotion, int colour)
+            : base(ServerPacketHeader.WhisperMessageComposer)
         {
-            WriteInteger(VirtualId);
-            WriteString(Text);
-            WriteInteger(Emotion);
-            WriteInteger(Colour);
+            WriteInteger(virtualId);
+            WriteString(text);
+            WriteInteger(emotion);
+            WriteInteger(colour);
+
             WriteInteger(0);
             WriteInteger(-1);
         }

@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.Hotel
 {
-    internal class ReloadVouchersCommand : IRCONCommand
+    internal class ReloadVouchersCommand : IRconCommand
     {
         public string Description => "This command is used to reload the voucher manager.";
 

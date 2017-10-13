@@ -14,120 +14,106 @@
 
     internal class PlaceBotEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, true))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var BotId = Packet.PopInt();
-            var X = Packet.PopInt();
-            var Y = Packet.PopInt();
-            if (!Room.GetGameMap().CanWalk(X, Y, false) || !Room.GetGameMap().ValidTile(X, Y))
-            {
-                Session.SendNotification("You cannot place a bot here!");
-                return;
-            }
-
-            Bot Bot = null;
-            if (!Session.GetHabbo().GetInventoryComponent().TryGetBot(BotId, out Bot))
+            if (!room.CheckRights(session, true))
             {
                 return;
             }
 
-            var BotCount = 0;
-            foreach (var User in Room.GetRoomUserManager().GetUserList().ToList())
+            var botId = packet.PopInt();
+            var x = packet.PopInt();
+            var y = packet.PopInt();
+
+            if (!room.GetGameMap().CanWalk(x, y, false) || !room.GetGameMap().ValidTile(x, y))
             {
-                if (User == null || User.IsPet || !User.IsBot)
+                session.SendNotification("You cannot place a bot here!");
+                return;
+            }
+
+            Bot bot;
+            if (!session.GetHabbo().GetInventoryComponent().TryGetBot(botId, out bot))
+            {
+                return;
+            }
+
+            var botCount = 0;
+            foreach (var user in room.GetRoomUserManager().GetUserList().ToList())
+            {
+                if (user == null || user.IsPet || !user.IsBot)
                 {
                     continue;
                 }
 
-                BotCount += 1;
+                botCount += 1;
             }
 
-            if (BotCount >= 5 && !Session.GetHabbo().GetPermissions().HasRight("bot_place_any_override"))
+            if (botCount >= 5 && !session.GetHabbo().GetPermissions().HasRight("bot_place_any_override"))
             {
-                Session.SendNotification("Sorry; 5 bots per room only!");
+                session.SendNotification("Sorry; 5 bots per room only!");
                 return;
             }
 
             //TODO: Hmm, maybe not????
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "UPDATE `bots` SET `room_id` = @roomId, `x` = @CoordX, `y` = @CoordY WHERE `id` = @BotId LIMIT 1");
-                dbClient.AddParameter("roomId", Room.RoomId);
-                dbClient.AddParameter("BotId", Bot.Id);
-                dbClient.AddParameter("CoordX", X);
-                dbClient.AddParameter("CoordY", Y);
+                dbClient.SetQuery("UPDATE `bots` SET `room_id` = @roomId, `x` = @CoordX, `y` = @CoordY WHERE `id` = @BotId LIMIT 1");
+                dbClient.AddParameter("roomId", room.RoomId);
+                dbClient.AddParameter("BotId", bot.Id);
+                dbClient.AddParameter("CoordX", x);
+                dbClient.AddParameter("CoordY", y);
                 dbClient.RunQuery();
             }
-            var BotSpeechList = new List<RandomSpeech>();
+
+            var botSpeechList = new List<RandomSpeech>();
 
             //TODO: Grab data?
-            DataRow GetData = null;
+            DataRow getData = null;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery(
                     "SELECT `ai_type`,`rotation`,`walk_mode`,`automatic_chat`,`speaking_interval`,`mix_sentences`,`chat_bubble` FROM `bots` WHERE `id` = @BotId LIMIT 1");
-                dbClient.AddParameter("BotId", Bot.Id);
-                GetData = dbClient.GetRow();
+                dbClient.AddParameter("BotId", bot.Id);
+                getData = dbClient.GetRow();
+
                 dbClient.SetQuery("SELECT `text` FROM `bots_speech` WHERE `bot_id` = @BotId");
-                dbClient.AddParameter("BotId", Bot.Id);
-                var BotSpeech = dbClient.GetTable();
-                foreach (DataRow Speech in BotSpeech.Rows)
+                dbClient.AddParameter("BotId", bot.Id);
+                var botSpeech = dbClient.GetTable();
+
+                foreach (DataRow speech in botSpeech.Rows)
                 {
-                    BotSpeechList.Add(new RandomSpeech(Convert.ToString(Speech["text"]), Bot.Id));
+                    botSpeechList.Add(new RandomSpeech(Convert.ToString(speech["text"]), bot.Id));
                 }
             }
 
-            var BotUser = Room.GetRoomUserManager()
-                .DeployBot(new RoomBot(Bot.Id,
-                        Session.GetHabbo().CurrentRoomId,
-                        Convert.ToString(GetData["ai_type"]),
-                        Convert.ToString(GetData["walk_mode"]),
-                        Bot.Name,
-                        "",
-                        Bot.Figure,
-                        X,
-                        Y,
-                        0,
-                        4,
-                        0,
-                        0,
-                        0,
-                        0,
-                        ref BotSpeechList,
-                        "",
-                        0,
-                        Bot.OwnerId,
-                        PlusEnvironment.EnumToBool(GetData["automatic_chat"].ToString()),
-                        Convert.ToInt32(GetData["speaking_interval"]),
-                        PlusEnvironment.EnumToBool(GetData["mix_sentences"].ToString()),
-                        Convert.ToInt32(GetData["chat_bubble"])),
-                    null);
-            BotUser.Chat("Hello!", false, 0);
-            Room.GetGameMap().UpdateUserMovement(new Point(X, Y), new Point(X, Y), BotUser);
-            Bot ToRemove = null;
-            if (!Session.GetHabbo().GetInventoryComponent().TryRemoveBot(BotId, out ToRemove))
+            var botUser = room.GetRoomUserManager().DeployBot(
+                new RoomBot(bot.Id, session.GetHabbo().CurrentRoomId, Convert.ToString(getData["ai_type"]), Convert.ToString(getData["walk_mode"]), bot.Name, "", bot.Figure, x, y,
+                    0, 4, 0, 0, 0, 0, ref botSpeechList, "", 0, bot.OwnerId, PlusEnvironment.EnumToBool(getData["automatic_chat"].ToString()),
+                    Convert.ToInt32(getData["speaking_interval"]), PlusEnvironment.EnumToBool(getData["mix_sentences"].ToString()), Convert.ToInt32(getData["chat_bubble"])), null);
+            botUser.Chat("Hello!", false);
+
+            room.GetGameMap().UpdateUserMovement(new Point(x, y), new Point(x, y), botUser);
+
+            Bot toRemove = null;
+            if (!session.GetHabbo().GetInventoryComponent().TryRemoveBot(botId, out toRemove))
             {
-                Console.WriteLine("Error whilst removing Bot: " + ToRemove.Id);
+                Console.WriteLine("Error whilst removing Bot: " + toRemove.Id);
                 return;
             }
 
-            Session.SendPacket(new BotInventoryComposer(Session.GetHabbo().GetInventoryComponent().GetBots()));
+            session.SendPacket(new BotInventoryComposer(session.GetHabbo().GetInventoryComponent().GetBots()));
         }
     }
 }

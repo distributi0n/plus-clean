@@ -5,7 +5,8 @@
 
     internal class GroupFurniConfigComposer : ServerPacket
     {
-        public GroupFurniConfigComposer(ICollection<Group> groups) : base(ServerPacketHeader.GroupFurniConfigMessageComposer)
+        public GroupFurniConfigComposer(ICollection<Group> groups)
+            : base(ServerPacketHeader.GroupFurniConfigMessageComposer)
         {
             WriteInteger(groups.Count);
             foreach (var group in groups)

@@ -8,32 +8,35 @@
     using HabboHotel.GameClients;
     using Outgoing.Marketplace;
 
-    internal sealed class GetOffersEvent : IPacketEvent
+    internal class GetOffersEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var MinCost = Packet.PopInt();
-            var MaxCost = Packet.PopInt();
-            var SearchQuery = Packet.PopString();
-            var FilterMode = Packet.PopInt();
-            DataTable table = null;
+            var minCost = packet.PopInt();
+            var maxCost = packet.PopInt();
+            var searchQuery = packet.PopString();
+            var filterMode = packet.PopInt();
+
+            DataTable table;
             var builder = new StringBuilder();
-            var str = "";
-            builder.Append("WHERE `state` = '1' AND `timestamp` >= " +
-                           PlusEnvironment.GetGame().GetCatalog().GetMarketplace().FormatTimestampString());
-            if (MinCost >= 0)
+            string str;
+            builder.Append("WHERE `state` = '1' AND `timestamp` >= " + PlusEnvironment.GetGame().GetCatalog().GetMarketplace().FormatTimestampString());
+            if (minCost >= 0)
             {
-                builder.Append(" AND `total_price` > " + MinCost);
+                builder.Append(" AND `total_price` > " + minCost);
             }
-            if (MaxCost >= 0)
+
+            if (maxCost >= 0)
             {
-                builder.Append(" AND `total_price` < " + MaxCost);
+                builder.Append(" AND `total_price` < " + maxCost);
             }
-            switch (FilterMode)
+
+            switch (filterMode)
             {
                 case 1:
                     str = "ORDER BY `asking_price` DESC";
                     break;
+
                 default:
                     str = "ORDER BY `asking_price` ASC";
                     break;
@@ -41,45 +44,37 @@
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "SELECT `offer_id`, `item_type`, `sprite_id`, `total_price`, `limited_number`,`limited_stack` FROM `catalog_marketplace_offers` " +
-                    builder +
-                    " " +
-                    str +
-                    " LIMIT 500");
-                dbClient.AddParameter("search_query", "%" + SearchQuery + "%");
-                if (SearchQuery.Length >= 1)
+                dbClient.SetQuery("SELECT `offer_id`, `item_type`, `sprite_id`, `total_price`, `limited_number`,`limited_stack` FROM `catalog_marketplace_offers` " + builder +
+                                  " " + str + " LIMIT 500");
+                dbClient.AddParameter("search_query", "%" + searchQuery + "%");
+                if (searchQuery.Length >= 1)
                 {
                     builder.Append(" AND `public_name` LIKE @search_query");
                 }
                 table = dbClient.GetTable();
             }
+
             PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItems.Clear();
             PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItemKeys.Clear();
             if (table != null)
             {
                 foreach (DataRow row in table.Rows)
                 {
-                    if (!PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItemKeys
-                        .Contains(Convert.ToInt32(row["offer_id"])))
+                    if (PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItemKeys.Contains(Convert.ToInt32(row["offer_id"])))
                     {
-                        PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItemKeys
-                            .Add(Convert.ToInt32(row["offer_id"]));
-                        PlusEnvironment.GetGame()
-                            .GetCatalog()
-                            .GetMarketplace()
-                            .MarketItems.Add(new MarketOffer(Convert.ToInt32(row["offer_id"]),
-                                Convert.ToInt32(row["sprite_id"]),
-                                Convert.ToInt32(row["total_price"]),
-                                int.Parse(row["item_type"].ToString()),
-                                Convert.ToInt32(row["limited_number"]),
-                                Convert.ToInt32(row["limited_stack"])));
+                        continue;
                     }
+
+                    PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItemKeys.Add(Convert.ToInt32(row["offer_id"]));
+                    PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItems.Add(new MarketOffer(Convert.ToInt32(row["offer_id"]), Convert.ToInt32(row["sprite_id"]),
+                        Convert.ToInt32(row["total_price"]), int.Parse(row["item_type"].ToString()), Convert.ToInt32(row["limited_number"]),
+                        Convert.ToInt32(row["limited_stack"])));
                 }
             }
 
             var dictionary = new Dictionary<int, MarketOffer>();
             var dictionary2 = new Dictionary<int, int>();
+
             foreach (var item in PlusEnvironment.GetGame().GetCatalog().GetMarketplace().MarketItems)
             {
                 if (dictionary.ContainsKey(item.SpriteId))
@@ -102,6 +97,7 @@
                             dictionary.Remove(item.SpriteId);
                             dictionary.Add(item.SpriteId, item);
                         }
+
                         var num = dictionary2[item.SpriteId];
                         dictionary2.Remove(item.SpriteId);
                         dictionary2.Add(item.SpriteId, num + 1);
@@ -120,7 +116,7 @@
                 }
             }
 
-            Session.SendPacket(new MarketPlaceOffersComposer(MinCost, MaxCost, dictionary, dictionary2));
+            session.SendPacket(new MarketPlaceOffersComposer(minCost, maxCost, dictionary, dictionary2));
         }
     }
 }

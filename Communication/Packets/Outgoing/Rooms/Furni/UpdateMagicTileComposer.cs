@@ -4,9 +4,10 @@
 
     internal class UpdateMagicTileComposer : ServerPacket
     {
-        public UpdateMagicTileComposer(int ItemId, int Decimal) : base(ServerPacketHeader.UpdateMagicTileMessageComposer)
+        public UpdateMagicTileComposer(int itemId, int Decimal)
+            : base(ServerPacketHeader.UpdateMagicTileMessageComposer)
         {
-            WriteInteger(Convert.ToInt32(ItemId));
+            WriteInteger(Convert.ToInt32(itemId));
             WriteInteger(Decimal);
         }
     }

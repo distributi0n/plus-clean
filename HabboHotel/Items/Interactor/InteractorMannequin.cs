@@ -7,77 +7,77 @@
 
     internal class InteractorMannequin : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Item.ExtraData.Contains(Convert.ToChar(5).ToString()))
+            if (item.ExtraData.Contains(Convert.ToChar(5).ToString()))
             {
-                var Stuff = Item.ExtraData.Split(Convert.ToChar(5));
-                Session.GetHabbo().Gender = Stuff[0].ToUpper();
-                var NewFig = new Dictionary<string, string>();
-                NewFig.Clear();
-                foreach (var Man in Stuff[1].Split('.'))
+                var stuff = item.ExtraData.Split(Convert.ToChar(5));
+                session.GetHabbo().Gender = stuff[0].ToUpper();
+                var newFig = new Dictionary<string, string>();
+                newFig.Clear();
+                foreach (var man in stuff[1].Split('.'))
                 {
-                    foreach (var Fig in Session.GetHabbo().Look.Split('.'))
+                    foreach (var fig in session.GetHabbo().Look.Split('.'))
                     {
-                        if (Fig.Split('-')[0] == Man.Split('-')[0])
+                        if (fig.Split('-')[0] == man.Split('-')[0])
                         {
-                            if (NewFig.ContainsKey(Fig.Split('-')[0]) && !NewFig.ContainsValue(Man))
+                            if (newFig.ContainsKey(fig.Split('-')[0]) && !newFig.ContainsValue(man))
                             {
-                                NewFig.Remove(Fig.Split('-')[0]);
-                                NewFig.Add(Fig.Split('-')[0], Man);
+                                newFig.Remove(fig.Split('-')[0]);
+                                newFig.Add(fig.Split('-')[0], man);
                             }
-                            else if (!NewFig.ContainsKey(Fig.Split('-')[0]) && !NewFig.ContainsValue(Man))
+                            else if (!newFig.ContainsKey(fig.Split('-')[0]) && !newFig.ContainsValue(man))
                             {
-                                NewFig.Add(Fig.Split('-')[0], Man);
+                                newFig.Add(fig.Split('-')[0], man);
                             }
                         }
                         else
                         {
-                            if (!NewFig.ContainsKey(Fig.Split('-')[0]))
+                            if (!newFig.ContainsKey(fig.Split('-')[0]))
                             {
-                                NewFig.Add(Fig.Split('-')[0], Fig);
+                                newFig.Add(fig.Split('-')[0], fig);
                             }
                         }
                     }
                 }
 
-                var Final = "";
-                foreach (var Str in NewFig.Values)
+                var final = "";
+                foreach (var str in newFig.Values)
                 {
-                    Final += Str + ".";
+                    final += str + ".";
                 }
 
-                Session.GetHabbo().Look = Final.TrimEnd('.');
+                session.GetHabbo().Look = final.TrimEnd('.');
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.SetQuery("UPDATE users SET look = @look, gender = @gender WHERE id = '" + Session.GetHabbo().Id +
+                    dbClient.SetQuery("UPDATE users SET look = @look, gender = @gender WHERE id = '" + session.GetHabbo().Id +
                                       "' LIMIT 1");
-                    dbClient.AddParameter("look", Session.GetHabbo().Look);
-                    dbClient.AddParameter("gender", Session.GetHabbo().Gender);
+                    dbClient.AddParameter("look", session.GetHabbo().Look);
+                    dbClient.AddParameter("gender", session.GetHabbo().Gender);
                     dbClient.RunQuery();
                 }
-                var Room = Session.GetHabbo().CurrentRoom;
-                if (Room != null)
+                var room = session.GetHabbo().CurrentRoom;
+                if (room != null)
                 {
-                    var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
-                    if (User != null)
+                    var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Username);
+                    if (user != null)
                     {
-                        Session.SendPacket(new UserChangeComposer(User, true));
-                        Session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(User, false));
+                        session.SendPacket(new UserChangeComposer(user, true));
+                        session.GetHabbo().CurrentRoom.SendPacket(new UserChangeComposer(user, false));
                     }
                 }
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

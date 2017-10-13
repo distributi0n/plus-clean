@@ -6,34 +6,36 @@
 
     internal class WiredTriggerConfigComposer : ServerPacket
     {
-        public WiredTriggerConfigComposer(IWiredItem Box, List<int> BlockedItems) : base(ServerPacketHeader
-            .WiredTriggerConfigMessageComposer)
+        public WiredTriggerConfigComposer(IWiredItem box, List<int> blockedItems)
+            : base(ServerPacketHeader.WiredTriggerConfigMessageComposer)
         {
             WriteBoolean(false);
             WriteInteger(5);
-            WriteInteger(Box.SetItems.Count);
-            foreach (var Item in Box.SetItems.Values.ToList())
+
+            WriteInteger(box.SetItems.Count);
+            foreach (var item in box.SetItems.Values.ToList())
             {
-                WriteInteger(Item.Id);
+                WriteInteger(item.Id);
             }
 
-            WriteInteger(Box.Item.GetBaseItem().SpriteId);
-            WriteInteger(Box.Item.Id);
-            WriteString(Box.StringData);
-            WriteInteger(Box is IWiredCycle ? 1 : 0);
-            if (Box is IWiredCycle)
+            WriteInteger(box.Item.GetBaseItem().SpriteId);
+            WriteInteger(box.Item.Id);
+            WriteString(box.StringData);
+
+            WriteInteger(box is IWiredCycle ? 1 : 0);
+            if (box is IWiredCycle)
             {
-                var Cycle = (IWiredCycle) Box;
-                WriteInteger(Cycle.Delay);
+                var cycle = (IWiredCycle) box;
+                WriteInteger(cycle.Delay);
             }
             WriteInteger(0);
-            WriteInteger(WiredBoxTypeUtility.GetWiredId(Box.Type));
-            WriteInteger(BlockedItems.Count());
-            if (BlockedItems.Count() > 0)
+            WriteInteger(WiredBoxTypeUtility.GetWiredId(box.Type));
+            WriteInteger(blockedItems.Count());
+            if (blockedItems.Any())
             {
-                foreach (var Id in BlockedItems.ToList())
+                foreach (var id in blockedItems.ToList())
                 {
-                    WriteInteger(Id);
+                    WriteInteger(id);
                 }
             }
         }

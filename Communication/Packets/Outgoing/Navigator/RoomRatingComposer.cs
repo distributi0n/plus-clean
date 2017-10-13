@@ -2,10 +2,11 @@
 {
     internal class RoomRatingComposer : ServerPacket
     {
-        public RoomRatingComposer(int Score, bool CanVote) : base(ServerPacketHeader.RoomRatingMessageComposer)
+        public RoomRatingComposer(int score, bool canVote)
+            : base(ServerPacketHeader.RoomRatingMessageComposer)
         {
-            WriteInteger(Score);
-            WriteBoolean(CanVote);
+            WriteInteger(score);
+            WriteBoolean(canVote);
         }
     }
 }

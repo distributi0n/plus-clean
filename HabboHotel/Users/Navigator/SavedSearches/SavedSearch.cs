@@ -2,11 +2,11 @@
 {
     public class SavedSearch
     {
-        public SavedSearch(int Id, string Filter, string Search)
+        public SavedSearch(int id, string filter, string search)
         {
-            this.Id = Id;
-            this.Filter = Filter;
-            this.Search = Search;
+            Id = id;
+            Filter = filter;
+            Search = search;
         }
 
         public int Id { get; set; }

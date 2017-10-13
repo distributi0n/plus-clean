@@ -5,14 +5,16 @@
 
     internal class PromotableRoomsComposer : ServerPacket
     {
-        public PromotableRoomsComposer(ICollection<RoomData> Rooms) : base(ServerPacketHeader.PromotableRoomsMessageComposer)
+        public PromotableRoomsComposer(ICollection<RoomData> rooms)
+            : base(ServerPacketHeader.PromotableRoomsMessageComposer)
         {
             WriteBoolean(true);
-            WriteInteger(Rooms.Count); //Count
-            foreach (var Data in Rooms)
+            WriteInteger(rooms.Count); //Count
+
+            foreach (var data in rooms)
             {
-                WriteInteger(Data.Id);
-                WriteString(Data.Name);
+                WriteInteger(data.Id);
+                WriteString(data.Name);
                 WriteBoolean(false);
             }
         }

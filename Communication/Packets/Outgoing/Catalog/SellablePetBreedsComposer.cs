@@ -6,18 +6,19 @@
 
     public class SellablePetBreedsComposer : ServerPacket
     {
-        public SellablePetBreedsComposer(string PetType, int PetId, ICollection<PetRace> Races) : base(ServerPacketHeader
-            .SellablePetBreedsMessageComposer)
+        public SellablePetBreedsComposer(string petType, int petId, ICollection<PetRace> races)
+            : base(ServerPacketHeader.SellablePetBreedsMessageComposer)
         {
-            WriteString(PetType);
-            WriteInteger(Races.Count);
-            foreach (var Race in Races.ToList())
+            WriteString(petType);
+
+            WriteInteger(races.Count);
+            foreach (var race in races.ToList())
             {
-                WriteInteger(PetId);
-                WriteInteger(Race.PrimaryColour);
-                WriteInteger(Race.SecondaryColour);
-                WriteBoolean(Race.HasPrimaryColour);
-                WriteBoolean(Race.HasSecondaryColour);
+                WriteInteger(petId);
+                WriteInteger(race.PrimaryColour);
+                WriteInteger(race.SecondaryColour);
+                WriteBoolean(race.HasPrimaryColour);
+                WriteBoolean(race.HasSecondaryColour);
             }
         }
     }

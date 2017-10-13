@@ -5,15 +5,15 @@
 
     internal class UserFlatCatsComposer : ServerPacket
     {
-        public UserFlatCatsComposer(ICollection<SearchResultList> Categories, int Rank) : base(ServerPacketHeader
-            .UserFlatCatsMessageComposer)
+        public UserFlatCatsComposer(ICollection<SearchResultList> categories, int rank)
+            : base(ServerPacketHeader.UserFlatCatsMessageComposer)
         {
-            WriteInteger(Categories.Count);
-            foreach (var Cat in Categories)
+            WriteInteger(categories.Count);
+            foreach (var cat in categories)
             {
-                WriteInteger(Cat.Id);
-                WriteString(Cat.PublicName);
-                WriteBoolean(Cat.RequiredRank <= Rank);
+                WriteInteger(cat.Id);
+                WriteString(cat.PublicName);
+                WriteBoolean(cat.RequiredRank <= rank);
                 WriteBoolean(false);
                 WriteString("");
                 WriteString("");

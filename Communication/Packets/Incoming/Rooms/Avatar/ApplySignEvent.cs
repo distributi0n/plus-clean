@@ -6,25 +6,27 @@
 
     internal class ApplySignEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var SignId = Packet.PopInt();
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            var signId = packet.PopInt();
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            User.UnIdle();
-            User.SetStatus("sign", Convert.ToString(SignId));
-            User.UpdateNeeded = true;
-            User.SignTime = PlusEnvironment.GetUnixTimestamp() + 5;
+            user.UnIdle();
+
+            user.SetStatus("sign", Convert.ToString(signId));
+            user.UpdateNeeded = true;
+            user.SignTime = PlusEnvironment.GetUnixTimestamp() + 5;
         }
     }
 }

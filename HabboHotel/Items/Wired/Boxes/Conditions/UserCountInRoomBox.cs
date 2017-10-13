@@ -6,10 +6,10 @@
 
     internal class UserCountInRoomBox : IWiredItem
     {
-        public UserCountInRoomBox(Room Instance, Item Item)
+        public UserCountInRoomBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -21,12 +21,12 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var CountOne = Packet.PopInt();
-            var CountTwo = Packet.PopInt();
-            StringData = CountOne + ";" + CountTwo;
+            var unknown = packet.PopInt();
+            var countOne = packet.PopInt();
+            var countTwo = packet.PopInt();
+            StringData = countOne + ";" + countTwo;
         }
 
         public bool Execute(params object[] Params)
@@ -40,9 +40,9 @@
                 return false;
             }
 
-            var CountOne = StringData != null ? int.Parse(StringData.Split(';')[0]) : 1;
-            var CountTwo = StringData != null ? int.Parse(StringData.Split(';')[1]) : 50;
-            if (Instance.UserCount >= CountOne && Instance.UserCount <= CountTwo)
+            var countOne = StringData != null ? int.Parse(StringData.Split(';')[0]) : 1;
+            var countTwo = StringData != null ? int.Parse(StringData.Split(';')[1]) : 50;
+            if (Instance.UserCount >= countOne && Instance.UserCount <= countTwo)
             {
                 return true;
             }

@@ -6,33 +6,33 @@
 
     internal class GroupMembersComposer : ServerPacket
     {
-        public GroupMembersComposer(Group Group, ICollection<UserCache> Members, int MembersCount, int Page, bool Admin,
-            int ReqType, string SearchVal)
+        public GroupMembersComposer(Group group, ICollection<UserCache> members, int membersCount, int page, bool admin, int reqType, string searchVal)
             : base(ServerPacketHeader.GroupMembersMessageComposer)
         {
-            WriteInteger(Group.Id);
-            WriteString(Group.Name);
-            WriteInteger(Group.RoomId);
-            WriteString(Group.Badge);
-            WriteInteger(MembersCount);
-            WriteInteger(Members.Count);
-            if (MembersCount > 0)
+            WriteInteger(group.Id);
+            WriteString(group.Name);
+            WriteInteger(group.RoomId);
+            WriteString(group.Badge);
+            WriteInteger(membersCount);
+
+            WriteInteger(members.Count);
+            if (membersCount > 0)
             {
-                foreach (var Data in Members)
+                foreach (var data in members)
                 {
-                    WriteInteger(Group.CreatorId == Data.Id ? 0 : Group.IsAdmin(Data.Id) ? 1 : Group.IsMember(Data.Id) ? 2 : 3);
-                    WriteInteger(Data.Id);
-                    WriteString(Data.Username);
-                    WriteString(Data.Look);
+                    WriteInteger(group.CreatorId == data.Id ? 0 : group.IsAdmin(data.Id) ? 1 : group.IsMember(data.Id) ? 2 : 3);
+                    WriteInteger(data.Id);
+                    WriteString(data.Username);
+                    WriteString(data.Look);
                     WriteString(string.Empty);
                 }
             }
 
-            WriteBoolean(Admin);
+            WriteBoolean(admin);
             WriteInteger(14);
-            WriteInteger(Page);
-            WriteInteger(ReqType);
-            WriteString(SearchVal);
+            WriteInteger(page);
+            WriteInteger(reqType);
+            WriteString(searchVal);
         }
     }
 }

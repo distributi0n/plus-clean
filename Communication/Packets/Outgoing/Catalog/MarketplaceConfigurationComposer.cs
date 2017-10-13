@@ -2,7 +2,8 @@
 {
     public class MarketplaceConfigurationComposer : ServerPacket
     {
-        public MarketplaceConfigurationComposer() : base(ServerPacketHeader.MarketplaceConfigurationMessageComposer)
+        public MarketplaceConfigurationComposer()
+            : base(ServerPacketHeader.MarketplaceConfigurationMessageComposer)
         {
             WriteBoolean(true);
             WriteInteger(1); //Min price.

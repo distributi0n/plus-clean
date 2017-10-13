@@ -2,7 +2,8 @@
 {
     public class RentableSpaceComposer : ServerPacket
     {
-        public RentableSpaceComposer() : base(ServerPacketHeader.RentableSpaceMessageComposer)
+        public RentableSpaceComposer()
+            : base(ServerPacketHeader.RentableSpaceMessageComposer)
         {
             WriteBoolean(true); //Is rented y/n
             WriteInteger(-1); //No fucking clue

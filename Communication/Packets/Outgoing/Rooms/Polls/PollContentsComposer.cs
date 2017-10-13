@@ -2,7 +2,8 @@
 {
     internal class PollContentsComposer : ServerPacket
     {
-        public PollContentsComposer() : base(3826)
+        public PollContentsComposer()
+            : base(3826)
         {
             WriteInteger(111141); //Room Id
             WriteString("Customer Satisfaction Poll"); //Title

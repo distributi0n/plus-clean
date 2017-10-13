@@ -6,27 +6,26 @@
 
     internal class ModeratorSupportTicketComposer : ServerPacket
     {
-        public ModeratorSupportTicketComposer(int Id, ModerationTicket Ticket) : base(ServerPacketHeader
-            .ModeratorSupportTicketMessageComposer)
+        public ModeratorSupportTicketComposer(int id, ModerationTicket ticket)
+            : base(ServerPacketHeader.ModeratorSupportTicketMessageComposer)
         {
-            WriteInteger(Ticket.Id); // Id
-            WriteInteger(Ticket.GetStatus(Id)); // Tab ID
-            WriteInteger(Ticket.Type); // Type
-            WriteInteger(Ticket.Category); // Category 
-            WriteInteger(Convert.ToInt32((DateTime.Now - UnixTimestamp.FromUnixTimestamp(Ticket.Timestamp))
-                .TotalMilliseconds)); // This should fix the overflow?
-            WriteInteger(Ticket.Priority); // Priority
+            WriteInteger(ticket.Id); // Id
+            WriteInteger(ticket.GetStatus(id)); // Tab ID
+            WriteInteger(ticket.Type); // Type
+            WriteInteger(ticket.Category); // Category 
+            WriteInteger(Convert.ToInt32((DateTime.Now - UnixTimestamp.FromUnixTimestamp(ticket.Timestamp)).TotalMilliseconds)); // This should fix the overflow?
+            WriteInteger(ticket.Priority); // Priority
             WriteInteger(0); //??
-            WriteInteger(Ticket.Sender == null ? 0 : Ticket.Sender.Id); // Sender ID
+            WriteInteger(ticket.Sender == null ? 0 : ticket.Sender.Id); // Sender ID
 
             //base.WriteInteger(1);
-            WriteString(Ticket.Sender == null ? string.Empty : Ticket.Sender.Username); // Sender Name
-            WriteInteger(Ticket.Reported == null ? 0 : Ticket.Reported.Id); // Reported ID
-            WriteString(Ticket.Reported == null ? string.Empty : Ticket.Reported.Username); // Reported Name
-            WriteInteger(Ticket.Moderator == null ? 0 : Ticket.Moderator.Id); // Moderator ID
-            WriteString(Ticket.Moderator == null ? string.Empty : Ticket.Moderator.Username); // Mod Name
-            WriteString(Ticket.Issue); // Issue
-            WriteInteger(Ticket.Room == null ? 0 : Ticket.Room.Id); // Room Id
+            WriteString(ticket.Sender == null ? string.Empty : ticket.Sender.Username); // Sender Name
+            WriteInteger(ticket.Reported == null ? 0 : ticket.Reported.Id); // Reported ID
+            WriteString(ticket.Reported == null ? string.Empty : ticket.Reported.Username); // Reported Name
+            WriteInteger(ticket.Moderator == null ? 0 : ticket.Moderator.Id); // Moderator ID
+            WriteString(ticket.Moderator == null ? string.Empty : ticket.Moderator.Username); // Mod Name
+            WriteString(ticket.Issue); // Issue
+            WriteInteger(ticket.Room == null ? 0 : ticket.Room.Id); // Room Id
             WriteInteger(0);
             {
                 // push String

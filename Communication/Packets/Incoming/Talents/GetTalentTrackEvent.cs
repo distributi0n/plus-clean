@@ -5,11 +5,13 @@
 
     internal class GetTalentTrackEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Type = Packet.PopString();
-            var Levels = PlusEnvironment.GetGame().GetTalentTrackManager().GetLevels();
-            Session.SendPacket(new TalentTrackComposer(Levels, Type));
+            var type = packet.PopString();
+
+            var levels = PlusEnvironment.GetGame().GetTalentTrackManager().GetLevels();
+
+            session.SendPacket(new TalentTrackComposer(levels, type));
         }
     }
 }

@@ -2,7 +2,8 @@
 {
     internal class BuildersClubMembershipComposer : ServerPacket
     {
-        public BuildersClubMembershipComposer() : base(ServerPacketHeader.BuildersClubMembershipMessageComposer)
+        public BuildersClubMembershipComposer()
+            : base(ServerPacketHeader.BuildersClubMembershipMessageComposer)
         {
             WriteInteger(int.MaxValue);
             WriteInteger(100);

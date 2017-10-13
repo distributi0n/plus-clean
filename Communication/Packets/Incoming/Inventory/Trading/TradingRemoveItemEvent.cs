@@ -6,56 +6,59 @@
 
     internal class TradingRemoveItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var RoomUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (RoomUser == null)
+            var roomUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (roomUser == null)
             {
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            Trade Trade = null;
-            if (!Room.GetTrading().TryGetTrade(RoomUser.TradeId, out Trade))
+            var itemId = packet.PopInt();
+
+            Trade trade;
+            if (!room.GetTrading().TryGetTrade(roomUser.TradeId, out trade))
             {
-                Session.SendPacket(new TradingClosedComposer(Session.GetHabbo().Id));
+                session.SendPacket(new TradingClosedComposer(session.GetHabbo().Id));
                 return;
             }
 
-            var Item = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
-            if (Item == null)
-            {
-                return;
-            }
-            if (!Trade.CanChange)
+            var item = session.GetHabbo().GetInventoryComponent().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            var User = Trade.Users[0];
-            if (User.RoomUser != RoomUser)
-            {
-                User = Trade.Users[1];
-            }
-            if (!User.OfferedItems.ContainsKey(Item.Id))
+            if (!trade.CanChange)
             {
                 return;
             }
 
-            Trade.RemoveAccepted();
-            User.OfferedItems.Remove(Item.Id);
-            Trade.SendPacket(new TradingUpdateComposer(Trade));
+            var user = trade.Users[0];
+            if (user.RoomUser != roomUser)
+            {
+                user = trade.Users[1];
+            }
+
+            if (!user.OfferedItems.ContainsKey(item.Id))
+            {
+                return;
+            }
+
+            trade.RemoveAccepted();
+            user.OfferedItems.Remove(item.Id);
+            trade.SendPacket(new TradingUpdateComposer(trade));
         }
     }
 }

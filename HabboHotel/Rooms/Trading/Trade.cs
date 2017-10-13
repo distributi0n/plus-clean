@@ -174,7 +174,7 @@
                 {
                     logUserOne += Item.Id + ";";
                     RoomUserOne.GetClient().GetHabbo().GetInventoryComponent().RemoveItem(Item.Id);
-                    if (Item.Data.InteractionType == InteractionType.EXCHANGE &&
+                    if (Item.Data.InteractionType == InteractionType.Exchange &&
                         PlusEnvironment.GetSettingsManager().TryGetValue("trading.auto_exchange_redeemables") == "1")
                     {
                         RoomUserTwo.GetClient().GetHabbo().Credits += Item.Data.BehaviourData;
@@ -200,7 +200,7 @@
                 {
                     logUserTwo += Item.Id + ";";
                     RoomUserTwo.GetClient().GetHabbo().GetInventoryComponent().RemoveItem(Item.Id);
-                    if (Item.Data.InteractionType == InteractionType.EXCHANGE &&
+                    if (Item.Data.InteractionType == InteractionType.Exchange &&
                         PlusEnvironment.GetSettingsManager().TryGetValue("trading.auto_exchange_redeemables") == "1")
                     {
                         RoomUserOne.GetClient().GetHabbo().Credits += Item.Data.BehaviourData;

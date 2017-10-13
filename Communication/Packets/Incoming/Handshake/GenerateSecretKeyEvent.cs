@@ -5,20 +5,21 @@
     using HabboHotel.GameClients;
     using Outgoing.Handshake;
 
-    public sealed class GenerateSecretKeyEvent : IPacketEvent
+    public class GenerateSecretKeyEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var CipherPublickey = Packet.PopString();
-            var SharedKey = HabboEncryptionV2.CalculateDiffieHellmanSharedKey(CipherPublickey);
-            if (SharedKey != 0)
+            var cipherPublickey = packet.PopString();
+
+            var sharedKey = HabboEncryptionV2.CalculateDiffieHellmanSharedKey(cipherPublickey);
+            if (sharedKey != 0)
             {
-                Session.RC4Client = new Arc4(SharedKey.getBytes());
-                Session.SendPacket(new SecretKeyComposer(HabboEncryptionV2.GetRsaDiffieHellmanPublicKey()));
+                session.Rc4Client = new Arc4(sharedKey.getBytes());
+                session.SendPacket(new SecretKeyComposer(HabboEncryptionV2.GetRsaDiffieHellmanPublicKey()));
             }
             else
             {
-                Session.SendNotification("There was an error logging you in, please try again!");
+                session.SendNotification("There was an error logging you in, please try again!");
             }
         }
     }

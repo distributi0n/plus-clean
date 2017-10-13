@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal class ProgressUserAchievementCommand : IRCONCommand
+    internal class ProgressUserAchievementCommand : IRconCommand
     {
         public string Description => "This command is used to progress a users achievement.";
 
@@ -10,19 +10,17 @@
 
         public bool TryExecute(string[] parameters)
         {
-            var userId = 0;
-            if (!int.TryParse(parameters[0], out userId))
+            if (!int.TryParse(parameters[0], out var userId))
             {
                 return false;
             }
 
             var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
-            if (client == null || client.GetHabbo() == null)
+            if (client?.GetHabbo() == null)
             {
                 return false;
             }
 
-            // Validate the achievement
             if (string.IsNullOrEmpty(Convert.ToString(parameters[1])))
             {
                 return false;
@@ -30,9 +28,7 @@
 
             var achievement = Convert.ToString(parameters[1]);
 
-            // Validate the progress
-            var progress = 0;
-            if (!int.TryParse(parameters[2], out progress))
+            if (!int.TryParse(parameters[2], out var progress))
             {
                 return false;
             }

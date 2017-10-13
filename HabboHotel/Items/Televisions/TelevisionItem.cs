@@ -2,13 +2,13 @@
 {
     public class TelevisionItem
     {
-        public TelevisionItem(int Id, string YouTubeId, string Title, string Description, bool Enabled)
+        public TelevisionItem(int id, string youTubeId, string title, string description, bool enabled)
         {
-            this.Id = Id;
-            this.YouTubeId = YouTubeId;
-            this.Title = Title;
-            this.Description = Description;
-            this.Enabled = Enabled;
+            Id = id;
+            YouTubeId = youTubeId;
+            Title = title;
+            Description = description;
+            Enabled = enabled;
         }
 
         public int Id { get; }

@@ -1,38 +1,37 @@
 ﻿namespace Plus.Core.FigureData.Types
 {
-    public static class SetTypeUtility
+    internal static class SetTypeUtility
     {
-        public static SetType GetSetType(string type)
+        internal static SetType GetSetType(string type)
         {
             switch (type)
             {
                 default:
-                case "hr":
-                    return SetType.HR;
+                    return SetType.Hr;
                 case "HD":
-                    return SetType.HD;
+                    return SetType.Hd;
                 case "CH":
-                    return SetType.CH;
+                    return SetType.Ch;
                 case "LG":
-                    return SetType.LG;
+                    return SetType.Lg;
                 case "SH":
-                    return SetType.SH;
+                    return SetType.Sh;
                 case "HA":
-                    return SetType.HA;
+                    return SetType.Ha;
                 case "HE":
-                    return SetType.HE;
+                    return SetType.He;
                 case "EA":
-                    return SetType.EA;
+                    return SetType.Ea;
                 case "FA":
-                    return SetType.FA;
+                    return SetType.Fa;
                 case "CA":
-                    return SetType.CA;
+                    return SetType.Ca;
                 case "WA":
-                    return SetType.WA;
+                    return SetType.Wa;
                 case "CC":
-                    return SetType.CC;
+                    return SetType.Cc;
                 case "CP":
-                    return SetType.CP;
+                    return SetType.Cp;
             }
         }
     }

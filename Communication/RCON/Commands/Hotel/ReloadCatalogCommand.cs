@@ -2,7 +2,7 @@
 {
     using Packets.Outgoing.Catalog;
 
-    internal class ReloadCatalogCommand : IRCONCommand
+    internal class ReloadCatalogCommand : IRconCommand
     {
         public string Description => "This command is used to reload the catalog.";
 

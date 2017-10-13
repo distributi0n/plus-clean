@@ -10,15 +10,15 @@
     {
         private int _delay;
         private long _next;
-        private bool Requested;
+        private bool _requested;
 
-        public MoveFurniToUserBox(Room Instance, Item Item)
+        public MoveFurniToUserBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
             TickCount = Delay;
-            Requested = false;
+            _requested = false;
         }
 
         public int Delay
@@ -35,46 +35,46 @@
 
         public bool OnCycle()
         {
-            if (Instance == null || !Requested || _next == 0)
+            if (Instance == null || !_requested || _next == 0)
             {
                 return false;
             }
 
-            var Now = PlusEnvironment.Now();
-            if (_next < Now)
+            var now = PlusEnvironment.Now();
+            if (_next < now)
             {
-                foreach (var Item in SetItems.Values.ToList())
+                foreach (var item in SetItems.Values.ToList())
                 {
-                    if (Item == null)
+                    if (item == null)
                     {
                         continue;
                     }
-                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+                    if (!Instance.GetRoomItemHandler().GetFloor.Contains(item))
                     {
                         continue;
                     }
 
                     Item toRemove = null;
-                    if (Instance.GetWired().OtherBoxHasItem(this, Item.Id))
+                    if (Instance.GetWired().OtherBoxHasItem(this, item.Id))
                     {
-                        SetItems.TryRemove(Item.Id, out toRemove);
+                        SetItems.TryRemove(item.Id, out toRemove);
                     }
-                    var Point = Instance.GetGameMap().GetChaseMovement(Item);
-                    Instance.GetWired().onUserFurniCollision(Instance, Item);
-                    if (!Instance.GetGameMap().ItemCanMove(Item, Point))
+                    var point = Instance.GetGameMap().GetChaseMovement(item);
+                    Instance.GetWired().OnUserFurniCollision(Instance, item);
+                    if (!Instance.GetGameMap().ItemCanMove(item, point))
                     {
                         continue;
                     }
 
-                    if (Instance.GetGameMap().CanRollItemHere(Point.X, Point.Y) &&
-                        !Instance.GetGameMap().SquareHasUsers(Point.X, Point.Y))
+                    if (Instance.GetGameMap().CanRollItemHere(point.X, point.Y) &&
+                        !Instance.GetGameMap().SquareHasUsers(point.X, point.Y))
                     {
-                        var NewZ = Item.GetZ;
-                        var CanBePlaced = true;
-                        var Items = Instance.GetGameMap().GetCoordinatedItems(Point);
-                        foreach (var IItem in Items.ToList())
+                        var newZ = item.GetZ;
+                        var canBePlaced = true;
+                        var items = Instance.GetGameMap().GetCoordinatedItems(point);
+                        foreach (var IItem in items.ToList())
                         {
-                            if (IItem == null || IItem.Id == Item.Id)
+                            if (IItem == null || IItem.Id == item.Id)
                             {
                                 continue;
                             }
@@ -82,26 +82,27 @@
                             if (!IItem.GetBaseItem().Walkable)
                             {
                                 _next = 0;
-                                CanBePlaced = false;
+                                canBePlaced = false;
                                 break;
                             }
 
-                            if (IItem.TotalHeight > NewZ)
+                            if (IItem.TotalHeight > newZ)
                             {
-                                NewZ = IItem.TotalHeight;
+                                newZ = IItem.TotalHeight;
                             }
-                            if (CanBePlaced && !IItem.GetBaseItem().Stackable)
+                            if (canBePlaced && !IItem.GetBaseItem().Stackable)
                             {
-                                CanBePlaced = false;
+                                canBePlaced = false;
                             }
                         }
 
-                        if (CanBePlaced && Point != Item.Coordinate)
+                        if (!canBePlaced || point == item.Coordinate)
                         {
-                            Instance.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, Point.X, Point.Y,
-                                NewZ, 0, 0, Item.Id));
-                            Instance.GetRoomItemHandler().SetFloorItem(Item, Point.X, Point.Y, NewZ);
+                            continue;
                         }
+
+                        Instance.SendPacket(new SlideObjectBundleComposer(item.GetX, item.GetY, item.GetZ, point.X, point.Y, newZ, 0, 0, item.Id));
+                        Instance.GetRoomItemHandler().SetFloorItem(item, point.X, point.Y, newZ);
                     }
                 }
 
@@ -122,26 +123,26 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var Unknown2 = Packet.PopString();
+            var unknown = packet.PopInt();
+            var unknown2 = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, SelectedItem.Id))
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null && !Instance.GetWired().OtherBoxHasItem(this, selectedItem.Id))
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            var Delay = Packet.PopInt();
-            this.Delay = Delay;
+            var delay = packet.PopInt();
+            Delay = delay;
         }
 
         public bool Execute(params object[] Params)
@@ -155,10 +156,10 @@
             {
                 _next = PlusEnvironment.Now() + Delay;
             }
-            if (!Requested)
+            if (!_requested)
             {
                 TickCount = Delay;
-                Requested = true;
+                _requested = true;
             }
             return true;
         }

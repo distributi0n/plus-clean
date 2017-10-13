@@ -2,7 +2,8 @@
 {
     internal class NavigatorPreferencesComposer : ServerPacket
     {
-        public NavigatorPreferencesComposer() : base(ServerPacketHeader.NavigatorPreferencesMessageComposer)
+        public NavigatorPreferencesComposer()
+            : base(ServerPacketHeader.NavigatorPreferencesMessageComposer)
         {
             WriteInteger(68); //X
             WriteInteger(42); //Y

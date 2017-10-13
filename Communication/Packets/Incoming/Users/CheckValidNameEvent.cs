@@ -7,73 +7,67 @@
 
     internal class CheckValidNameEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var InUse = false;
-            var Name = Packet.PopString();
+            var inUse = false;
+            var name = packet.PopString();
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT COUNT(0) FROM `users` WHERE `username` = @name LIMIT 1");
-                dbClient.AddParameter("name", Name);
-                InUse = dbClient.GetInteger() == 1;
+                dbClient.AddParameter("name", name);
+                inUse = dbClient.GetInteger() == 1;
             }
-            var Letters = Name.ToLower().ToCharArray();
-            var AllowedCharacters = "abcdefghijklmnopqrstuvwxyz.,_-;:?!1234567890";
-            foreach (var Chr in Letters)
+
+            var letters = name.ToLower().ToCharArray();
+            var allowedCharacters = "abcdefghijklmnopqrstuvwxyz.,_-;:?!1234567890";
+
+            foreach (var chr in letters)
             {
-                if (!AllowedCharacters.Contains(Chr))
+                if (!allowedCharacters.Contains(chr))
                 {
-                    Session.SendPacket(new NameChangeUpdateComposer(Name, 4));
+                    session.SendPacket(new NameChangeUpdateComposer(name, 4));
                     return;
                 }
             }
 
-            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().IsFiltered(Name))
+            if (PlusEnvironment.GetGame().GetChatManager().GetFilter().IsFiltered(name))
             {
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 4));
+                session.SendPacket(new NameChangeUpdateComposer(name, 4));
                 return;
             }
 
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool") && Name.ToLower().Contains("mod") ||
-                Name.ToLower().Contains("adm") ||
-                Name.ToLower().Contains("admin") ||
-                Name.ToLower().Contains("m0d"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool") && name.ToLower().Contains("mod") || name.ToLower().Contains("adm") || name.ToLower().Contains("admin") ||
+                name.ToLower().Contains("m0d"))
             {
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 4));
-                return;
+                session.SendPacket(new NameChangeUpdateComposer(name, 4));
             }
-
-            if (!Name.ToLower().Contains("mod") && (Session.GetHabbo().Rank == 2 || Session.GetHabbo().Rank == 3))
+            else if (!name.ToLower().Contains("mod") && (session.GetHabbo().Rank == 2 || session.GetHabbo().Rank == 3))
             {
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 4));
-                return;
+                session.SendPacket(new NameChangeUpdateComposer(name, 4));
             }
-
-            if (Name.Length > 15)
+            else if (name.Length > 15)
             {
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 3));
-                return;
+                session.SendPacket(new NameChangeUpdateComposer(name, 3));
             }
-
-            if (Name.Length < 3)
+            else if (name.Length < 3)
             {
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 2));
-                return;
+                session.SendPacket(new NameChangeUpdateComposer(name, 2));
             }
-
-            if (InUse)
+            else if (inUse)
             {
-                ICollection<string> Suggestions = new List<string>();
+                ICollection<string> suggestions = new List<string>();
                 for (var i = 100; i < 103; i++)
                 {
-                    Suggestions.Add(i.ToString());
+                    suggestions.Add(i.ToString());
                 }
 
-                Session.SendPacket(new NameChangeUpdateComposer(Name, 5, Suggestions));
-                return;
+                session.SendPacket(new NameChangeUpdateComposer(name, 5, suggestions));
             }
-
-            Session.SendPacket(new NameChangeUpdateComposer(Name, 0));
+            else
+            {
+                session.SendPacket(new NameChangeUpdateComposer(name, 0));
+            }
         }
     }
 }

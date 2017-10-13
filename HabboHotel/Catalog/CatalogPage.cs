@@ -4,55 +4,55 @@
 
     public class CatalogPage
     {
-        public CatalogPage(int Id,
-            int ParentId,
-            string Enabled,
-            string Caption,
-            string PageLink,
-            int Icon,
-            int MinRank,
-            int MinVIP,
-            string Visible,
-            string Template,
-            string PageStrings1,
-            string PageStrings2,
-            Dictionary<int, CatalogItem> Items,
-            ref Dictionary<int, int> flatOffers)
+        internal CatalogPage(int id,
+                             int parentId,
+                             string enabled,
+                             string caption,
+                             string pageLink,
+                             int icon,
+                             int minRank,
+                             int minVip,
+                             string visible,
+                             string template,
+                             string pageStrings1,
+                             string pageStrings2,
+                             Dictionary<int, CatalogItem> items,
+                             ref Dictionary<int, int> flatOffers)
         {
-            this.Id = Id;
-            this.ParentId = ParentId;
-            this.Enabled = Enabled.ToLower() == "1" ? true : false;
-            this.Caption = Caption;
-            this.PageLink = PageLink;
-            this.Icon = Icon;
-            MinimumRank = MinRank;
-            MinimumVIP = MinVIP;
-            this.Visible = Visible.ToLower() == "1" ? true : false;
-            this.Template = Template;
-            foreach (var Str in PageStrings1.Split('|'))
+            Id = id;
+            ParentId = parentId;
+            Enabled = enabled.ToLower() == "1" ? true : false;
+            Caption = caption;
+            PageLink = pageLink;
+            Icon = icon;
+            MinimumRank = minRank;
+            MinimumVip = minVip;
+            Visible = visible.ToLower() == "1" ? true : false;
+            Template = template;
+            foreach (var str in pageStrings1.Split('|'))
             {
-                if (this.PageStrings1 == null)
+                if (PageStrings1 == null)
                 {
-                    this.PageStrings1 = new List<string>();
+                    PageStrings1 = new List<string>();
                 }
-                this.PageStrings1.Add(Str);
+                PageStrings1.Add(str);
             }
-            foreach (var Str in PageStrings2.Split('|'))
+            foreach (var str in pageStrings2.Split('|'))
             {
-                if (this.PageStrings2 == null)
+                if (PageStrings2 == null)
                 {
-                    this.PageStrings2 = new List<string>();
+                    PageStrings2 = new List<string>();
                 }
-                this.PageStrings2.Add(Str);
+                PageStrings2.Add(str);
             }
 
-            this.Items = Items;
+            Items = items;
             ItemOffers = new Dictionary<int, CatalogItem>();
             foreach (var i in flatOffers.Keys)
             {
-                if (flatOffers[i] == Id)
+                if (flatOffers[i] == id)
                 {
-                    foreach (var item in this.Items.Values)
+                    foreach (var item in Items.Values)
                     {
                         if (item.OfferId == i)
                         {
@@ -66,23 +66,23 @@
             }
         }
 
-        public int Id { get; set; }
+        internal int Id { get; set; }
 
-        public int ParentId { get; set; }
+        internal int ParentId { get; set; }
 
-        public bool Enabled { get; set; }
+        internal bool Enabled { get; set; }
 
-        public string Caption { get; set; }
+        internal string Caption { get; set; }
 
-        public string PageLink { get; set; }
+        internal string PageLink { get; set; }
 
-        public int Icon { get; set; }
+        internal int Icon { get; set; }
 
-        public int MinimumRank { get; set; }
+        internal int MinimumRank { get; set; }
 
-        public int MinimumVIP { get; set; }
+        internal int MinimumVip { get; set; }
 
-        public bool Visible { get; set; }
+        internal bool Visible { get; set; }
 
         public string Template { get; set; }
 
@@ -93,15 +93,5 @@
         public Dictionary<int, CatalogItem> Items { get; }
 
         public Dictionary<int, CatalogItem> ItemOffers { get; }
-
-        public CatalogItem GetItem(int pId)
-        {
-            if (Items.ContainsKey(pId))
-            {
-                return Items[pId];
-            }
-
-            return null;
-        }
     }
 }

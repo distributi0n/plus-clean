@@ -4,10 +4,11 @@
 
     internal class DanceComposer : ServerPacket
     {
-        public DanceComposer(RoomUser Avatar, int Dance) : base(ServerPacketHeader.DanceMessageComposer)
+        public DanceComposer(RoomUser avatar, int dance)
+            : base(ServerPacketHeader.DanceMessageComposer)
         {
-            WriteInteger(Avatar.VirtualId);
-            WriteInteger(Dance);
+            WriteInteger(avatar.VirtualId);
+            WriteInteger(dance);
         }
     }
 }

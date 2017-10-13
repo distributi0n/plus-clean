@@ -4,27 +4,28 @@
 
     internal class ModerationCautionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_caution"))
+            if (session?.GetHabbo() == null || !session.GetHabbo().GetPermissions().HasRight("mod_caution"))
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            var Message = Packet.PopString();
-            var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(UserId);
-            if (Client == null || Client.GetHabbo() == null)
+            var userId = packet.PopInt();
+            var message = packet.PopString();
+
+            var client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(userId);
+            if (client?.GetHabbo() == null)
             {
                 return;
             }
 
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.RunQuery("UPDATE `user_info` SET `cautions` = `cautions` + '1' WHERE `user_id` = '" +
-                                  Client.GetHabbo().Id + "' LIMIT 1");
+                dbClient.RunQuery("UPDATE `user_info` SET `cautions` = `cautions` + '1' WHERE `user_id` = '" + client.GetHabbo().Id + "' LIMIT 1");
             }
-            Client.SendNotification(Message);
+
+            client.SendNotification(message);
         }
     }
 }

@@ -2,7 +2,8 @@
 {
     internal class SanctionStatusComposer : ServerPacket
     {
-        public SanctionStatusComposer() : base(ServerPacketHeader.SanctionStatusMessageComposer)
+        public SanctionStatusComposer()
+            : base(ServerPacketHeader.SanctionStatusMessageComposer)
         {
             WriteBoolean(false);
             WriteBoolean(false);

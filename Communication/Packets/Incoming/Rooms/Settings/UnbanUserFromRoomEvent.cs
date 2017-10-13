@@ -12,19 +12,23 @@
                 return;
             }
 
-            var Instance = session.GetHabbo().CurrentRoom;
-            if (Instance == null || !Instance.CheckRights(session, true))
+            var instance = session.GetHabbo().CurrentRoom;
+            if (instance == null || !instance.CheckRights(session, true))
             {
                 return;
             }
 
-            var UserId = packet.PopInt();
-            var RoomId = packet.PopInt();
-            if (Instance.GetBans().IsBanned(UserId))
+            var userId = packet.PopInt();
+            var roomId = packet.PopInt();
+
+            if (!instance.GetBans().IsBanned(userId))
             {
-                Instance.GetBans().Unban(UserId);
-                session.SendPacket(new UnbanUserFromRoomComposer(RoomId, UserId));
+                return;
             }
+
+            instance.GetBans().Unban(userId);
+
+            session.SendPacket(new UnbanUserFromRoomComposer(roomId, userId));
         }
     }
 }

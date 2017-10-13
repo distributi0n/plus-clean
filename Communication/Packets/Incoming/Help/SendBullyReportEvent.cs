@@ -5,9 +5,9 @@
 
     internal class SendBullyReportEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new SendBullyReportComposer());
+            session.SendPacket(new SendBullyReportComposer());
         }
     }
 }

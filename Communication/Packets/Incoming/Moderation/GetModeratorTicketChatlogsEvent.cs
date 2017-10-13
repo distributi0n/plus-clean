@@ -4,29 +4,30 @@
     using HabboHotel.Moderation;
     using Outgoing.Moderation;
 
-    internal sealed class GetModeratorTicketChatlogsEvent : IPacketEvent
+    internal class GetModeratorTicketChatlogsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().GetPermissions().HasRight("mod_tickets"))
+            if (session?.GetHabbo() == null || !session.GetHabbo().GetPermissions().HasRight("mod_tickets"))
             {
                 return;
             }
 
-            var TicketId = Packet.PopInt();
-            ModerationTicket Ticket = null;
-            if (!PlusEnvironment.GetGame().GetModerationManager().TryGetTicket(TicketId, out Ticket) || Ticket.Room == null)
+            var ticketId = packet.PopInt();
+
+            ModerationTicket ticket;
+            if (!PlusEnvironment.GetGame().GetModerationManager().TryGetTicket(ticketId, out ticket) || ticket.Room == null)
             {
                 return;
             }
 
-            var Data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(Ticket.Room.Id);
-            if (Data == null)
+            var data = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(ticket.Room.Id);
+            if (data == null)
             {
                 return;
             }
 
-            Session.SendPacket(new ModeratorTicketChatlogComposer(Ticket, Data, Ticket.Timestamp));
+            session.SendPacket(new ModeratorTicketChatlogComposer(ticket, data, ticket.Timestamp));
         }
     }
 }

@@ -2,10 +2,11 @@
 {
     internal class UpdateFreezeLivesComposer : ServerPacket
     {
-        public UpdateFreezeLivesComposer(int UserId, int FreezeLives) : base(ServerPacketHeader.UpdateFreezeLivesMessageComposer)
+        public UpdateFreezeLivesComposer(int userId, int freezeLives)
+            : base(ServerPacketHeader.UpdateFreezeLivesMessageComposer)
         {
-            WriteInteger(UserId);
-            WriteInteger(FreezeLives);
+            WriteInteger(userId);
+            WriteInteger(freezeLives);
         }
     }
 }

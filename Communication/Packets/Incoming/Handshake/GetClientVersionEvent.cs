@@ -2,15 +2,12 @@
 {
     using HabboHotel.GameClients;
 
-    public sealed class GetClientVersionEvent : IPacketEvent
+    internal class GetClientVersionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Build = Packet.PopString();
-            if (PlusEnvironment.SWFRevision != Build)
-            {
-                PlusEnvironment.SWFRevision = Build;
-            }
+            var build = packet.PopString();
+            PlusEnvironment.SWFRevision = build;
         }
     }
 }

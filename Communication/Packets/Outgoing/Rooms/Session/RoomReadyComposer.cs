@@ -2,10 +2,11 @@
 {
     internal class RoomReadyComposer : ServerPacket
     {
-        public RoomReadyComposer(int RoomId, string Model) : base(ServerPacketHeader.RoomReadyMessageComposer)
+        public RoomReadyComposer(int roomId, string model)
+            : base(ServerPacketHeader.RoomReadyMessageComposer)
         {
-            WriteString(Model);
-            WriteInteger(RoomId);
+            WriteString(model);
+            WriteInteger(roomId);
         }
     }
 }

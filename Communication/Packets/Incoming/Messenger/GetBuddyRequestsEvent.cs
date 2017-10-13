@@ -8,10 +8,11 @@
 
     internal class GetBuddyRequestsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            ICollection<MessengerRequest> Requests = Session.GetHabbo().GetMessenger().GetRequests().ToList();
-            Session.SendPacket(new BuddyRequestsComposer(Requests));
+            ICollection<MessengerRequest> requests = session.GetHabbo().GetMessenger().GetRequests().ToList();
+
+            session.SendPacket(new BuddyRequestsComposer(requests));
         }
     }
 }

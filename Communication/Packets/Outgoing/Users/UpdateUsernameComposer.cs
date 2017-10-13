@@ -2,10 +2,11 @@
 {
     internal class UpdateUsernameComposer : ServerPacket
     {
-        public UpdateUsernameComposer(string User) : base(ServerPacketHeader.UpdateUsernameMessageComposer)
+        public UpdateUsernameComposer(string user)
+            : base(ServerPacketHeader.UpdateUsernameMessageComposer)
         {
             WriteInteger(0);
-            WriteString(User);
+            WriteString(user);
             WriteInteger(0);
         }
     }

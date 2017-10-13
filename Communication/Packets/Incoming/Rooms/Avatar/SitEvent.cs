@@ -4,18 +4,19 @@
 
     internal class SitEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var user = Session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
+            var user = session.GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
             if (user == null)
             {
                 return;
             }
+
             if (user.Statusses.ContainsKey("lie") || user.isLying || user.RidingHorse || user.IsWalking)
             {
                 return;
@@ -25,11 +26,6 @@
             {
                 if (user.RotBody % 2 == 0)
                 {
-                    if (user == null)
-                    {
-                        return;
-                    }
-
                     try
                     {
                         user.Statusses.Add("sit", "1.0");
@@ -39,6 +35,7 @@
                     }
                     catch
                     {
+                        // ignored
                     }
                 }
                 else

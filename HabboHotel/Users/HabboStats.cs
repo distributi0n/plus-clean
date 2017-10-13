@@ -3,19 +3,19 @@
     public class HabboStats
     {
         public HabboStats(int roomVisits,
-            double onlineTime,
-            int Respect,
-            int respectGiven,
-            int giftsGiven,
-            int giftsReceived,
-            int dailyRespectPoints,
-            int dailyPetRespectPoints,
-            int achievementPoints,
-            int questID,
-            int questProgress,
-            int groupID,
-            string RespectsTimestamp,
-            int ForumPosts)
+                          double onlineTime,
+                          int Respect,
+                          int respectGiven,
+                          int giftsGiven,
+                          int giftsReceived,
+                          int dailyRespectPoints,
+                          int dailyPetRespectPoints,
+                          int achievementPoints,
+                          int questID,
+                          int questProgress,
+                          int groupID,
+                          string RespectsTimestamp,
+                          int ForumPosts)
         {
             RoomVisits = roomVisits;
             OnlineTime = onlineTime;

@@ -4,16 +4,17 @@
 
     public class OpenFlatConnectionEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session == null || session.GetHabbo() == null)
             {
                 return;
             }
 
-            var RoomId = Packet.PopInt();
-            var Password = Packet.PopString();
-            Session.GetHabbo().PrepareRoom(RoomId, Password);
+            var roomId = packet.PopInt();
+            var password = packet.PopString();
+
+            session.GetHabbo().PrepareRoom(roomId, password);
         }
     }
 }

@@ -9,33 +9,34 @@
     {
         public void Parse(GameClient session, ClientPacket packet)
         {
-            var Category = packet.PopString();
-            var Search = packet.PopString();
-            ICollection<SearchResultList> Categories = new List<SearchResultList>();
-            if (!string.IsNullOrEmpty(Search))
+            var category = packet.PopString();
+            var search = packet.PopString();
+
+            ICollection<SearchResultList> categories = new List<SearchResultList>();
+
+            if (!string.IsNullOrEmpty(search))
             {
-                SearchResultList QueryResult = null;
-                if (PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(0, out QueryResult))
+                if (PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(0, out var queryResult))
                 {
-                    Categories.Add(QueryResult);
+                    categories.Add(queryResult);
                 }
             }
             else
             {
-                Categories = PlusEnvironment.GetGame().GetNavigator().GetCategorysForSearch(Category);
-                if (Categories.Count == 0)
+                categories = PlusEnvironment.GetGame().GetNavigator().GetCategorysForSearch(category);
+                if (categories.Count == 0)
                 {
                     //Are we going in deep?!
-                    Categories = PlusEnvironment.GetGame().GetNavigator().GetResultByIdentifier(Category);
-                    if (Categories.Count > 0)
+                    categories = PlusEnvironment.GetGame().GetNavigator().GetResultByIdentifier(category);
+                    if (categories.Count > 0)
                     {
-                        session.SendPacket(new NavigatorSearchResultSetComposer(Category, Search, Categories, session, 2, 100));
+                        session.SendPacket(new NavigatorSearchResultSetComposer(category, search, categories, session, 2, 100));
                         return;
                     }
                 }
             }
 
-            session.SendPacket(new NavigatorSearchResultSetComposer(Category, Search, Categories, session));
+            session.SendPacket(new NavigatorSearchResultSetComposer(category, search, categories, session));
         }
     }
 }

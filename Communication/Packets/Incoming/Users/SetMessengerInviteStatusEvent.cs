@@ -4,15 +4,15 @@
 
     internal class SetMessengerInviteStatusEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var Status = Packet.PopBoolean();
-            Session.GetHabbo().AllowMessengerInvites = Status;
+            var status = packet.PopBoolean();
+
+            session.GetHabbo().AllowMessengerInvites = status;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `users` SET `ignore_invites` = @MessengerInvites WHERE `id` = '" +
-                                  Session.GetHabbo().Id + "' LIMIT 1");
-                dbClient.AddParameter("MessengerInvites", PlusEnvironment.BoolToEnum(Status));
+                dbClient.SetQuery("UPDATE `users` SET `ignore_invites` = @MessengerInvites WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.AddParameter("MessengerInvites", PlusEnvironment.BoolToEnum(status));
                 dbClient.RunQuery();
             }
         }

@@ -5,16 +5,16 @@
 
     internal class GetSelectedBadgesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var UserId = Packet.PopInt();
-            var Habbo = PlusEnvironment.GetHabboById(UserId);
-            if (Habbo == null)
+            var userId = packet.PopInt();
+            var habbo = PlusEnvironment.GetHabboById(userId);
+            if (habbo == null)
             {
                 return;
             }
 
-            Session.SendPacket(new HabboUserBadgesComposer(Habbo));
+            session.SendPacket(new HabboUserBadgesComposer(habbo));
         }
     }
 }

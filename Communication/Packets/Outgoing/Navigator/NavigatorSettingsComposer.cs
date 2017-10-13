@@ -2,10 +2,11 @@
 {
     internal class NavigatorSettingsComposer : ServerPacket
     {
-        public NavigatorSettingsComposer(int Homeroom) : base(ServerPacketHeader.NavigatorSettingsMessageComposer)
+        public NavigatorSettingsComposer(int homeroom)
+            : base(ServerPacketHeader.NavigatorSettingsMessageComposer)
         {
-            WriteInteger(Homeroom);
-            WriteInteger(Homeroom);
+            WriteInteger(homeroom);
+            WriteInteger(homeroom);
         }
     }
 }

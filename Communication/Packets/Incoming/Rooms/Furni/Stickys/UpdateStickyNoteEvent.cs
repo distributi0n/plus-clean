@@ -6,48 +6,53 @@
 
     internal class UpdateStickyNoteEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var Item = Room.GetRoomItemHandler().GetItem(Packet.PopInt());
-            if (Item == null || Item.GetBaseItem().InteractionType != InteractionType.POSTIT)
+            var item = room.GetRoomItemHandler().GetItem(packet.PopInt());
+            if (item == null || item.GetBaseItem().InteractionType != InteractionType.Postit)
             {
                 return;
             }
 
-            var Color = Packet.PopString();
-            var Text = Packet.PopString();
-            if (!Room.CheckRights(Session))
+            var color = packet.PopString();
+            var text = packet.PopString();
+
+            if (!room.CheckRights(session))
             {
-                if (!Text.StartsWith(Item.ExtraData))
+                if (!text.StartsWith(item.ExtraData))
                 {
                     return; // we can only ADD stuff! older stuff changed, this is not allowed
                 }
             }
 
-            switch (Color)
+            switch (color)
             {
                 case "FFFF33":
                 case "FF9CFF":
                 case "9CCEFF":
                 case "9CFF9C":
+
                     break;
+
                 default:
+
                     return; // invalid color
             }
 
-            Item.ExtraData = Color + " " + Text;
-            Item.UpdateState(true, true);
+            item.ExtraData = color + " " + text;
+            item.UpdateState(true, true);
         }
     }
 }

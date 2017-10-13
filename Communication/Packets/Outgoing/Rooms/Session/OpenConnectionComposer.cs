@@ -2,7 +2,8 @@
 {
     internal class OpenConnectionComposer : ServerPacket
     {
-        public OpenConnectionComposer() : base(ServerPacketHeader.OpenConnectionMessageComposer)
+        public OpenConnectionComposer()
+            : base(ServerPacketHeader.OpenConnectionMessageComposer)
         {
         }
     }

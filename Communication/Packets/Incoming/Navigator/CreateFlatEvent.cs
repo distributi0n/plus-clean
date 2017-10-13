@@ -5,66 +5,70 @@
     using HabboHotel.Rooms;
     using Outgoing.Navigator;
 
-    internal sealed class CreateFlatEvent : IPacketEvent
+    internal class CreateFlatEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session?.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            if (Session.GetHabbo().UsersRooms.Count >= 500)
+            if (session.GetHabbo().UsersRooms.Count >= 500)
             {
-                Session.SendPacket(new CanCreateRoomComposer(true, 500));
+                session.SendPacket(new CanCreateRoomComposer(true, 500));
                 return;
             }
 
-            var Name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            var Description = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            var ModelName = Packet.PopString();
-            var Category = Packet.PopInt();
-            var MaxVisitors = Packet.PopInt(); //10 = min, 25 = max.
-            var TradeSettings = Packet.PopInt(); //2 = All can trade, 1 = owner only, 0 = no trading.
-            if (Name.Length < 3)
-            {
-                return;
-            }
-            if (Name.Length > 25)
+            var name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+            var description = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+            var modelName = packet.PopString();
+
+            var category = packet.PopInt();
+            var maxVisitors = packet.PopInt(); //10 = min, 25 = max.
+            var tradeSettings = packet.PopInt(); //2 = All can trade, 1 = owner only, 0 = no trading.
+
+            if (name.Length < 3)
             {
                 return;
             }
 
-            RoomModel RoomModel = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetModel(ModelName, out RoomModel))
+            if (name.Length > 25)
             {
                 return;
             }
 
-            SearchResultList SearchResultList = null;
-            if (!PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(Category, out SearchResultList))
+            RoomModel roomModel = null;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetModel(modelName, out roomModel))
             {
-                Category = 36;
+                return;
             }
-            if (SearchResultList.CategoryType != NavigatorCategoryType.CATEGORY ||
-                SearchResultList.RequiredRank > Session.GetHabbo().Rank)
+
+            SearchResultList searchResultList = null;
+            if (!PlusEnvironment.GetGame().GetNavigator().TryGetSearchResultList(category, out searchResultList))
             {
-                Category = 36;
+                category = 36;
             }
-            if (MaxVisitors < 10 || MaxVisitors > 25)
+
+            if (searchResultList.CategoryType != NavigatorCategoryType.CATEGORY || searchResultList.RequiredRank > session.GetHabbo().Rank)
             {
-                MaxVisitors = 10;
+                category = 36;
             }
-            if (TradeSettings < 0 || TradeSettings > 2)
+
+            if (maxVisitors < 10 || maxVisitors > 25)
             {
-                TradeSettings = 0;
+                maxVisitors = 10;
             }
-            var NewRoom = PlusEnvironment.GetGame()
-                .GetRoomManager()
-                .CreateRoom(Session, Name, Description, ModelName, Category, MaxVisitors, TradeSettings);
-            if (NewRoom != null)
+
+            if (tradeSettings < 0 || tradeSettings > 2)
             {
-                Session.SendPacket(new FlatCreatedComposer(NewRoom.Id, Name));
+                tradeSettings = 0;
+            }
+
+            var newRoom = PlusEnvironment.GetGame().GetRoomManager().CreateRoom(session, name, description, modelName, category, maxVisitors, tradeSettings);
+            if (newRoom != null)
+            {
+                session.SendPacket(new FlatCreatedComposer(newRoom.Id, name));
             }
         }
     }

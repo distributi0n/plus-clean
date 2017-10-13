@@ -4,10 +4,11 @@
 
     internal class AvatarEffectActivatedComposer : ServerPacket
     {
-        public AvatarEffectActivatedComposer(AvatarEffect Effect) : base(ServerPacketHeader.AvatarEffectActivatedMessageComposer)
+        public AvatarEffectActivatedComposer(AvatarEffect effect)
+            : base(ServerPacketHeader.AvatarEffectActivatedMessageComposer)
         {
-            WriteInteger(Effect.SpriteId);
-            WriteInteger((int) Effect.Duration);
+            WriteInteger(effect.SpriteId);
+            WriteInteger((int) effect.Duration);
             WriteBoolean(false); //Permanent
         }
     }

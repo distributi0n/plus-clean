@@ -6,38 +6,41 @@
 
     internal class MoveWallItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session))
+            Room room;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var itemID = Packet.PopInt();
-            var wallPositionData = Packet.PopString();
-            var Item = Room.GetRoomItemHandler().GetItem(itemID);
-            if (Item == null)
+            if (!room.CheckRights(session))
+            {
+                return;
+            }
+
+            var itemId = packet.PopInt();
+            var wallPositionData = packet.PopString();
+
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+
+            if (item == null)
             {
                 return;
             }
 
             try
             {
-                var WallPos = Room.GetRoomItemHandler().WallPositionCheck(":" + wallPositionData.Split(':')[1]);
-                Item.wallCoord = WallPos;
+                var wallPos = room.GetRoomItemHandler().WallPositionCheck(":" + wallPositionData.Split(':')[1]);
+                item.WallCoord = wallPos;
             }
             catch
             {
                 return;
             }
 
-            Room.GetRoomItemHandler().UpdateItem(Item);
-            Room.SendPacket(new ItemUpdateComposer(Item, Room.OwnerId));
+            room.GetRoomItemHandler().UpdateItem(item);
+            room.SendPacket(new ItemUpdateComposer(item, room.OwnerId));
         }
     }
 }

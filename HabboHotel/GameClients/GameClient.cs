@@ -30,11 +30,11 @@
         private Habbo _habbo;
         private GamePacketParser _packetParser;
         public string MachineId;
-        public Arc4 RC4Client;
+        public Arc4 Rc4Client;
 
-        public GameClient(int ClientId, ConnectionInformation pConnection)
+        public GameClient(int clientId, ConnectionInformation pConnection)
         {
-            ConnectionID = ClientId;
+            ConnectionId = clientId;
             _connection = pConnection;
             _packetParser = new GamePacketParser(this);
             PingCount = 0;
@@ -42,23 +42,23 @@
 
         public int PingCount { get; set; }
 
-        public int ConnectionID { get; }
+        public int ConnectionId { get; }
 
         private void SwitchParserRequest()
         {
             _packetParser.SetConnection(_connection);
             _packetParser.OnNewPacket += parser_onNewPacket;
-            var data = (_connection.parser as InitialPacketParser).currentData;
-            _connection.parser.Dispose();
-            _connection.parser = _packetParser;
-            _connection.parser.handlePacketData(data);
+            var data = (_connection.Parser as InitialPacketParser).CurrentData;
+            _connection.Parser.Dispose();
+            _connection.Parser = _packetParser;
+            _connection.Parser.HandlePacketData(data);
         }
 
-        private void parser_onNewPacket(ClientPacket Message)
+        private void parser_onNewPacket(ClientPacket message)
         {
             try
             {
-                PlusEnvironment.GetGame().GetPacketManager().TryExecutePacket(this, Message);
+                PlusEnvironment.GetGame().GetPacketManager().TryExecutePacket(this, message);
             }
             catch (Exception e)
             {
@@ -84,17 +84,17 @@
             }
 
             PingCount = 0;
-            (_connection.parser as InitialPacketParser).PolicyRequest += PolicyRequest;
-            (_connection.parser as InitialPacketParser).SwitchParserRequest += SwitchParserRequest;
-            _connection.startPacketProcessing();
+            (_connection.Parser as InitialPacketParser).PolicyRequest += PolicyRequest;
+            (_connection.Parser as InitialPacketParser).SwitchParserRequest += SwitchParserRequest;
+            _connection.StartPacketProcessing();
         }
 
-        public bool TryAuthenticate(string AuthTicket)
+        public bool TryAuthenticate(string authTicket)
         {
             try
             {
                 byte errorCode = 0;
-                var userData = UserDataFactory.GetUserData(AuthTicket, out errorCode);
+                var userData = UserDataFactory.GetUserData(authTicket, out errorCode);
                 if (errorCode == 1 || errorCode == 2)
                 {
                     Disconnect();
@@ -102,10 +102,10 @@
                 }
 
                 //Let's have a quick search for a ban before we successfully authenticate..
-                ModerationBan BanRecord = null;
+                ModerationBan banRecord = null;
                 if (!string.IsNullOrEmpty(MachineId))
                 {
-                    if (PlusEnvironment.GetGame().GetModerationManager().IsBanned(MachineId, out BanRecord))
+                    if (PlusEnvironment.GetGame().GetModerationManager().IsBanned(MachineId, out banRecord))
                     {
                         if (PlusEnvironment.GetGame().GetModerationManager().MachineBanCheck(MachineId))
                         {
@@ -118,8 +118,8 @@
                 if (userData.user != null)
                 {
                     //Now let us check for a username ban record..
-                    BanRecord = null;
-                    if (PlusEnvironment.GetGame().GetModerationManager().IsBanned(userData.user.Username, out BanRecord))
+                    banRecord = null;
+                    if (PlusEnvironment.GetGame().GetModerationManager().IsBanned(userData.user.Username, out banRecord))
                     {
                         if (PlusEnvironment.GetGame().GetModerationManager().UsernameBanCheck(userData.user.Username))
                         {
@@ -134,7 +134,7 @@
                 if (_habbo != null)
                 {
                     userData.user.Init(this, userData);
-                    SendPacket(new AuthenticationOKComposer());
+                    SendPacket(new AuthenticationOkComposer());
                     SendPacket(new AvatarEffectsComposer(_habbo.Effects().GetAllEffects));
                     SendPacket(new NavigatorSettingsComposer(_habbo.HomeRoom));
                     SendPacket(new FavouritesComposer(userData.user.FavoriteRooms));
@@ -144,7 +144,7 @@
                     SendPacket(new AchievementScoreComposer(_habbo.GetStats().AchievementPoints));
                     SendPacket(new BuildersClubMembershipComposer());
                     SendPacket(new CfhTopicsInitComposer(PlusEnvironment.GetGame().GetModerationManager().UserActionPresets));
-                    SendPacket(new BadgeDefinitionsComposer(PlusEnvironment.GetGame().GetAchievementManager()._achievements));
+                    SendPacket(new BadgeDefinitionsComposer(PlusEnvironment.GetGame().GetAchievementManager().Achievements));
                     SendPacket(new SoundSettingsComposer(_habbo.ClientVolume,
                         _habbo.ChatPreference,
                         _habbo.AllowMessengerInvites,
@@ -170,25 +170,25 @@
                         }
                         _habbo.MachineId = MachineId;
                     }
-                    PermissionGroup PermissionGroup = null;
-                    if (PlusEnvironment.GetGame().GetPermissionManager().TryGetGroup(_habbo.Rank, out PermissionGroup))
+                    PermissionGroup permissionGroup = null;
+                    if (PlusEnvironment.GetGame().GetPermissionManager().TryGetGroup(_habbo.Rank, out permissionGroup))
                     {
-                        if (!string.IsNullOrEmpty(PermissionGroup.Badge))
+                        if (!string.IsNullOrEmpty(permissionGroup.Badge))
                         {
-                            if (!_habbo.GetBadgeComponent().HasBadge(PermissionGroup.Badge))
+                            if (!_habbo.GetBadgeComponent().HasBadge(permissionGroup.Badge))
                             {
-                                _habbo.GetBadgeComponent().GiveBadge(PermissionGroup.Badge, true, this);
+                                _habbo.GetBadgeComponent().GiveBadge(permissionGroup.Badge, true, this);
                             }
                         }
                     }
-                    SubscriptionData SubData = null;
-                    if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(_habbo.VIPRank, out SubData))
+                    SubscriptionData subData = null;
+                    if (PlusEnvironment.GetGame().GetSubscriptionManager().TryGetSubscriptionData(_habbo.VipRank, out subData))
                     {
-                        if (!string.IsNullOrEmpty(SubData.Badge))
+                        if (!string.IsNullOrEmpty(subData.Badge))
                         {
-                            if (!_habbo.GetBadgeComponent().HasBadge(SubData.Badge))
+                            if (!_habbo.GetBadgeComponent().HasBadge(subData.Badge))
                             {
-                                _habbo.GetBadgeComponent().GiveBadge(SubData.Badge, true, this);
+                                _habbo.GetBadgeComponent().GiveBadge(subData.Badge, true, this);
                             }
                         }
                     }
@@ -207,7 +207,7 @@
                     }
                     if (PlusEnvironment.GetSettingsManager().TryGetValue("user.login.message.enabled") == "1")
                     {
-                        SendPacket(new MOTDNotificationComposer(PlusEnvironment.GetLanguageManager()
+                        SendPacket(new MotdNotificationComposer(PlusEnvironment.GetLanguageManager()
                             .TryGetValue("user.login.message")));
                     }
                     PlusEnvironment.GetGame().GetRewardManager().CheckRewards(this);
@@ -222,31 +222,31 @@
             return false;
         }
 
-        public void SendWhisper(string Message, int Colour = 0)
+        public void SendWhisper(string message, int colour = 0)
         {
             if (GetHabbo() == null || GetHabbo().CurrentRoom == null)
             {
                 return;
             }
 
-            var User = GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(GetHabbo().Username);
-            if (User == null)
+            var user = GetHabbo().CurrentRoom.GetRoomUserManager().GetRoomUserByHabbo(GetHabbo().Username);
+            if (user == null)
             {
                 return;
             }
 
-            SendPacket(new WhisperComposer(User.VirtualId, Message, 0, Colour == 0 ? User.LastBubble : Colour));
+            SendPacket(new WhisperComposer(user.VirtualId, message, 0, colour == 0 ? user.LastBubble : colour));
         }
 
-        public void SendNotification(string Message)
+        public void SendNotification(string message)
         {
-            SendPacket(new BroadcastMessageAlertComposer(Message));
+            SendPacket(new BroadcastMessageAlertComposer(message));
         }
 
-        public void SendPacket(IServerPacket Message)
+        public void SendPacket(IServerPacket message)
         {
-            var bytes = Message.GetBytes();
-            if (Message == null)
+            var bytes = message.GetBytes();
+            if (message == null)
             {
                 return;
             }
@@ -299,7 +299,7 @@
             _disconnected = true;
             _habbo = null;
             _connection = null;
-            RC4Client = null;
+            Rc4Client = null;
             _packetParser = null;
         }
     }

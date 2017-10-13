@@ -9,59 +9,64 @@
 
     internal class UsersComposer : ServerPacket
     {
-        public UsersComposer(ICollection<RoomUser> Users) : base(ServerPacketHeader.UsersMessageComposer)
+        public UsersComposer(ICollection<RoomUser> users)
+            : base(ServerPacketHeader.UsersMessageComposer)
         {
-            WriteInteger(Users.Count);
-            foreach (var User in Users.ToList())
+            WriteInteger(users.Count);
+            foreach (var user in users.ToList())
             {
-                WriteUser(User);
+                WriteUser(user);
             }
         }
 
-        public UsersComposer(RoomUser User) : base(ServerPacketHeader.UsersMessageComposer)
+        public UsersComposer(RoomUser user)
+            : base(ServerPacketHeader.UsersMessageComposer)
         {
             WriteInteger(1); //1 avatar
-            WriteUser(User);
+            WriteUser(user);
         }
 
-        private void WriteUser(RoomUser User)
+        private void WriteUser(RoomUser user)
         {
-            if (!User.IsPet && !User.IsBot)
+            if (!user.IsPet && !user.IsBot)
             {
-                var Habbo = User.GetClient().GetHabbo();
-                Group Group = null;
-                if (Habbo != null)
+                var habbo = user.GetClient().GetHabbo();
+
+                Group group = null;
+                if (habbo != null)
                 {
-                    if (Habbo.GetStats() != null)
+                    if (habbo.GetStats() != null)
                     {
-                        if (Habbo.GetStats().FavouriteGroupId > 0)
+                        if (habbo.GetStats().FavouriteGroupId > 0)
                         {
-                            if (!PlusEnvironment.GetGame().GetGroupManager()
-                                .TryGetGroup(Habbo.GetStats().FavouriteGroupId, out Group))
+                            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(habbo.GetStats().FavouriteGroupId, out group))
                             {
-                                Group = null;
+                                group = null;
                             }
                         }
                     }
                 }
-                if (Habbo.PetId == 0)
+
+                if (habbo.PetId == 0)
                 {
-                    WriteInteger(Habbo.Id);
-                    WriteString(Habbo.Username);
-                    WriteString(Habbo.Motto);
-                    WriteString(Habbo.Look);
-                    WriteInteger(User.VirtualId);
-                    WriteInteger(User.X);
-                    WriteInteger(User.Y);
-                    WriteDouble(User.Z);
+                    WriteInteger(habbo.Id);
+                    WriteString(habbo.Username);
+                    WriteString(habbo.Motto);
+                    WriteString(habbo.Look);
+                    WriteInteger(user.VirtualId);
+                    WriteInteger(user.X);
+                    WriteInteger(user.Y);
+                    WriteDouble(user.Z);
+
                     WriteInteger(0); //2 for user, 4 for bot.
                     WriteInteger(1); //1 for user, 2 for pet, 3 for bot.
-                    WriteString(Habbo.Gender.ToLower());
-                    if (Group != null)
+                    WriteString(habbo.Gender.ToLower());
+
+                    if (group != null)
                     {
-                        WriteInteger(Group.Id);
+                        WriteInteger(group.Id);
                         WriteInteger(0);
-                        WriteString(Group.Name);
+                        WriteString(group.Name);
                     }
                     else
                     {
@@ -69,25 +74,28 @@
                         WriteInteger(0);
                         WriteString("");
                     }
+
                     WriteString(""); //Whats this?
-                    WriteInteger(Habbo.GetStats().AchievementPoints); //Achievement score
+                    WriteInteger(habbo.GetStats().AchievementPoints); //Achievement score
                     WriteBoolean(false); //Builders club?
                 }
-                else if (Habbo.PetId > 0 && Habbo.PetId != 100)
+                else if (habbo.PetId > 0 && habbo.PetId != 100)
                 {
-                    WriteInteger(Habbo.Id);
-                    WriteString(Habbo.Username);
-                    WriteString(Habbo.Motto);
-                    WriteString(PetFigureForType(Habbo.PetId));
-                    WriteInteger(User.VirtualId);
-                    WriteInteger(User.X);
-                    WriteInteger(User.Y);
-                    WriteDouble(User.Z);
+                    WriteInteger(habbo.Id);
+                    WriteString(habbo.Username);
+                    WriteString(habbo.Motto);
+                    WriteString(PetFigureForType(habbo.PetId));
+
+                    WriteInteger(user.VirtualId);
+                    WriteInteger(user.X);
+                    WriteInteger(user.Y);
+                    WriteDouble(user.Z);
                     WriteInteger(0);
                     WriteInteger(2); //Pet.
-                    WriteInteger(Habbo.PetId); //pet type.
-                    WriteInteger(Habbo.Id); //UserId of the owner.
-                    WriteString(Habbo.Username); //Username of the owner.
+
+                    WriteInteger(habbo.PetId); //pet type.
+                    WriteInteger(habbo.Id); //UserId of the owner.
+                    WriteString(habbo.Username); //Username of the owner.
                     WriteInteger(1);
                     WriteBoolean(false); //Has saddle.
                     WriteBoolean(false); //Is someone riding this horse?
@@ -95,84 +103,69 @@
                     WriteInteger(0);
                     WriteString("");
                 }
-                else if (Habbo.PetId > 0 && Habbo.PetId == 100)
+                else if (habbo.PetId > 0 && habbo.PetId == 100)
                 {
-                    WriteInteger(Habbo.Id);
-                    WriteString(Habbo.Username);
-                    WriteString(Habbo.Motto);
-                    WriteString(Habbo.Look.ToLower());
-                    WriteInteger(User.VirtualId);
-                    WriteInteger(User.X);
-                    WriteInteger(User.Y);
-                    WriteDouble(User.Z);
+                    WriteInteger(habbo.Id);
+                    WriteString(habbo.Username);
+                    WriteString(habbo.Motto);
+                    WriteString(habbo.Look.ToLower());
+                    WriteInteger(user.VirtualId);
+                    WriteInteger(user.X);
+                    WriteInteger(user.Y);
+                    WriteDouble(user.Z);
                     WriteInteger(0);
                     WriteInteger(4);
-                    WriteString(Habbo.Gender.ToLower()); // ?
-                    WriteInteger(Habbo.Id); //Owner Id
-                    WriteString(Habbo.Username); // Owner name
+
+                    WriteString(habbo.Gender.ToLower()); // ?
+                    WriteInteger(habbo.Id); //Owner Id
+                    WriteString(habbo.Username); // Owner name
                     WriteInteger(0); //Action Count
                 }
             }
-            else if (User.IsPet)
+            else if (user.IsPet)
             {
-                WriteInteger(User.BotAI.BaseId);
-                WriteString(User.BotData.Name);
-                WriteString(User.BotData.Motto);
+                WriteInteger(user.BotAI.BaseId);
+                WriteString(user.BotData.Name);
+                WriteString(user.BotData.Motto);
 
                 //base.WriteString("26 30 ffffff 5 3 302 4 2 201 11 1 102 12 0 -1 28 4 401 24");
-                WriteString(User.BotData.Look.ToLower() +
-                            (User.PetData.Saddle > 0
-                                ? " 3 2 " +
-                                  User.PetData.PetHair +
-                                  " " +
-                                  User.PetData.HairDye +
-                                  " 3 " +
-                                  User.PetData.PetHair +
-                                  " " +
-                                  User.PetData.HairDye +
-                                  " 4 " +
-                                  User.PetData.Saddle +
-                                  " 0"
-                                : " 2 2 " +
-                                  User.PetData.PetHair +
-                                  " " +
-                                  User.PetData.HairDye +
-                                  " 3 " +
-                                  User.PetData.PetHair +
-                                  " " +
-                                  User.PetData.HairDye +
-                                  ""));
-                WriteInteger(User.VirtualId);
-                WriteInteger(User.X);
-                WriteInteger(User.Y);
-                WriteDouble(User.Z);
+                WriteString(user.BotData.Look.ToLower() + (user.PetData.Saddle > 0
+                                ? " 3 2 " + user.PetData.PetHair + " " + user.PetData.HairDye + " 3 " + user.PetData.PetHair + " " + user.PetData.HairDye + " 4 " +
+                                  user.PetData.Saddle + " 0"
+                                : " 2 2 " + user.PetData.PetHair + " " + user.PetData.HairDye + " 3 " + user.PetData.PetHair + " " + user.PetData.HairDye + ""));
+
+                WriteInteger(user.VirtualId);
+                WriteInteger(user.X);
+                WriteInteger(user.Y);
+                WriteDouble(user.Z);
                 WriteInteger(0);
-                WriteInteger(User.BotData.AiType == BotAIType.PET ? 2 : 4);
-                WriteInteger(User.PetData.Type);
-                WriteInteger(User.PetData.OwnerId); // userid
-                WriteString(User.PetData.OwnerName); // username
+                WriteInteger(user.BotData.AiType == BotAIType.PET ? 2 : 4);
+                WriteInteger(user.PetData.Type);
+                WriteInteger(user.PetData.OwnerId); // userid
+                WriteString(user.PetData.OwnerName); // username
                 WriteInteger(1);
-                WriteBoolean(User.PetData.Saddle > 0);
-                WriteBoolean(User.RidingHorse);
+                WriteBoolean(user.PetData.Saddle > 0);
+                WriteBoolean(user.RidingHorse);
                 WriteInteger(0);
                 WriteInteger(0);
                 WriteString("");
             }
-            else if (User.IsBot)
+            else if (user.IsBot)
             {
-                WriteInteger(User.BotAI.BaseId);
-                WriteString(User.BotData.Name);
-                WriteString(User.BotData.Motto);
-                WriteString(User.BotData.Look.ToLower());
-                WriteInteger(User.VirtualId);
-                WriteInteger(User.X);
-                WriteInteger(User.Y);
-                WriteDouble(User.Z);
+                WriteInteger(user.BotAI.BaseId);
+                WriteString(user.BotData.Name);
+                WriteString(user.BotData.Motto);
+                WriteString(user.BotData.Look.ToLower());
+                WriteInteger(user.VirtualId);
+                WriteInteger(user.X);
+                WriteInteger(user.Y);
+                WriteDouble(user.Z);
                 WriteInteger(0);
-                WriteInteger(User.BotData.AiType == BotAIType.PET ? 2 : 4);
-                WriteString(User.BotData.Gender.ToLower()); // ?
-                WriteInteger(User.BotData.ownerID); //Owner Id
-                WriteString(PlusEnvironment.GetUsernameById(User.BotData.ownerID)); // Owner name
+                WriteInteger(user.BotData.AiType == BotAIType.PET ? 2 : 4);
+
+                WriteString(user.BotData.Gender.ToLower()); // ?
+                WriteInteger(user.BotData.OwnerId); //Owner Id
+                WriteString(PlusEnvironment.GetUsernameById(user.BotData.OwnerId)); // Owner name
                 WriteInteger(5); //Action Count
                 WriteShort(1); //Copy looks
                 WriteShort(2); //Setup speech
@@ -182,16 +175,19 @@
             }
         }
 
-        public string PetFigureForType(int Type)
+        public string PetFigureForType(int type)
         {
-            var _random = new Random();
-            switch (Type)
+            var random = new Random();
+
+            switch (type)
             {
+                #region Dog Figures
+
                 default:
                 case 60:
                 {
-                    var RandomNumber = _random.Next(1, 4);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 4);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -204,10 +200,15 @@
                             return "0 21 da9dbd 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Cat Figures.
+
                 case 1:
                 {
-                    var RandomNumber = _random.Next(1, 5);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 5);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -222,10 +223,15 @@
                             return "1 24 d5b35f 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Terrier Figures
+
                 case 2:
                 {
-                    var RandomNumber = _random.Next(1, 6);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 6);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -242,10 +248,15 @@
                             return "3 5 dddddd 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Croco Figures
+
                 case 3:
                 {
-                    var RandomNumber = _random.Next(1, 5);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 5);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -260,10 +271,15 @@
                             return "2 2 fcfad3 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Bear Figures
+
                 case 4:
                 {
-                    var RandomNumber = _random.Next(1, 4);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 4);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -276,10 +292,15 @@
                             return "4 0 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Pig Figures
+
                 case 5:
                 {
-                    var RandomNumber = _random.Next(1, 7);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 7);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -298,10 +319,15 @@
                             return "5 8 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Lion Figures
+
                 case 6:
                 {
-                    var RandomNumber = _random.Next(1, 11);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 11);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -328,10 +354,15 @@
                             return "6 2 ff9ae 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Rhino Figures
+
                 case 7:
                 {
-                    var RandomNumber = _random.Next(1, 7);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 7);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -350,10 +381,15 @@
                             return "7 0 cccccc 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Spider Figures
+
                 case 8:
                 {
-                    var RandomNumber = _random.Next(1, 13);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 13);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -384,10 +420,15 @@
                             return "8 7 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Turtle Figures
+
                 case 9:
                 {
-                    var RandomNumber = _random.Next(1, 9);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 9);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -410,20 +451,30 @@
                             return "9 8 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Chick Figures
+
                 case 10:
                 {
-                    var RandomNumber = _random.Next(1, 1);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 1);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
                             return "10 0 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Frog Figures
+
                 case 11:
                 {
-                    var RandomNumber = _random.Next(1, 13);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 13);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -454,10 +505,15 @@
                             return "11 18 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Dragon Figures
+
                 case 12:
                 {
-                    var RandomNumber = _random.Next(1, 6);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 6);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -474,10 +530,15 @@
                             return "12 5 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Monkey Figures
+
                 case 14:
                 {
-                    var RandomNumber = _random.Next(1, 14);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 14);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -510,10 +571,15 @@
                             return "14 13 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Horse Figures
+
                 case 15:
                 {
-                    var RandomNumber = _random.Next(1, 20);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 20);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -558,10 +624,15 @@
                             return "15 80 ffffff 2 2 -1 0 3 -1 0";
                     }
                 }
+
+                #endregion
+
+                #region Bunny Figures
+
                 case 17:
                 {
-                    var RandomNumber = _random.Next(1, 8);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 8);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -582,10 +653,15 @@
                             return "20 0 ffffff";
                     }
                 }
+
+                #endregion
+
+                #region Pigeon Figures (White & Black)
+
                 case 21:
                 {
-                    var RandomNumber = _random.Next(1, 3);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 3);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -594,10 +670,15 @@
                             return "22 0 ffffff";
                     }
                 }
+
+                #endregion
+
+                #region Demon Monkey Figures
+
                 case 23:
                 {
-                    var RandomNumber = _random.Next(1, 3);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 3);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -608,10 +689,15 @@
                             return "23 3 ffffff";
                     }
                 }
+
+                #endregion
+
+                #region Gnome Figures
+
                 case 26:
                 {
-                    var RandomNumber = _random.Next(1, 4);
-                    switch (RandomNumber)
+                    var randomNumber = random.Next(1, 4);
+                    switch (randomNumber)
                     {
                         default:
                         case 1:
@@ -624,6 +710,8 @@
                             return "26 30 ffffff 5 0 -1 0 3 303 4 4 401 5 1 101 2 2 201 3";
                     }
                 }
+
+                #endregion
             }
         }
     }

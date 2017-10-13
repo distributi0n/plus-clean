@@ -23,15 +23,15 @@
         public int userID;
 
         public UserData(int userID,
-            ConcurrentDictionary<string, UserAchievement> achievements,
-            List<int> favouritedRooms,
-            List<Badge> badges,
-            Dictionary<int, MessengerBuddy> friends,
-            Dictionary<int, MessengerRequest> requests,
-            List<RoomData> rooms,
-            Dictionary<int, int> quests,
-            Habbo user,
-            Dictionary<int, Relationship> Relations)
+                        ConcurrentDictionary<string, UserAchievement> achievements,
+                        List<int> favouritedRooms,
+                        List<Badge> badges,
+                        Dictionary<int, MessengerBuddy> friends,
+                        Dictionary<int, MessengerRequest> requests,
+                        List<RoomData> rooms,
+                        Dictionary<int, int> quests,
+                        Habbo user,
+                        Dictionary<int, Relationship> Relations)
         {
             this.userID = userID;
             this.achievements = achievements;

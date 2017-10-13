@@ -1,36 +1,34 @@
 ﻿namespace Plus.HabboHotel.Moderation
 {
-    public class ModerationPresetActionMessages
+    internal class ModerationPresetActionMessages
     {
-        public ModerationPresetActionMessages(int Id,
-            int ParentId,
-            string Caption,
-            string MessageText,
-            int MuteTime,
-            int BanTime,
-            int IPBanTime,
-            int TradeLockTime,
-            string Notice)
+        internal ModerationPresetActionMessages(int id,
+                                                int parentId,
+                                                string caption,
+                                                string messageText,
+                                                int muteTime,
+                                                int banTime,
+                                                int ipBanTime,
+                                                int tradeLockTime,
+                                                string notice)
         {
-            this.Id = Id;
-            this.ParentId = ParentId;
-            this.Caption = Caption;
-            this.MessageText = MessageText;
-            this.MuteTime = MuteTime;
-            this.BanTime = BanTime;
-            this.IPBanTime = IPBanTime;
-            this.TradeLockTime = TradeLockTime;
-            this.Notice = Notice;
+            Id = id;
+            Caption = caption;
+            MessageText = messageText;
+            MuteTime = muteTime;
+            BanTime = banTime;
+            IpBanTime = ipBanTime;
+            TradeLockTime = tradeLockTime;
+            Notice = notice;
         }
 
-        public int Id { get; set; }
-        public int ParentId { get; set; }
-        public string Caption { get; set; }
-        public string MessageText { get; set; }
-        public int MuteTime { get; set; }
-        public int BanTime { get; set; }
-        public int IPBanTime { get; set; }
-        public int TradeLockTime { get; set; }
-        public string Notice { get; set; }
+        private int Id { get; }
+        private string Caption { get; }
+        private string MessageText { get; }
+        private int MuteTime { get; }
+        private int BanTime { get; }
+        private int IpBanTime { get; }
+        private int TradeLockTime { get; }
+        private string Notice { get; }
     }
 }

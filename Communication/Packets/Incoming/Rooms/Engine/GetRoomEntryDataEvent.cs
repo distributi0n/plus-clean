@@ -8,74 +8,81 @@
 
     internal class GetRoomEntryDataEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            if (Session.GetHabbo().InRoom)
+            if (session.GetHabbo().InRoom)
             {
-                Room OldRoom;
-                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out OldRoom))
+                Room oldRoom;
+
+                if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out oldRoom))
                 {
                     return;
                 }
 
-                if (OldRoom.GetRoomUserManager() != null)
+                if (oldRoom.GetRoomUserManager() != null)
                 {
-                    OldRoom.GetRoomUserManager().RemoveUserFromRoom(Session, false, false);
+                    oldRoom.GetRoomUserManager().RemoveUserFromRoom(session, false);
                 }
             }
 
-            if (!Room.GetRoomUserManager().AddAvatarToRoom(Session))
+            if (!room.GetRoomUserManager().AddAvatarToRoom(session))
             {
-                Room.GetRoomUserManager().RemoveUserFromRoom(Session, false, false);
+                room.GetRoomUserManager().RemoveUserFromRoom(session, false);
                 return; //TODO: Remove?
             }
 
-            Room.SendObjects(Session);
+            room.SendObjects(session);
 
             //Status updating for messenger, do later as buggy.
+
             try
             {
-                if (Session.GetHabbo().GetMessenger() != null)
+                if (session.GetHabbo().GetMessenger() != null)
                 {
-                    Session.GetHabbo().GetMessenger().OnStatusChanged(true);
+                    session.GetHabbo().GetMessenger().OnStatusChanged(true);
                 }
             }
             catch
             {
+                // ignored
             }
-            if (Session.GetHabbo().GetStats().QuestID > 0)
+
+            if (session.GetHabbo().GetStats().QuestID > 0)
             {
-                PlusEnvironment.GetGame().GetQuestManager().QuestReminder(Session, Session.GetHabbo().GetStats().QuestID);
+                PlusEnvironment.GetGame().GetQuestManager().QuestReminder(session, session.GetHabbo().GetStats().QuestID);
             }
-            Session.SendPacket(new RoomEntryInfoComposer(Room.RoomId, Room.CheckRights(Session, true)));
-            Session.SendPacket(new RoomVisualizationSettingsComposer(Room.WallThickness,
-                Room.FloorThickness,
-                PlusEnvironment.EnumToBool(Room.Hidewall.ToString())));
-            var ThisUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Username);
-            if (ThisUser != null && Session.GetHabbo().PetId == 0)
+
+            session.SendPacket(new RoomEntryInfoComposer(room.RoomId, room.CheckRights(session, true)));
+            session.SendPacket(new RoomVisualizationSettingsComposer(room.WallThickness, room.FloorThickness, PlusEnvironment.EnumToBool(room.Hidewall.ToString())));
+
+            var thisUser = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Username);
+
+            if (thisUser != null && session.GetHabbo().PetId == 0)
             {
-                Room.SendPacket(new UserChangeComposer(ThisUser, false));
+                room.SendPacket(new UserChangeComposer(thisUser, false));
             }
-            Session.SendPacket(new RoomEventComposer(Room.RoomData, Room.RoomData.Promotion));
-            if (Room.GetWired() != null)
+
+            session.SendPacket(new RoomEventComposer(room.RoomData, room.RoomData.Promotion));
+
+            if (room.GetWired() != null)
             {
-                Room.GetWired().TriggerEvent(WiredBoxType.TriggerRoomEnter, Session.GetHabbo());
+                room.GetWired().TriggerEvent(WiredBoxType.TriggerRoomEnter, session.GetHabbo());
             }
-            if (PlusEnvironment.GetUnixTimestamp() < Session.GetHabbo().FloodTime && Session.GetHabbo().FloodTime != 0)
+
+            if (PlusEnvironment.GetUnixTimestamp() < session.GetHabbo().FloodTime && session.GetHabbo().FloodTime != 0)
             {
-                Session.SendPacket(
-                    new FloodControlComposer((int) Session.GetHabbo().FloodTime - (int) PlusEnvironment.GetUnixTimestamp()));
+                session.SendPacket(new FloodControlComposer((int) session.GetHabbo().FloodTime - (int) PlusEnvironment.GetUnixTimestamp()));
             }
         }
     }

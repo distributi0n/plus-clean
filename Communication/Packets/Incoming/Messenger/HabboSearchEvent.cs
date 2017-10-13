@@ -9,35 +9,36 @@
 
     internal class HabboSearchEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            if (session?.GetHabbo() == null || session.GetHabbo().GetMessenger() == null)
             {
                 return;
             }
 
-            var Query = StringCharFilter.Escape(Packet.PopString().Replace("%", ""));
-            if (Query.Length < 1 || Query.Length > 100)
+            var query = StringCharFilter.Escape(packet.PopString().Replace("%", ""));
+            if (query.Length < 1 || query.Length > 100)
             {
                 return;
             }
 
-            var Friends = new List<SearchResult>();
-            var OthersUsers = new List<SearchResult>();
-            var Results = SearchResultFactory.GetSearchResult(Query);
-            foreach (var Result in Results.ToList())
+            var friends = new List<SearchResult>();
+            var othersUsers = new List<SearchResult>();
+
+            var results = SearchResultFactory.GetSearchResult(query);
+            foreach (var result in results.ToList())
             {
-                if (Session.GetHabbo().GetMessenger().FriendshipExists(Result.UserId))
+                if (session.GetHabbo().GetMessenger().FriendshipExists(result.UserId))
                 {
-                    Friends.Add(Result);
+                    friends.Add(result);
                 }
                 else
                 {
-                    OthersUsers.Add(Result);
+                    othersUsers.Add(result);
                 }
             }
 
-            Session.SendPacket(new HabboSearchResultComposer(Friends, OthersUsers));
+            session.SendPacket(new HabboSearchResultComposer(friends, othersUsers));
         }
     }
 }

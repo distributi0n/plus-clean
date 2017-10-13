@@ -8,53 +8,55 @@
     using HabboHotel.Rooms.Chat.Logs;
     using Outgoing.Moderation;
 
-    internal sealed class GetModeratorRoomChatlogEvent : IPacketEvent
+    internal class GetModeratorRoomChatlogEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
-            {
-                return;
-            }
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var Junk = Packet.PopInt();
-            var RoomId = Packet.PopInt();
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(RoomId, out Room))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            {
+                return;
+            }
+
+            packet.PopInt();
+            var roomId = packet.PopInt();
+
+            Room room;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(roomId, out room))
             {
                 return;
             }
 
             PlusEnvironment.GetGame().GetChatManager().GetLogs().FlushAndSave();
-            var Chats = new List<ChatlogEntry>();
-            DataTable Data = null;
+
+            var chats = new List<ChatlogEntry>();
+
+            DataTable data;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT * FROM `chatlogs` WHERE `room_id` = @id ORDER BY `id` DESC LIMIT 100");
-                dbClient.AddParameter("id", RoomId);
-                Data = dbClient.GetTable();
-                if (Data != null)
+                dbClient.AddParameter("id", roomId);
+                data = dbClient.GetTable();
+
+                if (data != null)
                 {
-                    foreach (DataRow Row in Data.Rows)
+                    foreach (DataRow row in data.Rows)
                     {
-                        var Habbo = PlusEnvironment.GetHabboById(Convert.ToInt32(Row["user_id"]));
-                        if (Habbo != null)
+                        var habbo = PlusEnvironment.GetHabboById(Convert.ToInt32(row["user_id"]));
+
+                        if (habbo != null)
                         {
-                            Chats.Add(new ChatlogEntry(Convert.ToInt32(Row["user_id"]),
-                                RoomId,
-                                Convert.ToString(Row["message"]),
-                                Convert.ToDouble(Row["timestamp"]),
-                                Habbo));
+                            chats.Add(new ChatlogEntry(Convert.ToInt32(row["user_id"]), roomId, Convert.ToString(row["message"]), Convert.ToDouble(row["timestamp"]), habbo));
                         }
                     }
                 }
             }
 
-            Session.SendPacket(new ModeratorRoomChatlogComposer(Room, Chats));
+            session.SendPacket(new ModeratorRoomChatlogComposer(room, chats));
         }
     }
 }

@@ -4,11 +4,11 @@
 
     internal class InstantMessageErrorComposer : ServerPacket
     {
-        public InstantMessageErrorComposer(MessengerMessageErrors Error, int Target) : base(ServerPacketHeader
-            .InstantMessageErrorMessageComposer)
+        public InstantMessageErrorComposer(MessengerMessageErrors error, int target)
+            : base(ServerPacketHeader.InstantMessageErrorMessageComposer)
         {
-            WriteInteger(MessengerMessageErrorsUtility.GetMessageErrorPacketNum(Error));
-            WriteInteger(Target);
+            WriteInteger(MessengerMessageErrorsUtility.GetMessageErrorPacketNum(error));
+            WriteInteger(target);
             WriteString("");
         }
     }

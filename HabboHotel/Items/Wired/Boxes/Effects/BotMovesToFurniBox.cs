@@ -9,10 +9,10 @@
 
     internal class BotMovesToFurniBox : IWiredItem
     {
-        public BotMovesToFurniBox(Room Instance, Item Item)
+        public BotMovesToFurniBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -24,25 +24,25 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var BotName = Packet.PopString();
+            var unknown = packet.PopInt();
+            var botName = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            var FurniCount = Packet.PopInt();
-            for (var i = 0; i < FurniCount; i++)
+            var furniCount = packet.PopInt();
+            for (var i = 0; i < furniCount; i++)
             {
-                var SelectedItem = Instance.GetRoomItemHandler().GetItem(Packet.PopInt());
-                if (SelectedItem != null)
+                var selectedItem = Instance.GetRoomItemHandler().GetItem(packet.PopInt());
+                if (selectedItem != null)
                 {
-                    SetItems.TryAdd(SelectedItem.Id, SelectedItem);
+                    SetItems.TryAdd(selectedItem.Id, selectedItem);
                 }
             }
 
-            StringData = BotName;
+            StringData = botName;
         }
 
         public bool Execute(params object[] Params)
@@ -52,40 +52,40 @@
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetBotByName(StringData);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetBotByName(StringData);
+            if (user == null)
             {
                 return false;
             }
 
             var rand = new Random();
-            var Items = SetItems.Values.ToList();
-            Items = Items.OrderBy(x => rand.Next()).ToList();
-            if (Items.Count == 0)
+            var items = SetItems.Values.ToList();
+            items = items.OrderBy(x => rand.Next()).ToList();
+            if (items.Count == 0)
             {
                 return false;
             }
 
-            var Item = Items.First();
-            if (Item == null)
+            var item = items.First();
+            if (item == null)
             {
                 return false;
             }
 
-            if (!Instance.GetRoomItemHandler().GetFloor.Contains(Item))
+            if (!Instance.GetRoomItemHandler().GetFloor.Contains(item))
             {
-                SetItems.TryRemove(Item.Id, out Item);
-                if (Items.Contains(Item))
+                SetItems.TryRemove(item.Id, out item);
+                if (items.Contains(item))
                 {
-                    Items.Remove(Item);
+                    items.Remove(item);
                 }
-                if (SetItems.Count == 0 || Items.Count == 0)
+                if (SetItems.Count == 0 || items.Count == 0)
                 {
                     return false;
                 }
 
-                Item = Items.First();
-                if (Item == null)
+                item = items.First();
+                if (item == null)
                 {
                     return false;
                 }
@@ -96,13 +96,13 @@
                 return false;
             }
 
-            if (User.IsWalking)
+            if (user.IsWalking)
             {
-                User.ClearMovement(true);
+                user.ClearMovement(true);
             }
-            User.BotData.ForcedMovement = true;
-            User.BotData.TargetCoordinate = new Point(Item.GetX, Item.GetY);
-            User.MoveTo(Item.GetX, Item.GetY);
+            user.BotData.ForcedMovement = true;
+            user.BotData.TargetCoordinate = new Point(item.GetX, item.GetY);
+            user.MoveTo(item.GetX, item.GetY);
             return true;
         }
     }

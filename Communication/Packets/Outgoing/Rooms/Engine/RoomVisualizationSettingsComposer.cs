@@ -2,12 +2,12 @@
 {
     internal class RoomVisualizationSettingsComposer : ServerPacket
     {
-        public RoomVisualizationSettingsComposer(int Walls, int Floor, bool HideWalls) : base(ServerPacketHeader
-            .RoomVisualizationSettingsMessageComposer)
+        public RoomVisualizationSettingsComposer(int walls, int floor, bool hideWalls)
+            : base(ServerPacketHeader.RoomVisualizationSettingsMessageComposer)
         {
-            WriteBoolean(HideWalls);
-            WriteInteger(Walls);
-            WriteInteger(Floor);
+            WriteBoolean(hideWalls);
+            WriteInteger(walls);
+            WriteInteger(floor);
         }
     }
 }

@@ -1,22 +1,22 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Groups
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Groups;
     using Outgoing.Groups;
 
-    internal sealed class UpdateGroupIdentityEvent : IPacketEvent
+    internal class UpdateGroupIdentityEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GroupId = Packet.PopInt();
-            var Name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            var Desc = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(Packet.PopString());
-            Group Group = null;
-            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(GroupId, out Group))
+            var groupId = packet.PopInt();
+            var name = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+            var desc = PlusEnvironment.GetGame().GetChatManager().GetFilter().CheckMessage(packet.PopString());
+
+            if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(groupId, out var group))
             {
                 return;
             }
-            if (Group.CreatorId != Session.GetHabbo().Id)
+
+            if (group.CreatorId != session.GetHabbo().Id)
             {
                 return;
             }
@@ -24,14 +24,16 @@
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `groups` SET `name`= @name, `desc` = @desc WHERE `id` = @groupId LIMIT 1");
-                dbClient.AddParameter("name", Name);
-                dbClient.AddParameter("desc", Desc);
-                dbClient.AddParameter("groupId", GroupId);
+                dbClient.AddParameter("name", name);
+                dbClient.AddParameter("desc", desc);
+                dbClient.AddParameter("groupId", groupId);
                 dbClient.RunQuery();
             }
-            Group.Name = Name;
-            Group.Description = Desc;
-            Session.SendPacket(new GroupInfoComposer(Group, Session));
+
+            group.Name = name;
+            group.Description = desc;
+
+            session.SendPacket(new GroupInfoComposer(group, session));
         }
     }
 }

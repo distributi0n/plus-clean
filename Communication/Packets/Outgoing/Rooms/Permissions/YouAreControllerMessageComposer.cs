@@ -2,9 +2,10 @@
 {
     internal class YouAreControllerComposer : ServerPacket
     {
-        public YouAreControllerComposer(int Setting) : base(ServerPacketHeader.YouAreControllerMessageComposer)
+        public YouAreControllerComposer(int setting)
+            : base(ServerPacketHeader.YouAreControllerMessageComposer)
         {
-            WriteInteger(Setting);
+            WriteInteger(setting);
         }
     }
 }

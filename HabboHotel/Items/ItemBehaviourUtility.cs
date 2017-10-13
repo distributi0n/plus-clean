@@ -7,243 +7,243 @@
 
     internal static class ItemBehaviourUtility
     {
-        public static void GenerateExtradata(Item Item, ServerPacket Message)
+        public static void GenerateExtradata(Item item, ServerPacket message)
         {
-            switch (Item.GetBaseItem().InteractionType)
+            switch (item.GetBaseItem().InteractionType)
             {
                 default:
-                    Message.WriteInteger(1);
-                    Message.WriteInteger(0);
-                    Message.WriteString(Item.GetBaseItem().InteractionType != InteractionType.FOOTBALL_GATE
-                        ? Item.ExtraData
+                    message.WriteInteger(1);
+                    message.WriteInteger(0);
+                    message.WriteString(item.GetBaseItem().InteractionType != InteractionType.FootballGate
+                        ? item.ExtraData
                         : string.Empty);
                     break;
-                case InteractionType.GNOME_BOX:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(0);
-                    Message.WriteString("");
+                case InteractionType.GnomeBox:
+                    message.WriteInteger(0);
+                    message.WriteInteger(0);
+                    message.WriteString("");
                     break;
-                case InteractionType.PET_BREEDING_BOX:
-                case InteractionType.PURCHASABLE_CLOTHING:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(0);
-                    Message.WriteString("0");
+                case InteractionType.PetBreedingBox:
+                case InteractionType.PurchasableClothing:
+                    message.WriteInteger(0);
+                    message.WriteInteger(0);
+                    message.WriteString("0");
                     break;
-                case InteractionType.STACKTOOL:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(0);
-                    Message.WriteString("");
+                case InteractionType.Stacktool:
+                    message.WriteInteger(0);
+                    message.WriteInteger(0);
+                    message.WriteString("");
                     break;
-                case InteractionType.WALLPAPER:
-                    Message.WriteInteger(2);
-                    Message.WriteInteger(0);
-                    Message.WriteString(Item.ExtraData);
+                case InteractionType.Wallpaper:
+                    message.WriteInteger(2);
+                    message.WriteInteger(0);
+                    message.WriteString(item.ExtraData);
                     break;
-                case InteractionType.FLOOR:
-                    Message.WriteInteger(3);
-                    Message.WriteInteger(0);
-                    Message.WriteString(Item.ExtraData);
+                case InteractionType.Floor:
+                    message.WriteInteger(3);
+                    message.WriteInteger(0);
+                    message.WriteString(item.ExtraData);
                     break;
-                case InteractionType.LANDSCAPE:
-                    Message.WriteInteger(4);
-                    Message.WriteInteger(0);
-                    Message.WriteString(Item.ExtraData);
+                case InteractionType.Landscape:
+                    message.WriteInteger(4);
+                    message.WriteInteger(0);
+                    message.WriteString(item.ExtraData);
                     break;
-                case InteractionType.GUILD_ITEM:
-                case InteractionType.GUILD_GATE:
-                case InteractionType.GUILD_FORUM:
-                    Group Group = null;
-                    if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(Item.GroupId, out Group))
+                case InteractionType.GuildItem:
+                case InteractionType.GuildGate:
+                case InteractionType.GuildForum:
+                    Group group = null;
+                    if (!PlusEnvironment.GetGame().GetGroupManager().TryGetGroup(item.GroupId, out group))
                     {
-                        Message.WriteInteger(1);
-                        Message.WriteInteger(0);
-                        Message.WriteString(Item.ExtraData);
+                        message.WriteInteger(1);
+                        message.WriteInteger(0);
+                        message.WriteString(item.ExtraData);
                     }
                     else
                     {
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(2);
-                        Message.WriteInteger(5);
-                        Message.WriteString(Item.ExtraData);
-                        Message.WriteString(Group.Id.ToString());
-                        Message.WriteString(Group.Badge);
-                        Message.WriteString(PlusEnvironment.GetGame().GetGroupManager().GetColourCode(Group.Colour1, true));
-                        Message.WriteString(PlusEnvironment.GetGame().GetGroupManager().GetColourCode(Group.Colour2, false));
+                        message.WriteInteger(0);
+                        message.WriteInteger(2);
+                        message.WriteInteger(5);
+                        message.WriteString(item.ExtraData);
+                        message.WriteString(group.Id.ToString());
+                        message.WriteString(group.Badge);
+                        message.WriteString(PlusEnvironment.GetGame().GetGroupManager().GetColourCode(group.Colour1, true));
+                        message.WriteString(PlusEnvironment.GetGame().GetGroupManager().GetColourCode(group.Colour2, false));
                     }
                     break;
-                case InteractionType.BACKGROUND:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(1);
-                    if (!string.IsNullOrEmpty(Item.ExtraData))
+                case InteractionType.Background:
+                    message.WriteInteger(0);
+                    message.WriteInteger(1);
+                    if (!string.IsNullOrEmpty(item.ExtraData))
                     {
-                        Message.WriteInteger(Item.ExtraData.Split(Convert.ToChar(9)).Length / 2);
-                        for (var i = 0; i <= Item.ExtraData.Split(Convert.ToChar(9)).Length - 1; i++)
+                        message.WriteInteger(item.ExtraData.Split(Convert.ToChar(9)).Length / 2);
+                        for (var i = 0; i <= item.ExtraData.Split(Convert.ToChar(9)).Length - 1; i++)
                         {
-                            Message.WriteString(Item.ExtraData.Split(Convert.ToChar(9))[i]);
+                            message.WriteString(item.ExtraData.Split(Convert.ToChar(9))[i]);
                         }
                     }
                     else
                     {
-                        Message.WriteInteger(0);
+                        message.WriteInteger(0);
                     }
 
                     break;
-                case InteractionType.GIFT:
+                case InteractionType.Gift:
                 {
-                    var ExtraData = Item.ExtraData.Split(Convert.ToChar(5));
-                    if (ExtraData.Length != 7)
+                    var extraData = item.ExtraData.Split(Convert.ToChar(5));
+                    if (extraData.Length != 7)
                     {
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(0);
-                        Message.WriteString(Item.ExtraData);
+                        message.WriteInteger(0);
+                        message.WriteInteger(0);
+                        message.WriteString(item.ExtraData);
                     }
                     else
                     {
-                        var Style = int.Parse(ExtraData[6]) * 1000 + int.Parse(ExtraData[6]);
-                        var Purchaser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Convert.ToInt32(ExtraData[2]));
-                        if (Purchaser == null)
+                        var style = int.Parse(extraData[6]) * 1000 + int.Parse(extraData[6]);
+                        var purchaser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(Convert.ToInt32(extraData[2]));
+                        if (purchaser == null)
                         {
-                            Message.WriteInteger(0);
-                            Message.WriteInteger(0);
-                            Message.WriteString(Item.ExtraData);
+                            message.WriteInteger(0);
+                            message.WriteInteger(0);
+                            message.WriteString(item.ExtraData);
                         }
                         else
                         {
-                            Message.WriteInteger(Style);
-                            Message.WriteInteger(1);
-                            Message.WriteInteger(6);
-                            Message.WriteString("EXTRA_PARAM");
-                            Message.WriteString("");
-                            Message.WriteString("MESSAGE");
-                            Message.WriteString(ExtraData[1]);
-                            Message.WriteString("PURCHASER_NAME");
-                            Message.WriteString(Purchaser.Username);
-                            Message.WriteString("PURCHASER_FIGURE");
-                            Message.WriteString(Purchaser.Look);
-                            Message.WriteString("PRODUCT_CODE");
-                            Message.WriteString("A1 KUMIANKKA");
-                            Message.WriteString("state");
-                            Message.WriteString(Item.MagicRemove ? "1" : "0");
+                            message.WriteInteger(style);
+                            message.WriteInteger(1);
+                            message.WriteInteger(6);
+                            message.WriteString("EXTRA_PARAM");
+                            message.WriteString("");
+                            message.WriteString("MESSAGE");
+                            message.WriteString(extraData[1]);
+                            message.WriteString("PURCHASER_NAME");
+                            message.WriteString(purchaser.Username);
+                            message.WriteString("PURCHASER_FIGURE");
+                            message.WriteString(purchaser.Look);
+                            message.WriteString("PRODUCT_CODE");
+                            message.WriteString("A1 KUMIANKKA");
+                            message.WriteString("state");
+                            message.WriteString(item.MagicRemove ? "1" : "0");
                         }
                     }
                 }
                     break;
-                case InteractionType.MANNEQUIN:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(1);
-                    Message.WriteInteger(3);
-                    if (Item.ExtraData.Contains(Convert.ToChar(5).ToString()))
+                case InteractionType.Mannequin:
+                    message.WriteInteger(0);
+                    message.WriteInteger(1);
+                    message.WriteInteger(3);
+                    if (item.ExtraData.Contains(Convert.ToChar(5).ToString()))
                     {
-                        var Stuff = Item.ExtraData.Split(Convert.ToChar(5));
-                        Message.WriteString("GENDER");
-                        Message.WriteString(Stuff[0]);
-                        Message.WriteString("FIGURE");
-                        Message.WriteString(Stuff[1]);
-                        Message.WriteString("OUTFIT_NAME");
-                        Message.WriteString(Stuff[2]);
+                        var stuff = item.ExtraData.Split(Convert.ToChar(5));
+                        message.WriteString("GENDER");
+                        message.WriteString(stuff[0]);
+                        message.WriteString("FIGURE");
+                        message.WriteString(stuff[1]);
+                        message.WriteString("OUTFIT_NAME");
+                        message.WriteString(stuff[2]);
                     }
                     else
                     {
-                        Message.WriteString("GENDER");
-                        Message.WriteString("");
-                        Message.WriteString("FIGURE");
-                        Message.WriteString("");
-                        Message.WriteString("OUTFIT_NAME");
-                        Message.WriteString("");
+                        message.WriteString("GENDER");
+                        message.WriteString("");
+                        message.WriteString("FIGURE");
+                        message.WriteString("");
+                        message.WriteString("OUTFIT_NAME");
+                        message.WriteString("");
                     }
                     break;
-                case InteractionType.TONER:
-                    if (Item.RoomId != 0)
+                case InteractionType.Toner:
+                    if (item.RoomId != 0)
                     {
-                        if (Item.GetRoom().TonerData == null)
+                        if (item.GetRoom().TonerData == null)
                         {
-                            Item.GetRoom().TonerData = new TonerData(Item.Id);
+                            item.GetRoom().TonerData = new TonerData(item.Id);
                         }
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(5);
-                        Message.WriteInteger(4);
-                        Message.WriteInteger(Item.GetRoom().TonerData.Enabled);
-                        Message.WriteInteger(Item.GetRoom().TonerData.Hue);
-                        Message.WriteInteger(Item.GetRoom().TonerData.Saturation);
-                        Message.WriteInteger(Item.GetRoom().TonerData.Lightness);
+                        message.WriteInteger(0);
+                        message.WriteInteger(5);
+                        message.WriteInteger(4);
+                        message.WriteInteger(item.GetRoom().TonerData.Enabled);
+                        message.WriteInteger(item.GetRoom().TonerData.Hue);
+                        message.WriteInteger(item.GetRoom().TonerData.Saturation);
+                        message.WriteInteger(item.GetRoom().TonerData.Lightness);
                     }
                     else
                     {
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(0);
-                        Message.WriteString(string.Empty);
+                        message.WriteInteger(0);
+                        message.WriteInteger(0);
+                        message.WriteString(string.Empty);
                     }
                     break;
-                case InteractionType.BADGE_DISPLAY:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(2);
-                    Message.WriteInteger(4);
-                    var BadgeData = Item.ExtraData.Split(Convert.ToChar(9));
-                    if (Item.ExtraData.Contains(Convert.ToChar(9).ToString()))
+                case InteractionType.BadgeDisplay:
+                    message.WriteInteger(0);
+                    message.WriteInteger(2);
+                    message.WriteInteger(4);
+                    var badgeData = item.ExtraData.Split(Convert.ToChar(9));
+                    if (item.ExtraData.Contains(Convert.ToChar(9).ToString()))
                     {
-                        Message.WriteString("0"); //No idea
-                        Message.WriteString(BadgeData[0]); //Badge name
-                        Message.WriteString(BadgeData[1]); //Owner
-                        Message.WriteString(BadgeData[2]); //Date
+                        message.WriteString("0"); //No idea
+                        message.WriteString(badgeData[0]); //Badge name
+                        message.WriteString(badgeData[1]); //Owner
+                        message.WriteString(badgeData[2]); //Date
                     }
                     else
                     {
-                        Message.WriteString("0"); //No idea
-                        Message.WriteString("DEV"); //Badge name
-                        Message.WriteString("Sledmore"); //Owner
-                        Message.WriteString("13-13-1337"); //Date
+                        message.WriteString("0"); //No idea
+                        message.WriteString("DEV"); //Badge name
+                        message.WriteString("Sledmore"); //Owner
+                        message.WriteString("13-13-1337"); //Date
                     }
                     break;
-                case InteractionType.TELEVISION:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(1);
-                    Message.WriteInteger(1);
-                    Message.WriteString("THUMBNAIL_URL");
+                case InteractionType.Television:
+                    message.WriteInteger(0);
+                    message.WriteInteger(1);
+                    message.WriteInteger(1);
+                    message.WriteString("THUMBNAIL_URL");
 
                     //Message.WriteString("http://img.youtube.com/vi/" + PlusEnvironment.GetGame().GetTelevisionManager().TelevisionList.OrderBy(x => Guid.NewGuid()).FirstOrDefault().YouTubeId + "/3.jpg");
-                    Message.WriteString("");
+                    message.WriteString("");
                     break;
-                case InteractionType.LOVELOCK:
-                    if (Item.ExtraData.Contains(Convert.ToChar(5).ToString()))
+                case InteractionType.Lovelock:
+                    if (item.ExtraData.Contains(Convert.ToChar(5).ToString()))
                     {
-                        var EData = Item.ExtraData.Split((char) 5);
+                        var eData = item.ExtraData.Split((char) 5);
                         var I = 0;
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(2);
-                        Message.WriteInteger(EData.Length);
-                        while (I < EData.Length)
+                        message.WriteInteger(0);
+                        message.WriteInteger(2);
+                        message.WriteInteger(eData.Length);
+                        while (I < eData.Length)
                         {
-                            Message.WriteString(EData[I]);
+                            message.WriteString(eData[I]);
                             I++;
                         }
                     }
                     else
                     {
-                        Message.WriteInteger(0);
-                        Message.WriteInteger(0);
-                        Message.WriteString("0");
+                        message.WriteInteger(0);
+                        message.WriteInteger(0);
+                        message.WriteString("0");
                     }
 
                     break;
-                case InteractionType.MONSTERPLANT_SEED:
-                    Message.WriteInteger(0);
-                    Message.WriteInteger(1);
-                    Message.WriteInteger(1);
-                    Message.WriteString("rarity");
-                    Message.WriteString("1"); //Leve should be dynamic.
+                case InteractionType.MonsterplantSeed:
+                    message.WriteInteger(0);
+                    message.WriteInteger(1);
+                    message.WriteInteger(1);
+                    message.WriteString("rarity");
+                    message.WriteString("1"); //Leve should be dynamic.
                     break;
             }
         }
 
-        public static void GenerateWallExtradata(Item Item, ServerPacket Message)
+        public static void GenerateWallExtradata(Item item, ServerPacket message)
         {
-            switch (Item.GetBaseItem().InteractionType)
+            switch (item.GetBaseItem().InteractionType)
             {
                 default:
-                    Message.WriteString(Item.ExtraData);
+                    message.WriteString(item.ExtraData);
                     break;
-                case InteractionType.POSTIT:
-                    Message.WriteString(Item.ExtraData.Split(' ')[0]);
+                case InteractionType.Postit:
+                    message.WriteString(item.ExtraData.Split(' ')[0]);
                     break;
             }
         }

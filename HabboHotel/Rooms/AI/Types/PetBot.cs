@@ -37,7 +37,7 @@
 
         public override void OnSelfEnterRoom()
         {
-            var nextCoord = GetRoom().GetGameMap().getRandomWalkableSquare();
+            var nextCoord = GetRoom().GetGameMap().GetRandomWalkableSquare();
 
             //int randomX = PlusEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeX);
             //int randomY = PlusEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeY);
@@ -87,9 +87,9 @@
 
             if (SpeechTimer <= 0)
             {
-                if (Pet.PetData.DBState != DatabaseUpdateState.NeedsInsert)
+                if (Pet.PetData.DbState != DatabaseUpdateState.NeedsInsert)
                 {
-                    Pet.PetData.DBState = DatabaseUpdateState.NeedsUpdate;
+                    Pet.PetData.DbState = DatabaseUpdateState.NeedsUpdate;
                 }
                 if (Pet != null)
                 {
@@ -123,7 +123,7 @@
                     {
                         // Remove Status
                         RemovePetStatus();
-                        var nextCoord = GetRoom().GetGameMap().getRandomWalkableSquare();
+                        var nextCoord = GetRoom().GetGameMap().GetRandomWalkableSquare();
                         if (GetRoomUser().CanWalk)
                         {
                             GetRoomUser().MoveTo(nextCoord.X, nextCoord.Y);
@@ -164,9 +164,9 @@
                 return;
             }
 
-            if (Pet.PetData.DBState != DatabaseUpdateState.NeedsInsert)
+            if (Pet.PetData.DbState != DatabaseUpdateState.NeedsInsert)
             {
-                Pet.PetData.DBState = DatabaseUpdateState.NeedsUpdate;
+                Pet.PetData.DbState = DatabaseUpdateState.NeedsUpdate;
             }
             if (Message.ToLower().Equals(Pet.PetData.Name.ToLower()))
             {
@@ -197,7 +197,7 @@
 
                             //int randomX = PlusEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeX);
                             //int randomY = PlusEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeY);
-                            var nextCoord = GetRoom().GetGameMap().getRandomWalkableSquare();
+                            var nextCoord = GetRoom().GetGameMap().GetRandomWalkableSquare();
                             Pet.MoveTo(nextCoord.X, nextCoord.Y);
                             Pet.PetData.Addexperience(10); // Give XP
                             break;

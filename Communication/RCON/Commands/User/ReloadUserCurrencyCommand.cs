@@ -3,7 +3,7 @@
     using System;
     using Packets.Outgoing.Inventory.Purse;
 
-    internal class ReloadUserCurrencyCommand : IRCONCommand
+    internal class ReloadUserCurrencyCommand : IRconCommand
     {
         public string Description => "This command is used to update the users currency from the database.";
 
@@ -84,7 +84,7 @@
                         dbClient.AddParameter("id", userId);
                         gotw = dbClient.GetInteger();
                     }
-                    client.GetHabbo().GOTWPoints = gotw;
+                    client.GetHabbo().GotwPoints = gotw;
                     client.SendPacket(new HabboActivityPointNotificationComposer(gotw, 0, 103));
                     break;
                 }

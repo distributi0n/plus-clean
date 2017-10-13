@@ -6,39 +6,42 @@
 
     internal class TalentTrackComposer : ServerPacket
     {
-        public TalentTrackComposer(ICollection<TalentTrackLevel> Levels, string Type) : base(ServerPacketHeader
-            .TalentTrackMessageComposer)
+        public TalentTrackComposer(ICollection<TalentTrackLevel> levels, string type)
+            : base(ServerPacketHeader.TalentTrackMessageComposer)
         {
             WriteString("citizenship");
-            WriteInteger(Levels.Count);
-            foreach (var Level in Levels.ToList())
+            WriteInteger(levels.Count);
+
+            foreach (var level in levels.ToList())
             {
-                WriteInteger(Level.Level); //First level
+                WriteInteger(level.Level); //First level
                 WriteInteger(0); //Progress, 0 = nothing, 1 = started, 2 = done
-                WriteInteger(Level.GetSubLevels().Count);
-                foreach (var Sub in Level.GetSubLevels())
+
+                WriteInteger(level.GetSubLevels().Count);
+                foreach (var sub in level.GetSubLevels())
                 {
                     WriteInteger(0); //Achievement Id
                     WriteInteger(0); //Achievement level
-                    WriteString(Sub.Badge); //Achievement name
+                    WriteString(sub.Badge); //Achievement name
                     WriteInteger(0); //Progress, 0 = nothing, 1 = started, 2 = done
                     WriteInteger(0); //My actual progress
-                    WriteInteger(Sub.RequiredProgress);
+                    WriteInteger(sub.RequiredProgress);
                 }
 
-                WriteInteger(Level.Actions.Count);
-                foreach (var Action in Level.Actions.ToList())
+                WriteInteger(level.Actions.Count);
+                foreach (var action in level.Actions.ToList())
                 {
-                    WriteString(Action);
+                    WriteString(action);
                 }
 
-                WriteInteger(Level.Gifts.Count);
-                foreach (var Gift in Level.Gifts.ToList())
+                WriteInteger(level.Gifts.Count);
+                foreach (var gift in level.Gifts.ToList())
                 {
-                    WriteString(Gift);
+                    WriteString(gift);
                     WriteInteger(0);
                 }
             }
+
             /*base.WriteString("citizenship");
             base.WriteInteger(5);
             {

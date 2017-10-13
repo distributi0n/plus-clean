@@ -10,29 +10,29 @@
 
         public string Description => "Disconnects another user from the hotel.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please enter the username of the user you wish to disconnect.");
+                session.SendWhisper("Please enter the username of the user you wish to disconnect.");
                 return;
             }
 
-            var TargetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
-            if (TargetClient == null)
+            var targetClient = PlusEnvironment.GetGame().GetClientManager().GetClientByUsername(Params[1]);
+            if (targetClient == null)
             {
-                Session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
+                session.SendWhisper("An error occoured whilst finding that user, maybe they're not online.");
                 return;
             }
 
-            if (TargetClient.GetHabbo().GetPermissions().HasRight("mod_tool") &&
-                !Session.GetHabbo().GetPermissions().HasRight("mod_disconnect_any"))
+            if (targetClient.GetHabbo().GetPermissions().HasRight("mod_tool") &&
+                !session.GetHabbo().GetPermissions().HasRight("mod_disconnect_any"))
             {
-                Session.SendWhisper("You are not allowed to disconnect that user.");
+                session.SendWhisper("You are not allowed to disconnect that user.");
                 return;
             }
 
-            TargetClient.GetConnection().Dispose();
+            targetClient.GetConnection().Dispose();
         }
     }
 }

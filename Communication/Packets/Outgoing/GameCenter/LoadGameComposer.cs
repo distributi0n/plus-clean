@@ -4,11 +4,12 @@
 
     internal class LoadGameComposer : ServerPacket
     {
-        public LoadGameComposer(GameData GameData, string SSOTicket) : base(ServerPacketHeader.LoadGameMessageComposer)
+        public LoadGameComposer(GameData gameData, string ssoTicket)
+            : base(ServerPacketHeader.LoadGameMessageComposer)
         {
-            WriteInteger(GameData.GameId);
+            WriteInteger(gameData.GameId);
             WriteString("1365260055982");
-            WriteString(GameData.ResourcePath + GameData.GameSWF);
+            WriteString(gameData.ResourcePath + gameData.GameSWF);
             WriteString("best");
             WriteString("showAll");
             WriteInteger(60); //FPS?
@@ -16,17 +17,17 @@
             WriteInteger(8);
             WriteInteger(6); //Asset count
             WriteString("assetUrl");
-            WriteString(GameData.ResourcePath + GameData.GameAssets);
+            WriteString(gameData.ResourcePath + gameData.GameAssets);
             WriteString("habboHost");
             WriteString("http://fuseus-private-httpd-fe-1");
             WriteString("accessToken");
-            WriteString(SSOTicket);
+            WriteString(ssoTicket);
             WriteString("gameServerHost");
-            WriteString(GameData.GameServerHost);
+            WriteString(gameData.GameServerHost);
             WriteString("gameServerPort");
-            WriteString(GameData.GameServerPort);
+            WriteString(gameData.GameServerPort);
             WriteString("socketPolicyPort");
-            WriteString(GameData.GameServerHost);
+            WriteString(gameData.GameServerHost);
         }
     }
 }

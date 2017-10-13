@@ -5,19 +5,21 @@
 
     internal class HabboUserBadgesComposer : ServerPacket
     {
-        public HabboUserBadgesComposer(Habbo Habbo) : base(ServerPacketHeader.HabboUserBadgesMessageComposer)
+        public HabboUserBadgesComposer(Habbo habbo)
+            : base(ServerPacketHeader.HabboUserBadgesMessageComposer)
         {
-            WriteInteger(Habbo.Id);
-            WriteInteger(Habbo.GetBadgeComponent().EquippedCount);
-            foreach (var Badge in Habbo.GetBadgeComponent().GetBadges().ToList())
+            WriteInteger(habbo.Id);
+            WriteInteger(habbo.GetBadgeComponent().EquippedCount);
+
+            foreach (var badge in habbo.GetBadgeComponent().GetBadges().ToList())
             {
-                if (Badge.Slot <= 0)
+                if (badge.Slot <= 0)
                 {
                     continue;
                 }
 
-                WriteInteger(Badge.Slot);
-                WriteString(Badge.Code);
+                WriteInteger(badge.Slot);
+                WriteString(badge.Code);
             }
         }
     }

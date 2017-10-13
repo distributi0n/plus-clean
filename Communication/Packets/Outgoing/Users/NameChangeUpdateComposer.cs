@@ -4,22 +4,24 @@
 
     internal class NameChangeUpdateComposer : ServerPacket
     {
-        public NameChangeUpdateComposer(string Name, int Error, ICollection<string> Tags) : base(ServerPacketHeader
-            .NameChangeUpdateMessageComposer)
+        public NameChangeUpdateComposer(string name, int error, ICollection<string> tags)
+            : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
         {
-            WriteInteger(Error);
-            WriteString(Name);
-            WriteInteger(Tags.Count);
-            foreach (var Tag in Tags)
+            WriteInteger(error);
+            WriteString(name);
+
+            WriteInteger(tags.Count);
+            foreach (var tag in tags)
             {
-                WriteString(Name + Tag);
+                WriteString(name + tag);
             }
         }
 
-        public NameChangeUpdateComposer(string Name, int Error) : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
+        public NameChangeUpdateComposer(string name, int error)
+            : base(ServerPacketHeader.NameChangeUpdateMessageComposer)
         {
-            WriteInteger(Error);
-            WriteString(Name);
+            WriteInteger(error);
+            WriteString(name);
             WriteInteger(0);
         }
     }

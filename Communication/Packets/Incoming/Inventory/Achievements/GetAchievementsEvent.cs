@@ -4,12 +4,11 @@
     using HabboHotel.GameClients;
     using Outgoing.Inventory.Achievements;
 
-    internal sealed class GetAchievementsEvent : IPacketEvent
+    internal class GetAchievementsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new AchievementsComposer(Session,
-                PlusEnvironment.GetGame().GetAchievementManager()._achievements.Values.ToList()));
+            session.SendPacket(new AchievementsComposer(session, PlusEnvironment.GetGame().GetAchievementManager().Achievements.Values.ToList()));
         }
     }
 }

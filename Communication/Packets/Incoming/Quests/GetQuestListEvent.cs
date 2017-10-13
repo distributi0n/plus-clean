@@ -4,9 +4,9 @@
 
     public class GetQuestListEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            PlusEnvironment.GetGame().GetQuestManager().GetList(Session, null);
+            PlusEnvironment.GetGame().GetQuestManager().GetList(session, null);
         }
     }
 }

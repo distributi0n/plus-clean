@@ -4,15 +4,15 @@
 
     internal class SetChatPreferenceEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var ChatPreference = Packet.PopBoolean();
-            Session.GetHabbo().ChatPreference = ChatPreference;
+            var chatPreference = packet.PopBoolean();
+
+            session.GetHabbo().ChatPreference = chatPreference;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `users` SET `chat_preference` = @chatPreference WHERE `id` = '" +
-                                  Session.GetHabbo().Id + "' LIMIT 1");
-                dbClient.AddParameter("chatPreference", PlusEnvironment.BoolToEnum(ChatPreference));
+                dbClient.SetQuery("UPDATE `users` SET `chat_preference` = @chatPreference WHERE `id` = '" + session.GetHabbo().Id + "' LIMIT 1");
+                dbClient.AddParameter("chatPreference", PlusEnvironment.BoolToEnum(chatPreference));
                 dbClient.RunQuery();
             }
         }

@@ -153,7 +153,7 @@
                 PermissionSet.AddRange(PermRights);
             }
             List<string> SubscriptionRights = null;
-            if (PermissionSubscriptionRights.TryGetValue(Player.VIPRank, out SubscriptionRights))
+            if (PermissionSubscriptionRights.TryGetValue(Player.VipRank, out SubscriptionRights))
             {
                 PermissionSet.AddRange(SubscriptionRights);
             }
@@ -162,7 +162,7 @@
 
         public List<string> GetCommandsForPlayer(Habbo Player)
         {
-            return _commands.Where(x => Player.Rank >= x.Value.GroupId && Player.VIPRank >= x.Value.SubscriptionId)
+            return _commands.Where(x => Player.Rank >= x.Value.GroupId && Player.VipRank >= x.Value.SubscriptionId)
                 .Select(x => x.Key).ToList();
         }
     }

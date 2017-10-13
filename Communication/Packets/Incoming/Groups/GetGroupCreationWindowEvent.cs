@@ -7,23 +7,23 @@
 
     internal class GetGroupCreationWindowEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null)
+            if (session == null)
             {
                 return;
             }
 
-            var ValidRooms = new List<RoomData>();
-            foreach (var Data in Session.GetHabbo().UsersRooms)
+            var validRooms = new List<RoomData>();
+            foreach (var data in session.GetHabbo().UsersRooms)
             {
-                if (Data.Group == null)
+                if (data.Group == null)
                 {
-                    ValidRooms.Add(Data);
+                    validRooms.Add(data);
                 }
             }
 
-            Session.SendPacket(new GroupCreationWindowComposer(ValidRooms));
+            session.SendPacket(new GroupCreationWindowComposer(validRooms));
         }
     }
 }

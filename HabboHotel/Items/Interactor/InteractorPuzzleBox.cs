@@ -8,59 +8,59 @@
 
     public class InteractorPuzzleBox : IFurniInteractor
     {
-        public void OnPlace(GameClient Session, Item Item)
+        public void OnPlace(GameClient session, Item item)
         {
         }
 
-        public void OnRemove(GameClient Session, Item Item)
+        public void OnRemove(GameClient session, Item item)
         {
         }
 
-        public void OnTrigger(GameClient Session, Item Item, int Request, bool HasRights)
+        public void OnTrigger(GameClient session, Item item, int request, bool hasRights)
         {
-            if (Session == null)
+            if (session == null)
             {
                 return;
             }
 
-            var User = Item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null)
+            var user = item.GetRoom().GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null)
             {
                 return;
             }
 
-            if (!(Math.Abs(User.X - Item.GetX) >= 2 || Math.Abs(User.Y - Item.GetY) >= 2))
+            if (!(Math.Abs(user.X - item.GetX) >= 2 || Math.Abs(user.Y - item.GetY) >= 2))
             {
-                User.SetRot(Rotation.Calculate(User.X, User.Y, Item.GetX, Item.GetY), false);
-                if (User.RotBody % 2 != 0)
+                user.SetRot(Rotation.Calculate(user.X, user.Y, item.GetX, item.GetY), false);
+                if (user.RotBody % 2 != 0)
                 {
-                    User.MoveTo(Item.GetX + 1, Item.GetY);
+                    user.MoveTo(item.GetX + 1, item.GetY);
                     return;
                 }
 
-                var Room = Item.GetRoom();
-                var NewPoint = new Point(0, 0);
-                if (User.RotBody == 4)
+                var room = item.GetRoom();
+                var newPoint = new Point(0, 0);
+                if (user.RotBody == 4)
                 {
-                    NewPoint = new Point(Item.GetX, Item.GetY + 1);
+                    newPoint = new Point(item.GetX, item.GetY + 1);
                 }
-                if (User.RotBody == 0)
+                if (user.RotBody == 0)
                 {
-                    NewPoint = new Point(Item.GetX, Item.GetY - 1);
+                    newPoint = new Point(item.GetX, item.GetY - 1);
                 }
-                if (User.RotBody == 6)
+                if (user.RotBody == 6)
                 {
-                    NewPoint = new Point(Item.GetX - 1, Item.GetY);
+                    newPoint = new Point(item.GetX - 1, item.GetY);
                 }
-                if (User.RotBody == 2)
+                if (user.RotBody == 2)
                 {
-                    NewPoint = new Point(Item.GetX + 1, Item.GetY);
+                    newPoint = new Point(item.GetX + 1, item.GetY);
                 }
-                if (Room.GetGameMap().ValidTile(NewPoint.X, NewPoint.Y) &&
-                    Room.GetGameMap().itemCanBePlacedHere(NewPoint.X, NewPoint.Y) &&
-                    Room.GetGameMap().CanRollItemHere(NewPoint.X, NewPoint.Y))
+                if (room.GetGameMap().ValidTile(newPoint.X, newPoint.Y) &&
+                    room.GetGameMap().ItemCanBePlacedHere(newPoint.X, newPoint.Y) &&
+                    room.GetGameMap().CanRollItemHere(newPoint.X, newPoint.Y))
                 {
-                    var NewZ = Item.GetRoom().GetGameMap().SqAbsoluteHeight(NewPoint.X, NewPoint.Y);
+                    var newZ = item.GetRoom().GetGameMap().SqAbsoluteHeight(newPoint.X, newPoint.Y);
                     /*var mMessage = new ServerMessage();
                     mMessage.Init(Outgoing.ObjectOnRoller); // Cf
                     mMessage.AppendInt32(Item.GetX);
@@ -73,20 +73,20 @@
                     mMessage.AppendString(NewZ.ToString().Replace(',', '.'));
                     mMessage.AppendInt32(0);
                     Room.SendMessage(mMessage);*/
-                    Room.SendPacket(new SlideObjectBundleComposer(Item.GetX, Item.GetY, Item.GetZ, NewPoint.X, NewPoint.Y, NewZ,
-                        0, 0, Item.Id));
-                    Item.GetRoom()
+                    room.SendPacket(new SlideObjectBundleComposer(item.GetX, item.GetY, item.GetZ, newPoint.X, newPoint.Y, newZ,
+                        0, 0, item.Id));
+                    item.GetRoom()
                         .GetRoomItemHandler()
-                        .SetFloorItem(User.GetClient(), Item, NewPoint.X, NewPoint.Y, Item.Rotation, false, false, false);
+                        .SetFloorItem(user.GetClient(), item, newPoint.X, newPoint.Y, item.Rotation, false, false, false);
                 }
             }
             else
             {
-                User.MoveTo(Item.GetX + 1, Item.GetY);
+                user.MoveTo(item.GetX + 1, item.GetY);
             }
         }
 
-        public void OnWiredTrigger(Item Item)
+        public void OnWiredTrigger(Item item)
         {
         }
     }

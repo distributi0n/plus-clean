@@ -1,6 +1,6 @@
 ﻿namespace Plus.Communication.RCON.Commands.User
 {
-    internal class DisconnectUserCommand : IRCONCommand
+    internal class DisconnectUserCommand : IRconCommand
     {
         public string Description => "This command is used to disconnect a user.";
 

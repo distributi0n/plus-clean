@@ -10,33 +10,33 @@
 
         public string Description => "Mute the room with a reason.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
             if (Params.Length == 1)
             {
-                Session.SendWhisper("Please provide a reason for muting the room to show to the users.");
+                session.SendWhisper("Please provide a reason for muting the room to show to the users.");
                 return;
             }
 
-            if (!Room.RoomMuted)
+            if (!room.RoomMuted)
             {
-                Room.RoomMuted = true;
+                room.RoomMuted = true;
             }
-            var Msg = CommandManager.MergeParams(Params, 1);
-            var RoomUsers = Room.GetRoomUserManager().GetRoomUsers();
-            if (RoomUsers.Count > 0)
+            var msg = CommandManager.MergeParams(Params, 1);
+            var roomUsers = room.GetRoomUserManager().GetRoomUsers();
+            if (roomUsers.Count > 0)
             {
-                foreach (var User in RoomUsers)
+                foreach (var user in roomUsers)
                 {
-                    if (User == null ||
-                        User.GetClient() == null ||
-                        User.GetClient().GetHabbo() == null ||
-                        User.GetClient().GetHabbo().Username == Session.GetHabbo().Username)
+                    if (user == null ||
+                        user.GetClient() == null ||
+                        user.GetClient().GetHabbo() == null ||
+                        user.GetClient().GetHabbo().Username == session.GetHabbo().Username)
                     {
                         continue;
                     }
 
-                    User.GetClient().SendWhisper("This room has been muted because: " + Msg);
+                    user.GetClient().SendWhisper("This room has been muted because: " + msg);
                 }
             }
         }

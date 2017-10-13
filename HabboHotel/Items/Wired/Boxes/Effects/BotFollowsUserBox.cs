@@ -7,10 +7,10 @@
 
     internal class BotFollowsUserBox : IWiredItem
     {
-        public BotFollowsUserBox(Room Instance, Item Item)
+        public BotFollowsUserBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -22,16 +22,16 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var FollowMode = Packet.PopInt(); //1 = follow, 0 = don't.
-            var BotConfiguration = Packet.PopString();
+            var unknown = packet.PopInt();
+            var followMode = packet.PopInt(); //1 = follow, 0 = don't.
+            var botConfiguration = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            StringData = FollowMode + ";" + BotConfiguration;
+            StringData = followMode + ";" + botConfiguration;
         }
 
         public bool Execute(params object[] Params)
@@ -45,53 +45,53 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var Human = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-            if (Human == null)
+            var human = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+            if (human == null)
             {
                 return false;
             }
 
-            var Stuff = StringData.Split(';');
-            if (Stuff.Length != 2)
+            var stuff = StringData.Split(';');
+            if (stuff.Length != 2)
             {
                 return false; //This is important, incase a cunt scripts.
             }
 
-            var Username = Stuff[1];
-            var User = Instance.GetRoomUserManager().GetBotByName(Username);
-            if (User == null)
+            var username = stuff[1];
+            var user = Instance.GetRoomUserManager().GetBotByName(username);
+            if (user == null)
             {
                 return false;
             }
 
-            var FollowMode = 0;
-            if (!int.TryParse(Stuff[0], out FollowMode))
+            var followMode = 0;
+            if (!int.TryParse(stuff[0], out followMode))
             {
                 return false;
             }
 
-            if (FollowMode == 0)
+            if (followMode == 0)
             {
-                User.BotData.ForcedUserTargetMovement = 0;
-                if (User.IsWalking)
+                user.BotData.ForcedUserTargetMovement = 0;
+                if (user.IsWalking)
                 {
-                    User.ClearMovement(true);
+                    user.ClearMovement(true);
                 }
             }
-            else if (FollowMode == 1)
+            else if (followMode == 1)
             {
-                User.BotData.ForcedUserTargetMovement = Player.Id;
-                if (User.IsWalking)
+                user.BotData.ForcedUserTargetMovement = player.Id;
+                if (user.IsWalking)
                 {
-                    User.ClearMovement(true);
+                    user.ClearMovement(true);
                 }
-                User.MoveTo(Human.X, Human.Y);
+                user.MoveTo(human.X, human.Y);
             }
             return true;
         }

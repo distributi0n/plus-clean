@@ -6,10 +6,10 @@
 
     internal class BotCommunicatesToAllBox : IWiredItem
     {
-        public BotCommunicatesToAllBox(Room Instance, Item Item)
+        public BotCommunicatesToAllBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -21,11 +21,11 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var ChatMode = Packet.PopInt();
-            var ChatConfig = Packet.PopString();
+            var unknown = packet.PopInt();
+            var chatMode = packet.PopInt();
+            var chatConfig = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
@@ -45,8 +45,8 @@
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetBotByName(StringData);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetBotByName(StringData);
+            if (user == null)
             {
                 return false;
             }

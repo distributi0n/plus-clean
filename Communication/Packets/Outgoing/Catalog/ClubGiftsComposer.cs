@@ -2,7 +2,8 @@
 {
     internal class ClubGiftsComposer : ServerPacket
     {
-        public ClubGiftsComposer() : base(ServerPacketHeader.ClubGiftsMessageComposer)
+        public ClubGiftsComposer()
+            : base(ServerPacketHeader.ClubGiftsMessageComposer)
         {
             WriteInteger(0); //Days until next gift.
             WriteInteger(10); //Gifts available
@@ -28,6 +29,7 @@
                 WriteBoolean(false); // TODO: Figure out
                 WriteString(""); //previewImage -> e.g; catalogue/pet_lion.png
             }
+
             WriteInteger(1); //Count
             {
                 //int, bool, int, bool

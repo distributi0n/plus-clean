@@ -4,12 +4,11 @@
     using HabboHotel.GameClients;
     using Outgoing.Handshake;
 
-    public sealed class InitCryptoEvent : IPacketEvent
+    public class InitCryptoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            Session.SendPacket(new InitCryptoComposer(HabboEncryptionV2.GetRsaDiffieHellmanPrimeKey(),
-                HabboEncryptionV2.GetRsaDiffieHellmanGeneratorKey()));
+            session.SendPacket(new InitCryptoComposer(HabboEncryptionV2.GetRsaDiffieHellmanPrimeKey(), HabboEncryptionV2.GetRsaDiffieHellmanGeneratorKey()));
         }
     }
 }

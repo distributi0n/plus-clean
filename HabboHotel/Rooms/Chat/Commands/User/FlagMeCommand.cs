@@ -12,43 +12,43 @@
 
         public string Description => "Gives you the option to change your username.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            if (!CanChangeName(Session.GetHabbo()))
+            if (!CanChangeName(session.GetHabbo()))
             {
-                Session.SendWhisper("Sorry, it seems you currently do not have the option to change your username!");
+                session.SendWhisper("Sorry, it seems you currently do not have the option to change your username!");
                 return;
             }
 
-            Session.GetHabbo().ChangingName = true;
-            Session.SendNotification(
+            session.GetHabbo().ChangingName = true;
+            session.SendNotification(
                 "Please be aware that if your username is deemed as inappropriate, you will be banned without question.\r\rAlso note that Staff will NOT change your username again should you have an issue with what you have chosen.\r\rClose this window and click yourself to begin choosing a new username!");
-            Session.SendPacket(new UserObjectComposer(Session.GetHabbo()));
+            session.SendPacket(new UserObjectComposer(session.GetHabbo()));
         }
 
-        private bool CanChangeName(Habbo Habbo)
+        private bool CanChangeName(Habbo habbo)
         {
-            if (Habbo.Rank == 1 && Habbo.VIPRank == 0 && Habbo.LastNameChange == 0)
+            if (habbo.Rank == 1 && habbo.VipRank == 0 && habbo.LastNameChange == 0)
             {
                 return true;
             }
-            if (Habbo.Rank == 1 &&
-                Habbo.VIPRank == 1 &&
-                (Habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 604800 > Habbo.LastNameChange))
+            if (habbo.Rank == 1 &&
+                habbo.VipRank == 1 &&
+                (habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 604800 > habbo.LastNameChange))
             {
                 return true;
             }
-            if (Habbo.Rank == 1 &&
-                Habbo.VIPRank == 2 &&
-                (Habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 86400 > Habbo.LastNameChange))
+            if (habbo.Rank == 1 &&
+                habbo.VipRank == 2 &&
+                (habbo.LastNameChange == 0 || PlusEnvironment.GetUnixTimestamp() + 86400 > habbo.LastNameChange))
             {
                 return true;
             }
-            if (Habbo.Rank == 1 && Habbo.VIPRank == 3)
+            if (habbo.Rank == 1 && habbo.VipRank == 3)
             {
                 return true;
             }
-            if (Habbo.GetPermissions().HasRight("mod_tool"))
+            if (habbo.GetPermissions().HasRight("mod_tool"))
             {
                 return true;
             }

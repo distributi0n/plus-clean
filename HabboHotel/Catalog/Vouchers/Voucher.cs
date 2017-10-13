@@ -2,26 +2,22 @@
 {
     public class Voucher
     {
-        public Voucher(string Code, string Type, int Value, int CurrentUses, int MaxUses)
+        internal Voucher(string code, string type, int value, int currentUses, int maxUses)
         {
-            this.Code = Code;
-            this.Type = VoucherUtility.GetType(Type);
-            this.Value = Value;
-            this.CurrentUses = CurrentUses;
-            this.MaxUses = MaxUses;
+            Code = code;
+            Type = VoucherUtility.GetType(type);
+            Value = value;
+            CurrentUses = currentUses;
+            MaxUses = maxUses;
         }
 
-        public string Code { get; set; }
+        private string Code { get; }
+        internal VoucherType Type { get; }
+        internal int Value { get; }
+        internal int CurrentUses { get; private set; }
+        internal int MaxUses { get; }
 
-        public VoucherType Type { get; set; }
-
-        public int Value { get; set; }
-
-        public int CurrentUses { get; set; }
-
-        public int MaxUses { get; set; }
-
-        public void UpdateUses()
+        internal void UpdateUses()
         {
             CurrentUses += 1;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())

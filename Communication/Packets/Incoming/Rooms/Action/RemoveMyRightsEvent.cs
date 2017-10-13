@@ -6,43 +6,49 @@
 
     internal class RemoveMyRightsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room = null;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
-            {
-                return;
-            }
-            if (!Room.CheckRights(Session, false))
+            Room room;
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            if (Room.UsersWithRights.Contains(Session.GetHabbo().Id))
+            if (!room.CheckRights(session, false))
             {
-                var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-                if (User != null && !User.IsBot)
-                {
-                    User.RemoveStatus("flatctrl 1");
-                    User.UpdateNeeded = true;
-                    User.GetClient().SendPacket(new YouAreNotControllerComposer());
-                }
-                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-                {
-                    dbClient.SetQuery("DELETE FROM `room_rights` WHERE `user_id` = @uid AND `room_id` = @rid LIMIT 1");
-                    dbClient.AddParameter("uid", Session.GetHabbo().Id);
-                    dbClient.AddParameter("rid", Room.Id);
-                    dbClient.RunQuery();
-                }
-                if (Room.UsersWithRights.Contains(Session.GetHabbo().Id))
-                {
-                    Room.UsersWithRights.Remove(Session.GetHabbo().Id);
-                }
+                return;
+            }
+
+            if (!room.UsersWithRights.Contains(session.GetHabbo().Id))
+            {
+                return;
+            }
+
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user != null && !user.IsBot)
+            {
+                user.RemoveStatus("flatctrl 1");
+                user.UpdateNeeded = true;
+
+                user.GetClient().SendPacket(new YouAreNotControllerComposer());
+            }
+
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.SetQuery("DELETE FROM `room_rights` WHERE `user_id` = @uid AND `room_id` = @rid LIMIT 1");
+                dbClient.AddParameter("uid", session.GetHabbo().Id);
+                dbClient.AddParameter("rid", room.Id);
+                dbClient.RunQuery();
+            }
+
+            if (room.UsersWithRights.Contains(session.GetHabbo().Id))
+            {
+                room.UsersWithRights.Remove(session.GetHabbo().Id);
             }
         }
     }

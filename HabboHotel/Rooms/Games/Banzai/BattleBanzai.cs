@@ -33,18 +33,18 @@
 
         public bool isBanzaiActive { get; private set; }
 
-        public void AddTile(Item item, int itemID)
+        public void AddTile(Item item, int itemId)
         {
-            if (!_banzaiTiles.ContainsKey(itemID))
+            if (!_banzaiTiles.ContainsKey(itemId))
             {
-                _banzaiTiles.TryAdd(itemID, item);
+                _banzaiTiles.TryAdd(itemId, item);
             }
         }
 
-        public void RemoveTile(int itemID)
+        public void RemoveTile(int itemId)
         {
             Item Item = null;
-            _banzaiTiles.TryRemove(itemID, out Item);
+            _banzaiTiles.TryRemove(itemId, out Item);
         }
 
         public void AddPuck(Item item)
@@ -70,93 +70,93 @@
 
             foreach (var item in _pucks.Values.ToList())
             {
-                var NewX = 0;
-                var NewY = 0;
+                var newX = 0;
+                var newY = 0;
                 var differenceX = User.X - item.GetX;
                 var differenceY = User.Y - item.GetY;
                 if (differenceX == 0 && differenceY == 0)
                 {
                     if (User.RotBody == 4)
                     {
-                        NewX = User.X;
-                        NewY = User.Y + 2;
+                        newX = User.X;
+                        newY = User.Y + 2;
                     }
                     else if (User.RotBody == 6)
                     {
-                        NewX = User.X - 2;
-                        NewY = User.Y;
+                        newX = User.X - 2;
+                        newY = User.Y;
                     }
                     else if (User.RotBody == 0)
                     {
-                        NewX = User.X;
-                        NewY = User.Y - 2;
+                        newX = User.X;
+                        newY = User.Y - 2;
                     }
                     else if (User.RotBody == 2)
                     {
-                        NewX = User.X + 2;
-                        NewY = User.Y;
+                        newX = User.X + 2;
+                        newY = User.Y;
                     }
                     else if (User.RotBody == 1)
                     {
-                        NewX = User.X + 2;
-                        NewY = User.Y - 2;
+                        newX = User.X + 2;
+                        newY = User.Y - 2;
                     }
                     else if (User.RotBody == 7)
                     {
-                        NewX = User.X - 2;
-                        NewY = User.Y - 2;
+                        newX = User.X - 2;
+                        newY = User.Y - 2;
                     }
                     else if (User.RotBody == 3)
                     {
-                        NewX = User.X + 2;
-                        NewY = User.Y + 2;
+                        newX = User.X + 2;
+                        newY = User.Y + 2;
                     }
                     else if (User.RotBody == 5)
                     {
-                        NewX = User.X - 2;
-                        NewY = User.Y + 2;
+                        newX = User.X - 2;
+                        newY = User.Y + 2;
                     }
-                    if (!_room.GetRoomItemHandler().CheckPosItem(User.GetClient(), item, NewX, NewY, item.Rotation, false, false))
+                    if (!_room.GetRoomItemHandler().CheckPosItem(User.GetClient(), item, newX, newY, item.Rotation, false, false))
                     {
                         if (User.RotBody == 0)
                         {
-                            NewX = User.X;
-                            NewY = User.Y + 1;
+                            newX = User.X;
+                            newY = User.Y + 1;
                         }
                         else if (User.RotBody == 2)
                         {
-                            NewX = User.X - 1;
-                            NewY = User.Y;
+                            newX = User.X - 1;
+                            newY = User.Y;
                         }
                         else if (User.RotBody == 4)
                         {
-                            NewX = User.X;
-                            NewY = User.Y - 1;
+                            newX = User.X;
+                            newY = User.Y - 1;
                         }
                         else if (User.RotBody == 6)
                         {
-                            NewX = User.X + 1;
-                            NewY = User.Y;
+                            newX = User.X + 1;
+                            newY = User.Y;
                         }
                         else if (User.RotBody == 5)
                         {
-                            NewX = User.X + 1;
-                            NewY = User.Y - 1;
+                            newX = User.X + 1;
+                            newY = User.Y - 1;
                         }
                         else if (User.RotBody == 3)
                         {
-                            NewX = User.X - 1;
-                            NewY = User.Y - 1;
+                            newX = User.X - 1;
+                            newY = User.Y - 1;
                         }
                         else if (User.RotBody == 7)
                         {
-                            NewX = User.X + 1;
-                            NewY = User.Y + 1;
+                            newX = User.X + 1;
+                            newY = User.Y + 1;
                         }
                         else if (User.RotBody == 1)
                         {
-                            NewX = User.X - 1;
-                            NewY = User.Y + 1;
+                            newX = User.X - 1;
+                            newY = User.Y + 1;
                         }
                     }
                 }
@@ -165,16 +165,16 @@
                          differenceY <= 1 &&
                          differenceY >= -1 &&
                          VerifyPuck(User, item.Coordinate.X, item.Coordinate.Y)
-                ) //VERYFIC BALL CHECAR SI ESTA EN DIRECCION ASIA LA PELOTA
+                )
                 {
-                    NewX = differenceX * -1;
-                    NewY = differenceY * -1;
-                    NewX = NewX + item.GetX;
-                    NewY = NewY + item.GetY;
+                    newX = differenceX * -1;
+                    newY = differenceY * -1;
+                    newX = newX + item.GetX;
+                    newY = newY + item.GetY;
                 }
-                if (item.GetRoom().GetGameMap().ValidTile(NewX, NewY))
+                if (item.GetRoom().GetGameMap().ValidTile(newX, newY))
                 {
-                    MovePuck(item, User.GetClient(), NewX, NewY, User.Team);
+                    MovePuck(item, User.GetClient(), newX, newY, User.Team);
                 }
             }
 
@@ -184,10 +184,10 @@
             }
         }
 
-        private bool VerifyPuck(RoomUser user, int actualx, int actualy) =>
+        private static bool VerifyPuck(RoomUser user, int actualx, int actualy) =>
             Rotation.Calculate(user.X, user.Y, actualx, actualy) == user.RotBody;
 
-        public void BanzaiStart()
+        internal void BanzaiStart()
         {
             if (isBanzaiActive)
             {
@@ -205,8 +205,8 @@
             foreach (var tile in _banzaiTiles.Values)
             {
                 tile.ExtraData = "1";
-                tile.value = 0;
-                tile.team = TEAM.NONE;
+                tile.Value = 0;
+                tile.Team = TEAM.NONE;
                 tile.UpdateState();
             }
 
@@ -219,17 +219,17 @@
             }
         }
 
-        public void ResetTiles()
+        private void ResetTiles()
         {
             foreach (var item in _room.GetRoomItemHandler().GetFloor.ToList())
             {
                 var type = item.GetBaseItem().InteractionType;
                 switch (type)
                 {
-                    case InteractionType.banzaiscoreblue:
-                    case InteractionType.banzaiscoregreen:
-                    case InteractionType.banzaiscorered:
-                    case InteractionType.banzaiscoreyellow:
+                    case InteractionType.Banzaiscoreblue:
+                    case InteractionType.Banzaiscoregreen:
+                    case InteractionType.Banzaiscorered:
+                    case InteractionType.Banzaiscoreyellow:
                     {
                         item.ExtraData = "0";
                         item.UpdateState();
@@ -239,7 +239,7 @@
             }
         }
 
-        public void BanzaiEnd(bool userTriggered = false)
+        internal void BanzaiEnd(bool userTriggered = false)
         {
             //TODO
             isBanzaiActive = false;
@@ -253,13 +253,13 @@
             _room.GetGameManager().UnlockGates();
             foreach (var tile in _banzaiTiles.Values)
             {
-                if (tile.team == winners)
+                if (tile.Team == winners)
                 {
-                    tile.interactionCount = 0;
-                    tile.interactionCountHelper = 0;
+                    tile.InteractionCount = 0;
+                    tile.InteractionCountHelper = 0;
                     tile.UpdateNeeded = true;
                 }
-                else if (tile.team == TEAM.NONE)
+                else if (tile.Team == TEAM.NONE)
                 {
                     tile.ExtraData = "0";
                     tile.UpdateState();
@@ -341,7 +341,7 @@
 
         public void MovePuck(Item item, GameClient mover, int newX, int newY, TEAM team)
         {
-            if (!_room.GetGameMap().itemCanBePlacedHere(newX, newY))
+            if (!_room.GetGameMap().ItemCanBePlacedHere(newX, newY))
             {
                 return;
             }
@@ -357,7 +357,7 @@
             item.UpdateState();
             double NewZ = _room.GetGameMap().Model.SqFloorHeight[newX, newY];
             _room.SendPacket(new SlideObjectBundleComposer(item.GetX, item.GetY, item.GetZ, newX, newY, NewZ, 0, 0, item.Id));
-            _room.GetRoomItemHandler().SetFloorItem(mover, item, newX, newY, item.Rotation, false, false, false, false);
+            _room.GetRoomItemHandler().SetFloorItem(mover, item, newX, newY, item.Rotation, false, false, false);
             if (mover == null || mover.GetHabbo() == null)
             {
                 return;
@@ -372,17 +372,17 @@
 
         private void SetTile(Item item, TEAM team, RoomUser user)
         {
-            if (item.team == team)
+            if (item.Team == team)
             {
-                if (item.value < 3)
+                if (item.Value < 3)
                 {
-                    item.value++;
-                    if (item.value == 3)
+                    item.Value++;
+                    if (item.Value == 3)
                     {
                         user.LockedTilesCount++;
-                        _room.GetGameManager().AddPointToTeam(item.team, 1);
-                        field.updateLocation(item.GetX, item.GetY, (byte) team);
-                        var gfield = field.doUpdate();
+                        _room.GetGameManager().AddPointToTeam(item.Team, 1);
+                        field.UpdateLocation(item.GetX, item.GetY, (byte) team);
+                        var gfield = field.DoUpdate();
                         TEAM t;
                         foreach (var gameField in gfield)
                         {
@@ -398,14 +398,14 @@
             }
             else
             {
-                if (item.value < 3)
+                if (item.Value < 3)
                 {
-                    item.team = team;
-                    item.value = 1;
+                    item.Team = team;
+                    item.Value = 1;
                 }
             }
 
-            var newColor = item.value + Convert.ToInt32(item.team) * 3 - 1;
+            var newColor = item.Value + Convert.ToInt32(item.Team) * 3 - 1;
             item.ExtraData = newColor.ToString();
         }
 
@@ -416,7 +416,6 @@
                 return;
             }
 
-            var items = _room.GetGameMap().GetCoordinatedItems(coord);
             var i = 0;
             foreach (var _item in _banzaiTiles.Values.ToList())
             {
@@ -425,7 +424,7 @@
                     continue;
                 }
 
-                if (_item.GetBaseItem().InteractionType != InteractionType.banzaifloor)
+                if (_item.GetBaseItem().InteractionType != InteractionType.Banzaifloor)
                 {
                     user.Team = TEAM.NONE;
                     user.ApplyEffect(0);
@@ -466,51 +465,47 @@
                 return;
             }
 
-            var items = _room.GetGameMap().GetCoordinatedItems(coord);
-            foreach (var _item in _banzaiTiles.Values.ToList())
+            foreach (var item in _banzaiTiles.Values.ToList())
             {
-                if (_item == null)
+                if (item?.GetBaseItem().InteractionType != InteractionType.Banzaifloor)
                 {
                     continue;
                 }
-                if (_item.GetBaseItem().InteractionType != InteractionType.banzaifloor)
-                {
-                    continue;
-                }
-                if (_item.GetX != coord.X || _item.GetY != coord.Y)
+                if (item.GetX != coord.X || item.GetY != coord.Y)
                 {
                     continue;
                 }
 
-                SetMaxForTile(_item, team);
+                SetMaxForTile(item, team);
                 _room.GetGameManager().AddPointToTeam(team, 1);
-                _item.UpdateState(false, true);
+                item.UpdateState(false, true);
             }
         }
 
         private static void SetMaxForTile(Item item, TEAM team)
         {
-            if (item.value < 3)
+            if (item.Value < 3)
             {
-                item.value = 3;
-                item.team = team;
+                item.Value = 3;
+                item.Team = team;
             }
-            var newColor = item.value + Convert.ToInt32(item.team) * 3 - 1;
+
+            var newColor = item.Value + Convert.ToInt32(item.Team) * 3 - 1;
             item.ExtraData = newColor.ToString();
         }
 
-        public void Dispose()
+        internal void Dispose()
         {
             _banzaiTiles.Clear();
             _pucks.Clear();
+
             if (floorMap != null)
             {
                 Array.Clear(floorMap, 0, floorMap.Length);
             }
-            if (field != null)
-            {
-                field.Dispose();
-            }
+
+            field?.Dispose();
+
             _room = null;
             _banzaiTiles = null;
             _pucks = null;

@@ -5,14 +5,13 @@
 
     internal class GetPlayableGamesEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var GameId = Packet.PopInt();
-            Session.SendPacket(new GameAccountStatusComposer(GameId));
-            Session.SendPacket(new PlayableGamesComposer(GameId));
-            Session.SendPacket(new GameAchievementListComposer(Session,
-                PlusEnvironment.GetGame().GetAchievementManager().GetGameAchievements(GameId),
-                GameId));
+            var gameId = packet.PopInt();
+
+            session.SendPacket(new GameAccountStatusComposer(gameId));
+            session.SendPacket(new PlayableGamesComposer(gameId));
+            session.SendPacket(new GameAchievementListComposer(session, PlusEnvironment.GetGame().GetAchievementManager().GetGameAchievements(gameId), gameId));
         }
     }
 }

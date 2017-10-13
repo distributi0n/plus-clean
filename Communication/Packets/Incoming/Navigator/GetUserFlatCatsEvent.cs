@@ -5,15 +5,16 @@
 
     public class GetUserFlatCatsEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null)
+            if (session == null)
             {
                 return;
             }
 
-            var Categories = PlusEnvironment.GetGame().GetNavigator().GetFlatCategories();
-            Session.SendPacket(new UserFlatCatsComposer(Categories, Session.GetHabbo().Rank));
+            var categories = PlusEnvironment.GetGame().GetNavigator().GetFlatCategories();
+
+            session.SendPacket(new UserFlatCatsComposer(categories, session.GetHabbo().Rank));
         }
     }
 }

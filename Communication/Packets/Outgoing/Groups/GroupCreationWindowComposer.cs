@@ -6,16 +6,16 @@
 
     internal class GroupCreationWindowComposer : ServerPacket
     {
-        public GroupCreationWindowComposer(ICollection<RoomData> Rooms) : base(ServerPacketHeader
-            .GroupCreationWindowMessageComposer)
+        public GroupCreationWindowComposer(ICollection<RoomData> rooms)
+            : base(ServerPacketHeader.GroupCreationWindowMessageComposer)
         {
-            WriteInteger(Convert.ToInt32(PlusEnvironment.GetSettingsManager()
-                .TryGetValue("catalog.group.purchase.cost"))); //Price
-            WriteInteger(Rooms.Count); //Room count that the user has.
-            foreach (var Room in Rooms)
+            WriteInteger(Convert.ToInt32(PlusEnvironment.GetSettingsManager().TryGetValue("catalog.group.purchase.cost"))); //Price
+
+            WriteInteger(rooms.Count); //Room count that the user has.
+            foreach (var room in rooms)
             {
-                WriteInteger(Room.Id); //Room Id
-                WriteString(Room.Name); //Room Name
+                WriteInteger(room.Id); //Room Id
+                WriteString(room.Name); //Room Name
                 WriteBoolean(false); //What?
             }
 
@@ -23,15 +23,19 @@
             WriteInteger(5);
             WriteInteger(11);
             WriteInteger(4);
+
             WriteInteger(6);
             WriteInteger(11);
             WriteInteger(4);
+
             WriteInteger(0);
             WriteInteger(0);
             WriteInteger(0);
+
             WriteInteger(0);
             WriteInteger(0);
             WriteInteger(0);
+
             WriteInteger(0);
             WriteInteger(0);
             WriteInteger(0);

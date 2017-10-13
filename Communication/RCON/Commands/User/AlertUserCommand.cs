@@ -3,7 +3,7 @@
     using System;
     using Packets.Outgoing.Moderation;
 
-    internal class AlertUserCommand : IRCONCommand
+    internal class AlertUserCommand : IRconCommand
     {
         public string Description => "This command is used to alert a user.";
 

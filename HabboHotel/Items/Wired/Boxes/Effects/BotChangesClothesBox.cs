@@ -7,10 +7,10 @@
 
     internal class BotChangesClothesBox : IWiredItem
     {
-        public BotChangesClothesBox(Room Instance, Item Item)
+        public BotChangesClothesBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -22,15 +22,15 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var BotConfiguration = Packet.PopString();
+            var unknown = packet.PopInt();
+            var botConfiguration = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            StringData = BotConfiguration;
+            StringData = botConfiguration;
         }
 
         public bool Execute(params object[] Params)
@@ -44,35 +44,35 @@
                 return false;
             }
 
-            var Stuff = StringData.Split('\t');
-            if (Stuff.Length != 2)
+            var stuff = StringData.Split('\t');
+            if (stuff.Length != 2)
             {
                 return false; //This is important, incase a cunt scripts.
             }
 
-            var Username = Stuff[0];
-            var User = Instance.GetRoomUserManager().GetBotByName(Username);
-            if (User == null)
+            var username = stuff[0];
+            var user = Instance.GetRoomUserManager().GetBotByName(username);
+            if (user == null)
             {
                 return false;
             }
 
-            var Figure = Stuff[1];
-            var UserChangeComposer = new ServerPacket(ServerPacketHeader.UserChangeMessageComposer);
-            UserChangeComposer.WriteInteger(User.VirtualId);
-            UserChangeComposer.WriteString(Figure);
-            UserChangeComposer.WriteString("M");
-            UserChangeComposer.WriteString(User.BotData.Motto);
-            UserChangeComposer.WriteInteger(0);
-            Instance.SendPacket(UserChangeComposer);
-            User.BotData.Look = Figure;
-            User.BotData.Gender = "M";
+            var figure = stuff[1];
+            var userChangeComposer = new ServerPacket(ServerPacketHeader.UserChangeMessageComposer);
+            userChangeComposer.WriteInteger(user.VirtualId);
+            userChangeComposer.WriteString(figure);
+            userChangeComposer.WriteString("M");
+            userChangeComposer.WriteString(user.BotData.Motto);
+            userChangeComposer.WriteInteger(0);
+            Instance.SendPacket(userChangeComposer);
+            user.BotData.Look = figure;
+            user.BotData.Gender = "M";
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery("UPDATE `bots` SET `look` = @look, `gender` = @gender WHERE `id` = '" + User.BotData.Id +
+                dbClient.SetQuery("UPDATE `bots` SET `look` = @look, `gender` = @gender WHERE `id` = '" + user.BotData.Id +
                                   "' LIMIT 1");
-                dbClient.AddParameter("look", User.BotData.Look);
-                dbClient.AddParameter("gender", User.BotData.Gender);
+                dbClient.AddParameter("look", user.BotData.Look);
+                dbClient.AddParameter("gender", user.BotData.Gender);
                 dbClient.RunQuery();
             }
             return true;

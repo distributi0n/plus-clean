@@ -8,10 +8,10 @@
 
     internal class RemoveActorFromTeamBox : IWiredItem
     {
-        public RemoveActorFromTeamBox(Room Instance, Item Item)
+        public RemoveActorFromTeamBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -23,9 +23,9 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
+            var unknown = packet.PopInt();
         }
 
         public bool Execute(params object[] Params)
@@ -35,28 +35,28 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+            if (user == null)
             {
                 return false;
             }
 
-            if (User.Team != TEAM.NONE)
+            if (user.Team != TEAM.NONE)
             {
-                var Team = Instance.GetTeamManagerForFreeze();
-                if (Team != null)
+                var team = Instance.GetTeamManagerForFreeze();
+                if (team != null)
                 {
-                    Team.OnUserLeave(User);
-                    User.Team = TEAM.NONE;
-                    if (User.GetClient().GetHabbo().Effects().CurrentEffect != 0)
+                    team.OnUserLeave(user);
+                    user.Team = TEAM.NONE;
+                    if (user.GetClient().GetHabbo().Effects().CurrentEffect != 0)
                     {
-                        User.GetClient().GetHabbo().Effects().ApplyEffect(0);
+                        user.GetClient().GetHabbo().Effects().ApplyEffect(0);
                     }
                 }
             }

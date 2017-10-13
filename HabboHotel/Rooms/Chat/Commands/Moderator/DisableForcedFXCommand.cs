@@ -2,7 +2,7 @@
 {
     using GameClients;
 
-    internal class DisableForcedFXCommand : IChatCommand
+    internal class DisableForcedFxCommand : IChatCommand
     {
         public string PermissionRequired => "command_forced_effects";
 
@@ -10,18 +10,18 @@
 
         public string Description => "Gives you the ability to ignore or allow forced effects.";
 
-        public void Execute(GameClient Session, Room Room, string[] Params)
+        public void Execute(GameClient session, Room room, string[] Params)
         {
-            Session.GetHabbo().DisableForcedEffects = !Session.GetHabbo().DisableForcedEffects;
+            session.GetHabbo().DisableForcedEffects = !session.GetHabbo().DisableForcedEffects;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("UPDATE `users` SET `disable_forced_effects` = @DisableForcedEffects WHERE `id` = '" +
-                                  Session.GetHabbo().Id +
+                                  session.GetHabbo().Id +
                                   "' LIMIT 1");
-                dbClient.AddParameter("DisableForcedEffects", (Session.GetHabbo().DisableForcedEffects ? 1 : 0).ToString());
+                dbClient.AddParameter("DisableForcedEffects", (session.GetHabbo().DisableForcedEffects ? 1 : 0).ToString());
                 dbClient.RunQuery();
             }
-            Session.SendWhisper("Forced FX mode is now " + (Session.GetHabbo().DisableForcedEffects ? "disabled!" : "enabled!"));
+            session.SendWhisper("Forced FX mode is now " + (session.GetHabbo().DisableForcedEffects ? "disabled!" : "enabled!"));
         }
     }
 }

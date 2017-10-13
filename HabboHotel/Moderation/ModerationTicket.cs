@@ -9,15 +9,15 @@
         public List<string> ReportedChats;
 
         public ModerationTicket(int id,
-            int type,
-            int category,
-            double timestamp,
-            int priority,
-            Habbo sender,
-            Habbo reported,
-            string issue,
-            RoomData room,
-            List<string> reportedChats)
+                                int type,
+                                int category,
+                                double timestamp,
+                                int priority,
+                                Habbo sender,
+                                Habbo reported,
+                                string issue,
+                                RoomData room,
+                                List<string> reportedChats)
         {
             Id = id;
             Type = type;
@@ -45,13 +45,13 @@
         public string Issue { get; set; }
         public RoomData Room { get; set; }
 
-        public int GetStatus(int Id)
+        public int GetStatus(int id)
         {
             if (Moderator == null)
             {
                 return 1;
             }
-            if (Moderator.Id == Id && !Answered)
+            if (Moderator.Id == id && !Answered)
             {
                 return 2;
             }

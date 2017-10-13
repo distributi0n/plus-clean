@@ -12,35 +12,41 @@
                 return;
             }
 
-            var Room = session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var Username = packet.PopString();
-            var Player = PlusEnvironment.GetHabboByUsername(Username);
-            if (Player == null || Player.GetPermissions().HasRight("mod_tool"))
-            {
-                return;
-            }
-            if (session.GetHabbo().GetIgnores().TryGet(Player.Id))
+            var username = packet.PopString();
+
+            var player = PlusEnvironment.GetHabboByUsername(username);
+            if (player == null || player.GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            if (session.GetHabbo().GetIgnores().TryAdd(Player.Id))
+            if (session.GetHabbo().GetIgnores().TryGet(player.Id))
             {
-                using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
-                {
-                    dbClient.SetQuery("INSERT INTO `user_ignores` (`user_id`,`ignore_id`) VALUES(@uid,@ignoreId);");
-                    dbClient.AddParameter("uid", session.GetHabbo().Id);
-                    dbClient.AddParameter("ignoreId", Player.Id);
-                    dbClient.RunQuery();
-                }
-                session.SendPacket(new IgnoreStatusComposer(1, Player.Username));
-                PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_SelfModIgnoreSeen", 1);
+                return;
             }
+
+            if (!session.GetHabbo().GetIgnores().TryAdd(player.Id))
+            {
+                return;
+            }
+
+            using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.SetQuery("INSERT INTO `user_ignores` (`user_id`,`ignore_id`) VALUES(@uid,@ignoreId);");
+                dbClient.AddParameter("uid", session.GetHabbo().Id);
+                dbClient.AddParameter("ignoreId", player.Id);
+                dbClient.RunQuery();
+            }
+
+            session.SendPacket(new IgnoreStatusComposer(1, player.Username));
+
+            PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_SelfModIgnoreSeen", 1);
         }
     }
 }

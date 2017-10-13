@@ -4,9 +4,9 @@
 
     internal class GetCatalogModeEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var PageMode = Packet.PopString();
+            packet.PopString();
         }
     }
 }

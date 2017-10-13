@@ -116,7 +116,7 @@
             return new List<RoomUser>();
         }
 
-        public Point getRandomWalkableSquare()
+        internal Point GetRandomWalkableSquare()
         {
             var walkableSquares = new List<Point>();
             for (var y = 0; y < GameMap.GetUpperBound(1); y++)
@@ -130,11 +130,12 @@
                 }
             }
 
-            var RandomNumber = PlusEnvironment.GetRandomNumber(0, walkableSquares.Count);
+            var randomNumber = PlusEnvironment.GetRandomNumber(0, walkableSquares.Count);
             var i = 0;
+            
             foreach (var coord in walkableSquares.ToList())
             {
-                if (i == RandomNumber)
+                if (i == randomNumber)
                 {
                     return coord;
                 }
@@ -145,29 +146,7 @@
             return new Point(0, 0);
         }
 
-        public bool isInMap(int X, int Y)
-        {
-            var walkableSquares = new List<Point>();
-            for (var y = 0; y < GameMap.GetUpperBound(1); y++)
-            {
-                for (var x = 0; x < GameMap.GetUpperBound(0); x++)
-                {
-                    if (StaticModel.DoorX != x && StaticModel.DoorY != y && GameMap[x, y] == 1)
-                    {
-                        walkableSquares.Add(new Point(x, y));
-                    }
-                }
-            }
-
-            if (walkableSquares.Contains(new Point(X, Y)))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public void AddToMap(Item item)
+        internal void AddToMap(Item item)
         {
             AddItemToMap(item);
         }
@@ -191,16 +170,17 @@
             }
         }
 
-        public void updateMapForItem(Item item)
+        internal void UpdateMapForItem(Item item)
         {
             RemoveFromMap(item);
             AddToMap(item);
         }
 
-        public void GenerateMaps(bool checkLines = true)
+        internal void GenerateMaps(bool checkLines = true)
         {
-            var MaxX = 0;
-            var MaxY = 0;
+            var maxX = 0;
+            var maxY = 0;
+            
             mCoordinatedItems = new ConcurrentDictionary<Point, List<int>>();
             if (checkLines)
             {
@@ -212,36 +192,35 @@
                         continue;
                     }
 
-                    if (item.GetX > Model.MapSizeX && item.GetX > MaxX)
+                    if (item.GetX > Model.MapSizeX && item.GetX > maxX)
                     {
-                        MaxX = item.GetX;
+                        maxX = item.GetX;
                     }
-                    if (item.GetY > Model.MapSizeY && item.GetY > MaxY)
+                    if (item.GetY > Model.MapSizeY && item.GetY > maxY)
                     {
-                        MaxY = item.GetY;
+                        maxY = item.GetY;
                     }
                 }
 
                 Array.Clear(items, 0, items.Length);
-                items = null;
             }
 
-            if (MaxY > Model.MapSizeY - 1 || MaxX > Model.MapSizeX - 1)
+            if (maxY > Model.MapSizeY - 1 || maxX > Model.MapSizeX - 1)
             {
-                if (MaxX < Model.MapSizeX)
+                if (maxX < Model.MapSizeX)
                 {
-                    MaxX = Model.MapSizeX;
+                    maxX = Model.MapSizeX;
                 }
-                if (MaxY < Model.MapSizeY)
+                if (maxY < Model.MapSizeY)
                 {
-                    MaxY = Model.MapSizeY;
+                    maxY = Model.MapSizeY;
                 }
-                Model.SetMapsize(MaxX + 7, MaxY + 7);
+                Model.SetMapsize(maxX + 7, maxY + 7);
                 GenerateMaps(false);
                 return;
             }
 
-            if (MaxX != StaticModel.MapSizeX || MaxY != StaticModel.MapSizeY)
+            if (maxX != StaticModel.MapSizeX || maxY != StaticModel.MapSizeY)
             {
                 EffectMap = new byte[Model.MapSizeX, Model.MapSizeY];
                 GameMap = new byte[Model.MapSizeX, Model.MapSizeY];
@@ -349,18 +328,6 @@
                         }
                     }
                 }
-                /** COMENTADO YA QUE SALAS PUBLICAS NUEVA CRYPTO NO NECESARIO
-                 * foreach (PublicRoomSquare square in StaticModel.Furnis)
-                {
-                    if (square.Content.Contains("chair") || square.Content.Contains("sofa"))
-                    {
-                        mGameMap[square.X, square.Y] = 1;
-                    }
-                    else
-                    {
-                        mGameMap[square.X, square.Y] = 0;
-                    }
-                }*/
             }
 
             var tmpItems = _room.GetRoomItemHandler().GetFloor.ToArray();
@@ -429,19 +396,19 @@
                     EffectMap[Coord.X, Coord.Y] = 0;
                     switch (Item.GetBaseItem().InteractionType)
                     {
-                        case InteractionType.POOL:
+                        case InteractionType.Pool:
                             EffectMap[Coord.X, Coord.Y] = 1;
                             break;
-                        case InteractionType.NORMAL_SKATES:
+                        case InteractionType.NormalSkates:
                             EffectMap[Coord.X, Coord.Y] = 2;
                             break;
-                        case InteractionType.ICE_SKATES:
+                        case InteractionType.IceSkates:
                             EffectMap[Coord.X, Coord.Y] = 3;
                             break;
-                        case InteractionType.lowpool:
+                        case InteractionType.Lowpool:
                             EffectMap[Coord.X, Coord.Y] = 4;
                             break;
-                        case InteractionType.haloweenpool:
+                        case InteractionType.Haloweenpool:
                             EffectMap[Coord.X, Coord.Y] = 5;
                             break;
                     }
@@ -455,7 +422,7 @@
                         }
                     }
                     else if (Item.GetZ <= Model.SqFloorHeight[Item.GetX, Item.GetY] + 0.1 &&
-                             Item.GetBaseItem().InteractionType == InteractionType.GATE &&
+                             Item.GetBaseItem().InteractionType == InteractionType.Gate &&
                              Item.ExtraData == "1") // If this item is a gate, open, and on the floor, allow users to walk here.
                     {
                         if (GameMap[Coord.X, Coord.Y] != 3)
@@ -464,8 +431,8 @@
                         }
                     }
                     else if (Item.GetBaseItem().IsSeat ||
-                             Item.GetBaseItem().InteractionType == InteractionType.BED ||
-                             Item.GetBaseItem().InteractionType == InteractionType.TENT_SMALL)
+                             Item.GetBaseItem().InteractionType == InteractionType.Bed ||
+                             Item.GetBaseItem().InteractionType == InteractionType.TentSmall)
                     {
                         GameMap[Coord.X, Coord.Y] = 3;
                     }
@@ -479,8 +446,8 @@
                 }
 
                 // Set bad maps
-                if (Item.GetBaseItem().InteractionType == InteractionType.BED ||
-                    Item.GetBaseItem().InteractionType == InteractionType.TENT_SMALL)
+                if (Item.GetBaseItem().InteractionType == InteractionType.Bed ||
+                    Item.GetBaseItem().InteractionType == InteractionType.TentSmall)
                 {
                     GameMap[Coord.X, Coord.Y] = 3;
                 }
@@ -548,7 +515,7 @@
         {
             switch (item.GetBaseItem().InteractionType)
             {
-                case InteractionType.FOOTBALL_GATE:
+                case InteractionType.FootballGate:
 
                     //IsTrans = true;
                     _room.GetSoccer().RegisterGate(item);
@@ -556,7 +523,7 @@
                     if (string.IsNullOrEmpty(item.ExtraData) || splittedExtraData.Length <= 1)
                     {
                         item.Gender = "M";
-                        switch (item.team)
+                        switch (item.Team)
                         {
                             case TEAM.YELLOW:
                                 item.Figure = "lg-275-93.hr-115-61.hd-207-14.ch-265-93.sh-305-62";
@@ -579,43 +546,43 @@
                     }
 
                     break;
-                case InteractionType.banzaifloor:
+                case InteractionType.Banzaifloor:
                 {
                     _room.GetBanzai().AddTile(item, item.Id);
                     break;
                 }
-                case InteractionType.banzaipyramid:
+                case InteractionType.Banzaipyramid:
                 {
                     _room.GetGameItemHandler().AddPyramid(item, item.Id);
                     break;
                 }
-                case InteractionType.banzaitele:
+                case InteractionType.Banzaitele:
                 {
                     _room.GetGameItemHandler().AddTeleport(item, item.Id);
                     item.ExtraData = "";
                     break;
                 }
-                case InteractionType.banzaipuck:
+                case InteractionType.Banzaipuck:
                 {
                     _room.GetBanzai().AddPuck(item);
                     break;
                 }
-                case InteractionType.FOOTBALL:
+                case InteractionType.Football:
                 {
                     _room.GetSoccer().AddBall(item);
                     break;
                 }
-                case InteractionType.FREEZE_TILE_BLOCK:
+                case InteractionType.FreezeTileBlock:
                 {
                     _room.GetFreeze().AddFreezeBlock(item);
                     break;
                 }
-                case InteractionType.FREEZE_TILE:
+                case InteractionType.FreezeTile:
                 {
                     _room.GetFreeze().AddFreezeTile(item);
                     break;
                 }
-                case InteractionType.freezeexit:
+                case InteractionType.Freezeexit:
                 {
                     _room.GetFreeze().AddExitTile(item);
                     break;
@@ -627,31 +594,31 @@
         {
             switch (item.GetBaseItem().InteractionType)
             {
-                case InteractionType.FOOTBALL_GATE:
+                case InteractionType.FootballGate:
                     _room.GetSoccer().UnRegisterGate(item);
                     break;
-                case InteractionType.banzaifloor:
+                case InteractionType.Banzaifloor:
                     _room.GetBanzai().RemoveTile(item.Id);
                     break;
-                case InteractionType.banzaipuck:
+                case InteractionType.Banzaipuck:
                     _room.GetBanzai().RemovePuck(item.Id);
                     break;
-                case InteractionType.banzaipyramid:
+                case InteractionType.Banzaipyramid:
                     _room.GetGameItemHandler().RemovePyramid(item.Id);
                     break;
-                case InteractionType.banzaitele:
+                case InteractionType.Banzaitele:
                     _room.GetGameItemHandler().RemoveTeleport(item.Id);
                     break;
-                case InteractionType.FOOTBALL:
+                case InteractionType.Football:
                     _room.GetSoccer().RemoveBall(item.Id);
                     break;
-                case InteractionType.FREEZE_TILE:
+                case InteractionType.FreezeTile:
                     _room.GetFreeze().RemoveFreezeTile(item.Id);
                     break;
-                case InteractionType.FREEZE_TILE_BLOCK:
+                case InteractionType.FreezeTileBlock:
                     _room.GetFreeze().RemoveFreezeBlock(item.Id);
                     break;
-                case InteractionType.freezeexit:
+                case InteractionType.Freezeexit:
                     _room.GetFreeze().RemoveExitTile(item.Id);
                     break;
             }
@@ -665,7 +632,7 @@
             }
             if (_room.GotSoccer())
             {
-                _room.GetSoccer().onGateRemove(item);
+                _room.GetSoccer().OnGateRemove(item);
             }
             var isRemoved = false;
             foreach (var coord in item.GetCoords.ToList())
@@ -719,12 +686,12 @@
                 AddSpecialItems(Item);
                 switch (Item.GetBaseItem().InteractionType)
                 {
-                    case InteractionType.FOOTBALL_GOAL_RED:
-                    case InteractionType.footballcounterred:
-                    case InteractionType.banzaiscorered:
-                    case InteractionType.banzaigatered:
-                    case InteractionType.freezeredcounter:
-                    case InteractionType.FREEZE_RED_GATE:
+                    case InteractionType.FootballGoalRed:
+                    case InteractionType.Footballcounterred:
+                    case InteractionType.Banzaiscorered:
+                    case InteractionType.Banzaigatered:
+                    case InteractionType.Freezeredcounter:
+                    case InteractionType.FreezeRedGate:
                     {
                         if (!_room.GetRoomItemHandler().GetFloor.Contains(Item))
                         {
@@ -732,12 +699,12 @@
                         }
                         break;
                     }
-                    case InteractionType.FOOTBALL_GOAL_GREEN:
-                    case InteractionType.footballcountergreen:
-                    case InteractionType.banzaiscoregreen:
-                    case InteractionType.banzaigategreen:
-                    case InteractionType.freezegreencounter:
-                    case InteractionType.FREEZE_GREEN_GATE:
+                    case InteractionType.FootballGoalGreen:
+                    case InteractionType.Footballcountergreen:
+                    case InteractionType.Banzaiscoregreen:
+                    case InteractionType.Banzaigategreen:
+                    case InteractionType.Freezegreencounter:
+                    case InteractionType.FreezeGreenGate:
                     {
                         if (!_room.GetRoomItemHandler().GetFloor.Contains(Item))
                         {
@@ -745,12 +712,12 @@
                         }
                         break;
                     }
-                    case InteractionType.FOOTBALL_GOAL_BLUE:
-                    case InteractionType.footballcounterblue:
-                    case InteractionType.banzaiscoreblue:
-                    case InteractionType.banzaigateblue:
-                    case InteractionType.freezebluecounter:
-                    case InteractionType.FREEZE_BLUE_GATE:
+                    case InteractionType.FootballGoalBlue:
+                    case InteractionType.Footballcounterblue:
+                    case InteractionType.Banzaiscoreblue:
+                    case InteractionType.Banzaigateblue:
+                    case InteractionType.Freezebluecounter:
+                    case InteractionType.FreezeBlueGate:
                     {
                         if (!_room.GetRoomItemHandler().GetFloor.Contains(Item))
                         {
@@ -758,12 +725,12 @@
                         }
                         break;
                     }
-                    case InteractionType.FOOTBALL_GOAL_YELLOW:
-                    case InteractionType.footballcounteryellow:
-                    case InteractionType.banzaiscoreyellow:
-                    case InteractionType.banzaigateyellow:
-                    case InteractionType.freezeyellowcounter:
-                    case InteractionType.FREEZE_YELLOW_GATE:
+                    case InteractionType.FootballGoalYellow:
+                    case InteractionType.Footballcounteryellow:
+                    case InteractionType.Banzaiscoreyellow:
+                    case InteractionType.Banzaigateyellow:
+                    case InteractionType.Freezeyellowcounter:
+                    case InteractionType.FreezeYellowGate:
                     {
                         if (!_room.GetRoomItemHandler().GetFloor.Contains(Item))
                         {
@@ -771,12 +738,12 @@
                         }
                         break;
                     }
-                    case InteractionType.freezeexit:
+                    case InteractionType.Freezeexit:
                     {
                         _room.GetFreeze().AddExitTile(Item);
                         break;
                     }
-                    case InteractionType.ROLLER:
+                    case InteractionType.Roller:
                     {
                         if (!_room.GetRoomItemHandler().GetRollers().Contains(Item))
                         {
@@ -921,7 +888,7 @@
             var Items = GetAllRoomItemForSquare(Square.X, Square.Y);
             Item = null;
             double HighestZ = -1;
-            if (Items != null && Items.Count() > 0)
+            if (Items != null && Items.Count > 0)
             {
                 foreach (var uItem in Items.ToList())
                 {
@@ -1062,10 +1029,10 @@
             var Items = _room.GetGameMap().GetAllRoomItemForSquare(To.X, To.Y);
             if (Items.Count > 0)
             {
-                var HasGroupGate = Items.ToList().Count(x => x.GetBaseItem().InteractionType == InteractionType.GUILD_GATE) > 0;
+                var HasGroupGate = Items.Count(x => x.GetBaseItem().InteractionType == InteractionType.GuildGate) > 0;
                 if (HasGroupGate)
                 {
-                    var I = Items.FirstOrDefault(x => x.GetBaseItem().InteractionType == InteractionType.GUILD_GATE);
+                    var I = Items.FirstOrDefault(x => x.GetBaseItem().InteractionType == InteractionType.GuildGate);
                     if (I != null)
                     {
                         Group Group = null;
@@ -1133,21 +1100,18 @@
             {
                 return false;
             }
+            
+            var userx = _room.GetRoomUserManager().GetUserForSquare(To.X, To.Y);
 
-            //Check this last, because ya.
-            var Userx = _room.GetRoomUserManager().GetUserForSquare(To.X, To.Y);
-            if (Userx != null)
+            if (userx == null)
             {
-                if (!Userx.IsWalking && EndOfPath)
-                {
-                    return false;
-                }
+                return true;
             }
 
-            return true;
+            return userx.IsWalking || !EndOfPath;
         }
 
-        public bool IsValidStep(Vector2D From, Vector2D To, bool EndOfPath, bool Override, bool Roller = false)
+        internal bool IsValidStep(Vector2D @from, Vector2D To, bool endOfPath, bool Override, bool roller = false)
         {
             if (!ValidTile(To.X, To.Y))
             {
@@ -1157,66 +1121,55 @@
             {
                 return true;
             }
-            /*
-             * 0 = blocked
-             * 1 = open
-             * 2 = last step
-             * 3 = door
-             * */
+            
             if (_room.RoomBlockingEnabled == 0 && SquareHasUsers(To.X, To.Y))
             {
                 return false;
             }
 
-            var Items = _room.GetGameMap().GetAllRoomItemForSquare(To.X, To.Y);
-            if (Items.Count > 0)
+            var items = _room.GetGameMap().GetAllRoomItemForSquare(To.X, To.Y);
+
+            if (items.Count > 0)
             {
-                var HasGroupGate = Items.ToList()
-                                       .Count(x => x != null && x.GetBaseItem().InteractionType == InteractionType.GUILD_GATE) >
-                                   0;
-                if (HasGroupGate)
+                var hasGroupGate = items.Count(x => x != null && x.GetBaseItem().InteractionType == InteractionType.GuildGate) > 0;
+
+                if (hasGroupGate)
                 {
                     return true;
                 }
             }
 
-            if (GameMap[To.X, To.Y] == 3 && !EndOfPath || GameMap[To.X, To.Y] == 0 || GameMap[To.X, To.Y] == 2 && !EndOfPath)
+            if (GameMap[To.X, To.Y] == 3 && !endOfPath || GameMap[To.X, To.Y] == 0 || GameMap[To.X, To.Y] == 2 && !endOfPath)
             {
                 return false;
             }
 
-            if (!Roller)
+            if (roller)
             {
-                var HeightDiff = SqAbsoluteHeight(To.X, To.Y) - SqAbsoluteHeight(From.X, From.Y);
-                if (HeightDiff > 1.5)
-                {
-                    return false;
-                }
+                return true;
             }
 
-            return true;
+            var heightDiff = SqAbsoluteHeight(To.X, To.Y) - SqAbsoluteHeight(@from.X, @from.Y);
+            
+            return !(heightDiff > 1.5);
         }
 
-        public static bool CanWalk(byte pState, bool pOverride)
+        private static bool CanWalk(byte pState, bool pOverride)
         {
-            if (!pOverride)
+            if (pOverride)
             {
-                if (pState == 3)
-                {
-                    return true;
-                }
-                if (pState == 1)
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
 
-            return true;
+            if (pState == 3)
+            {
+                return true;
+            }
+            
+            return pState == 1;
         }
 
-        public bool itemCanBePlacedHere(int x, int y)
+        internal bool ItemCanBePlacedHere(int x, int y)
         {
             if (Model.MapSizeX - 1 < x || Model.MapSizeY - 1 < y || x == Model.DoorX && y == Model.DoorY)
             {
@@ -1226,66 +1179,56 @@
             return GameMap[x, y] == 1;
         }
 
-        public double SqAbsoluteHeight(int X, int Y)
+        internal double SqAbsoluteHeight(int X, int Y)
         {
             var Points = new Point(X, Y);
-            List<int> Ids;
-            if (mCoordinatedItems.TryGetValue(Points, out Ids))
+
+            if (!mCoordinatedItems.TryGetValue(Points, out var ids))
             {
-                var Items = GetItemsFromIds(Ids);
-                return SqAbsoluteHeight(X, Y, Items);
+                return Model.SqFloorHeight[X, Y];
             }
 
-            return Model.SqFloorHeight[X, Y];
-            /*
-            if (mCoordinatedItems.ContainsKey(Points))
-            {
-                List<Item> Items = new List<Item>();
-                foreach (Item Item in mCoordinatedItems[Points].ToArray())
-                {
-                    if (!Items.Contains(Item))
-                        Items.Add(Item);
-                }
-                return SqAbsoluteHeight(X, Y, Items);
-            }*/
+            var items = GetItemsFromIds(ids);
+            
+            return SqAbsoluteHeight(X, Y, items);
         }
 
-        public double SqAbsoluteHeight(int X, int Y, List<Item> ItemsOnSquare)
+        internal double SqAbsoluteHeight(int X, int Y, List<Item> itemsOnSquare)
         {
             try
             {
                 var deduct = false;
-                double HighestStack = 0;
+                double highestStack = 0;
                 var deductable = 0.0;
-                if (ItemsOnSquare != null && ItemsOnSquare.Count > 0)
+                
+                if (itemsOnSquare != null && itemsOnSquare.Count > 0)
                 {
-                    foreach (var Item in ItemsOnSquare.ToList())
+                    foreach (var item in itemsOnSquare.ToList())
                     {
-                        if (Item == null)
+                        if (!(item?.TotalHeight > highestStack))
                         {
                             continue;
                         }
 
-                        if (Item.TotalHeight > HighestStack)
+                        if (item.GetBaseItem().IsSeat ||
+                            item.GetBaseItem().InteractionType == InteractionType.Bed ||
+                            item.GetBaseItem().InteractionType == InteractionType.TentSmall)
                         {
-                            if (Item.GetBaseItem().IsSeat ||
-                                Item.GetBaseItem().InteractionType == InteractionType.BED ||
-                                Item.GetBaseItem().InteractionType == InteractionType.TENT_SMALL)
-                            {
-                                deduct = true;
-                                deductable = Item.GetBaseItem().Height;
-                            }
-                            else
-                            {
-                                deduct = false;
-                            }
-                            HighestStack = Item.TotalHeight;
+                            deduct = true;
+                            deductable = item.GetBaseItem().Height;
                         }
+                        else
+                        {
+                            deduct = false;
+                        }
+                        
+                        highestStack = item.TotalHeight;
                     }
                 }
 
                 double floorHeight = Model.SqFloorHeight[X, Y];
-                var stackHeight = HighestStack - Model.SqFloorHeight[X, Y];
+                var stackHeight = highestStack - Model.SqFloorHeight[X, Y];
+                
                 if (deduct)
                 {
                     stackHeight -= deductable;
@@ -1313,31 +1256,32 @@
             return true;
         }
 
-        public static Dictionary<int, ThreeDCoord> GetAffectedTiles(int Length, int Width, int PosX, int PosY, int Rotation)
+        internal static Dictionary<int, ThreeDCoord> GetAffectedTiles(int Length, int Width, int PosX, int posY, int rotation)
         {
             var x = 0;
-            var PointList = new Dictionary<int, ThreeDCoord>();
+            var pointList = new Dictionary<int, ThreeDCoord>();
+            
             if (Length > 1)
             {
-                if (Rotation == 0 || Rotation == 4)
+                if (rotation == 0 || rotation == 4)
                 {
                     for (var i = 1; i < Length; i++)
                     {
-                        PointList.Add(x++, new ThreeDCoord(PosX, PosY + i, i));
+                        pointList.Add(x++, new ThreeDCoord(PosX, posY + i, i));
                         for (var j = 1; j < Width; j++)
                         {
-                            PointList.Add(x++, new ThreeDCoord(PosX + j, PosY + i, i < j ? j : i));
+                            pointList.Add(x++, new ThreeDCoord(PosX + j, posY + i, i < j ? j : i));
                         }
                     }
                 }
-                else if (Rotation == 2 || Rotation == 6)
+                else if (rotation == 2 || rotation == 6)
                 {
                     for (var i = 1; i < Length; i++)
                     {
-                        PointList.Add(x++, new ThreeDCoord(PosX + i, PosY, i));
+                        pointList.Add(x++, new ThreeDCoord(PosX + i, posY, i));
                         for (var j = 1; j < Width; j++)
                         {
-                            PointList.Add(x++, new ThreeDCoord(PosX + i, PosY + j, i < j ? j : i));
+                            pointList.Add(x++, new ThreeDCoord(PosX + i, posY + j, i < j ? j : i));
                         }
                     }
                 }
@@ -1345,54 +1289,55 @@
 
             if (Width > 1)
             {
-                if (Rotation == 0 || Rotation == 4)
+                if (rotation == 0 || rotation == 4)
                 {
                     for (var i = 1; i < Width; i++)
                     {
-                        PointList.Add(x++, new ThreeDCoord(PosX + i, PosY, i));
+                        pointList.Add(x++, new ThreeDCoord(PosX + i, posY, i));
                         for (var j = 1; j < Length; j++)
                         {
-                            PointList.Add(x++, new ThreeDCoord(PosX + i, PosY + j, i < j ? j : i));
+                            pointList.Add(x++, new ThreeDCoord(PosX + i, posY + j, i < j ? j : i));
                         }
                     }
                 }
-                else if (Rotation == 2 || Rotation == 6)
+                else if (rotation == 2 || rotation == 6)
                 {
                     for (var i = 1; i < Width; i++)
                     {
-                        PointList.Add(x++, new ThreeDCoord(PosX, PosY + i, i));
+                        pointList.Add(x++, new ThreeDCoord(PosX, posY + i, i));
                         for (var j = 1; j < Length; j++)
                         {
-                            PointList.Add(x++, new ThreeDCoord(PosX + j, PosY + i, i < j ? j : i));
+                            pointList.Add(x++, new ThreeDCoord(PosX + j, posY + i, i < j ? j : i));
                         }
                     }
                 }
             }
 
-            return PointList;
+            return pointList;
         }
 
-        public List<Item> GetItemsFromIds(List<int> Input)
+        public List<Item> GetItemsFromIds(List<int> input)
         {
-            if (Input == null || Input.Count == 0)
+            if (input == null || input.Count == 0)
             {
                 return new List<Item>();
             }
 
-            var Items = new List<Item>();
-            lock (Input)
+            var items = new List<Item>();
+            
+            lock (input)
             {
-                foreach (var Id in Input.ToList())
+                foreach (var Id in input.ToList())
                 {
                     var Itm = _room.GetRoomItemHandler().GetItem(Id);
-                    if (Itm != null && !Items.Contains(Itm))
+                    if (Itm != null && !items.Contains(Itm))
                     {
-                        Items.Add(Itm);
+                        items.Add(Itm);
                     }
                 }
             }
 
-            return Items.ToList();
+            return items.ToList();
         }
 
         public List<Item> GetRoomItemForSquare(int pX, int pY, double minZ)
@@ -1440,20 +1385,10 @@
 
         public List<Item> GetAllRoomItemForSquare(int pX, int pY)
         {
-            var Coord = new Point(pX, pY);
-            var Items = new List<Item>();
-            List<int> Ids;
-
-            // CHANGED THIS ~  IF FAILED CHANGE BACK
-            if (mCoordinatedItems.TryGetValue(Coord, out Ids))
-            {
-                Items = GetItemsFromIds(Ids);
-            }
-            else
-            {
-                Items = new List<Item>();
-            }
-            return Items;
+            var coord = new Point(pX, pY);
+            var items = mCoordinatedItems.TryGetValue(coord, out var ids) ? GetItemsFromIds(ids) : new List<Item>();
+            
+            return items;
         }
 
         public bool SquareHasUsers(int X, int Y) => MapGotUser(new Point(X, Y));
@@ -1464,12 +1399,8 @@
             {
                 return true;
             }
-            if (X1 == X2 && Y1 == Y2)
-            {
-                return true;
-            }
-
-            return false;
+            
+            return X1 == X2 && Y1 == Y2;
         }
 
         public static int TileDistance(int X1, int Y1, int X2, int Y2) => Math.Abs(X1 - X2) + Math.Abs(Y1 - Y2);

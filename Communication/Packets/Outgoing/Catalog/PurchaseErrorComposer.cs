@@ -2,9 +2,10 @@
 {
     internal class PurchaseErrorComposer : ServerPacket
     {
-        public PurchaseErrorComposer(int ErrorCode) : base(ServerPacketHeader.PurchaseErrorMessageComposer)
+        public PurchaseErrorComposer(int errorCode)
+            : base(ServerPacketHeader.PurchaseErrorMessageComposer)
         {
-            WriteInteger(ErrorCode);
+            WriteInteger(errorCode);
         }
     }
 }

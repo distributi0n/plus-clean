@@ -7,12 +7,12 @@
         public ModerationBanType Type;
         public string Value;
 
-        public ModerationBan(ModerationBanType Type, string Value, string Reason, double Expire)
+        public ModerationBan(ModerationBanType type, string value, string reason, double expire)
         {
-            this.Type = Type;
-            this.Value = Value;
-            this.Reason = Reason;
-            this.Expire = Expire;
+            Type = type;
+            Value = value;
+            Reason = reason;
+            Expire = expire;
         }
 
         public bool Expired

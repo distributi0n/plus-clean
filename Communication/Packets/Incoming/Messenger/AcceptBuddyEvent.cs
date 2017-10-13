@@ -1,46 +1,46 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Messenger
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Users.Messenger;
 
-    internal sealed class AcceptBuddyEvent : IPacketEvent
+    internal class AcceptBuddyEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || Session.GetHabbo().GetMessenger() == null)
+            if (session?.GetHabbo() == null || session.GetHabbo().GetMessenger() == null)
             {
                 return;
             }
 
-            var Amount = Packet.PopInt();
-            if (Amount > 50)
+            var amount = packet.PopInt();
+            if (amount > 50)
             {
-                Amount = 50;
+                amount = 50;
             }
-            else if (Amount < 0)
+            else if (amount < 0)
             {
                 return;
             }
 
-            for (var i = 0; i < Amount; i++)
+            for (var i = 0; i < amount; i++)
             {
-                var RequestId = Packet.PopInt();
-                MessengerRequest Request = null;
-                if (!Session.GetHabbo().GetMessenger().TryGetRequest(RequestId, out Request))
+                var requestId = packet.PopInt();
+
+                if (!session.GetHabbo().GetMessenger().TryGetRequest(requestId, out var request))
                 {
                     continue;
                 }
 
-                if (Request.To != Session.GetHabbo().Id)
+                if (request.To != session.GetHabbo().Id)
                 {
                     return;
                 }
 
-                if (!Session.GetHabbo().GetMessenger().FriendshipExists(Request.To))
+                if (!session.GetHabbo().GetMessenger().FriendshipExists(request.To))
                 {
-                    Session.GetHabbo().GetMessenger().CreateFriendship(Request.From);
+                    session.GetHabbo().GetMessenger().CreateFriendship(request.From);
                 }
-                Session.GetHabbo().GetMessenger().HandleRequest(RequestId);
+
+                session.GetHabbo().GetMessenger().HandleRequest(requestId);
             }
         }
     }

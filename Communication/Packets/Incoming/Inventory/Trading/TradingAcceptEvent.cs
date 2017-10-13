@@ -1,50 +1,48 @@
 ﻿namespace Plus.Communication.Packets.Incoming.Inventory.Trading
 {
     using HabboHotel.GameClients;
-    using HabboHotel.Rooms.Trading;
     using Outgoing.Inventory.Trading;
 
-    internal sealed class TradingAcceptEvent : IPacketEvent
+    internal class TradingAcceptEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+
+            var roomUser = room?.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (roomUser == null)
             {
                 return;
             }
 
-            var RoomUser = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (RoomUser == null)
+            if (!room.GetTrading().TryGetTrade(roomUser.TradeId, out var trade))
+            {
+                session.SendPacket(new TradingClosedComposer(session.GetHabbo().Id));
+                return;
+            }
+
+            var tradeUser = trade.Users[0];
+            if (tradeUser.RoomUser != roomUser)
+            {
+                tradeUser = trade.Users[1];
+            }
+
+            tradeUser.HasAccepted = true;
+            trade.SendPacket(new TradingAcceptComposer(session.GetHabbo().Id, true));
+
+            if (!trade.AllAccepted)
             {
                 return;
             }
 
-            Trade Trade = null;
-            if (!Room.GetTrading().TryGetTrade(RoomUser.TradeId, out Trade))
-            {
-                Session.SendPacket(new TradingClosedComposer(Session.GetHabbo().Id));
-                return;
-            }
-
-            var TradeUser = Trade.Users[0];
-            if (TradeUser.RoomUser != RoomUser)
-            {
-                TradeUser = Trade.Users[1];
-            }
-            TradeUser.HasAccepted = true;
-            Trade.SendPacket(new TradingAcceptComposer(Session.GetHabbo().Id, true));
-            if (Trade.AllAccepted)
-            {
-                Trade.SendPacket(new TradingCompleteComposer());
-                Trade.CanChange = false;
-                Trade.RemoveAccepted();
-            }
+            trade.SendPacket(new TradingCompleteComposer());
+            trade.CanChange = false;
+            trade.RemoveAccepted();
         }
     }
 }

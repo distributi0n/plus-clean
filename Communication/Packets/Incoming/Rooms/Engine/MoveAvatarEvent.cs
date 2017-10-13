@@ -4,45 +4,48 @@
 
     internal class MoveAvatarEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null)
-            {
-                return;
-            }
-            if (!Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var User = Room.GetRoomUserManager().GetRoomUserByHabbo(Session.GetHabbo().Id);
-            if (User == null || !User.CanWalk)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var MoveX = Packet.PopInt();
-            var MoveY = Packet.PopInt();
-            if (MoveX == User.X && MoveY == User.Y)
+            var user = room.GetRoomUserManager().GetRoomUserByHabbo(session.GetHabbo().Id);
+            if (user == null || !user.CanWalk)
             {
                 return;
             }
 
-            if (User.RidingHorse)
+            var moveX = packet.PopInt();
+            var moveY = packet.PopInt();
+
+            if (moveX == user.X && moveY == user.Y)
             {
-                var Horse = Room.GetRoomUserManager().GetRoomUserByVirtualId(User.HorseID);
-                if (Horse != null)
+                return;
+            }
+
+            if (user.RidingHorse)
+            {
+                var horse = room.GetRoomUserManager().GetRoomUserByVirtualId(user.HorseID);
+                if (horse != null)
                 {
-                    Horse.MoveTo(MoveX, MoveY);
+                    horse.MoveTo(moveX, moveY);
                 }
             }
-            User.MoveTo(MoveX, MoveY);
+
+            user.MoveTo(moveX, moveY);
         }
     }
 }

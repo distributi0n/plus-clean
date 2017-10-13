@@ -7,10 +7,10 @@
 
     internal class BotGivesHandItemBox : IWiredItem
     {
-        public BotGivesHandItemBox(Room Instance, Item Item)
+        public BotGivesHandItemBox(Room instance, Item item)
         {
-            this.Instance = Instance;
-            this.Item = Item;
+            Instance = instance;
+            Item = item;
             SetItems = new ConcurrentDictionary<int, Item>();
         }
 
@@ -22,16 +22,16 @@
         public bool BoolData { get; set; }
         public string ItemsData { get; set; }
 
-        public void HandleSave(ClientPacket Packet)
+        public void HandleSave(ClientPacket packet)
         {
-            var Unknown = Packet.PopInt();
-            var DrinkID = Packet.PopInt();
-            var BotName = Packet.PopString();
+            var unknown = packet.PopInt();
+            var drinkId = packet.PopInt();
+            var botName = packet.PopString();
             if (SetItems.Count > 0)
             {
                 SetItems.Clear();
             }
-            StringData = BotName + ";" + DrinkID;
+            StringData = botName + ";" + drinkId;
         }
 
         public bool Execute(params object[] Params)
@@ -45,41 +45,41 @@
                 return false;
             }
 
-            var Player = (Habbo) Params[0];
-            if (Player == null)
+            var player = (Habbo) Params[0];
+            if (player == null)
             {
                 return false;
             }
 
-            var Actor = Instance.GetRoomUserManager().GetRoomUserByHabbo(Player.Id);
-            if (Actor == null)
+            var actor = Instance.GetRoomUserManager().GetRoomUserByHabbo(player.Id);
+            if (actor == null)
             {
                 return false;
             }
 
-            var User = Instance.GetRoomUserManager().GetBotByName(StringData.Split(';')[0]);
-            if (User == null)
+            var user = Instance.GetRoomUserManager().GetBotByName(StringData.Split(';')[0]);
+            if (user == null)
             {
                 return false;
             }
 
-            if (User.BotData.TargetUser == 0)
+            if (user.BotData.TargetUser == 0)
             {
-                if (!Instance.GetGameMap().CanWalk(Actor.SquareBehind.X, Actor.SquareBehind.Y, false))
+                if (!Instance.GetGameMap().CanWalk(actor.SquareBehind.X, actor.SquareBehind.Y, false))
                 {
                     return false;
                 }
 
-                var Data = StringData.Split(';');
-                int DrinkId;
-                if (!int.TryParse(Data[1], out DrinkId))
+                var data = StringData.Split(';');
+                int drinkId;
+                if (!int.TryParse(data[1], out drinkId))
                 {
                     return false;
                 }
 
-                User.CarryItem(DrinkId);
-                User.BotData.TargetUser = Actor.HabboId;
-                User.MoveTo(Actor.SquareBehind.X, Actor.SquareBehind.Y);
+                user.CarryItem(drinkId);
+                user.BotData.TargetUser = actor.HabboId;
+                user.MoveTo(actor.SquareBehind.X, actor.SquareBehind.Y);
             }
 
             return true;

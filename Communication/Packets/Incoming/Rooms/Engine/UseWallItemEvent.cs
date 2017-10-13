@@ -7,37 +7,36 @@
 
     internal class UseWallItemEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session == null || session.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            Room Room;
-            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(Session.GetHabbo().CurrentRoomId, out Room))
+            Room room;
+
+            if (!PlusEnvironment.GetGame().GetRoomManager().TryGetRoom(session.GetHabbo().CurrentRoomId, out room))
             {
                 return;
             }
 
-            var itemID = Packet.PopInt();
-            var Item = Room.GetRoomItemHandler().GetItem(itemID);
-            if (Item == null)
+            var itemId = packet.PopInt();
+            var item = room.GetRoomItemHandler().GetItem(itemId);
+            if (item == null)
             {
                 return;
             }
 
-            var hasRights = false;
-            if (Room.CheckRights(Session, false, true))
-            {
-                hasRights = true;
-            }
-            var oldData = Item.ExtraData;
-            var request = Packet.PopInt();
-            Item.Interactor.OnTrigger(Session, Item, request, hasRights);
-            Item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, Session.GetHabbo(), Item);
-            PlusEnvironment.GetGame().GetQuestManager()
-                .ProgressUserQuest(Session, QuestType.EXPLORE_FIND_ITEM, Item.GetBaseItem().Id);
+            var hasRights = room.CheckRights(session, false, true);
+
+            var oldData = item.ExtraData;
+            var request = packet.PopInt();
+
+            item.Interactor.OnTrigger(session, item, request, hasRights);
+            item.GetRoom().GetWired().TriggerEvent(WiredBoxType.TriggerStateChanges, session.GetHabbo(), item);
+
+            PlusEnvironment.GetGame().GetQuestManager().ProgressUserQuest(session, QuestType.ExploreFindItem, item.GetBaseItem().Id);
         }
     }
 }

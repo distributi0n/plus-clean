@@ -5,34 +5,40 @@
 
     internal class ItemsComposer : ServerPacket
     {
-        public ItemsComposer(Item[] Objects, Room Room) : base(ServerPacketHeader.ItemsMessageComposer)
+        public ItemsComposer(Item[] objects, Room room)
+            : base(ServerPacketHeader.ItemsMessageComposer)
         {
             WriteInteger(1);
-            WriteInteger(Room.OwnerId);
-            WriteString(Room.OwnerName);
-            WriteInteger(Objects.Length);
-            foreach (var Item in Objects)
+            WriteInteger(room.OwnerId);
+            WriteString(room.OwnerName);
+
+            WriteInteger(objects.Length);
+
+            foreach (var item in objects)
             {
-                WriteWallItem(Item, Room.OwnerId);
+                WriteWallItem(item, room.OwnerId);
             }
         }
 
-        private void WriteWallItem(Item Item, int UserId)
+        private void WriteWallItem(Item item, int userId)
         {
-            WriteString(Item.Id.ToString());
-            WriteInteger(Item.Data.SpriteId);
+            WriteString(item.Id.ToString());
+            WriteInteger(item.Data.SpriteId);
+
             try
             {
-                WriteString(Item.wallCoord);
+                WriteString(item.WallCoord);
             }
             catch
             {
                 WriteString("");
             }
-            ItemBehaviourUtility.GenerateWallExtradata(Item, this);
+
+            ItemBehaviourUtility.GenerateWallExtradata(item, this);
+
             WriteInteger(-1);
-            WriteInteger(Item.Data.Modes > 1 ? 1 : 0);
-            WriteInteger(UserId);
+            WriteInteger(item.Data.Modes > 1 ? 1 : 0);
+            WriteInteger(userId);
         }
     }
 }

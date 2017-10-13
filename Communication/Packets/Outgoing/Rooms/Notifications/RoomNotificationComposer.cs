@@ -2,40 +2,43 @@
 {
     internal class RoomNotificationComposer : ServerPacket
     {
-        public RoomNotificationComposer(string Type, string Key, string Value) : base(ServerPacketHeader
-            .RoomNotificationMessageComposer)
+        public RoomNotificationComposer(string type, string key, string value)
+            : base(ServerPacketHeader.RoomNotificationMessageComposer)
         {
-            WriteString(Type);
+            WriteString(type);
             WriteInteger(1); //Count
             {
-                WriteString(Key); //Type of message
-                WriteString(Value);
+                WriteString(key); //Type of message
+                WriteString(value);
             }
         }
 
-        public RoomNotificationComposer(string Type) : base(ServerPacketHeader.RoomNotificationMessageComposer)
+        public RoomNotificationComposer(string type)
+            : base(ServerPacketHeader.RoomNotificationMessageComposer)
         {
-            WriteString(Type);
+            WriteString(type);
             WriteInteger(0); //Count
         }
 
-        public RoomNotificationComposer(string Title, string Message, string Image, string HotelName = "",
-            string HotelURL = "") : base(
-            ServerPacketHeader.RoomNotificationMessageComposer)
+        public RoomNotificationComposer(string title, string message, string image, string hotelName = "", string hotelUrl = "")
+            : base(ServerPacketHeader.RoomNotificationMessageComposer)
         {
-            WriteString(Image);
-            WriteInteger(string.IsNullOrEmpty(HotelName) ? 2 : 4);
+            WriteString(image);
+            WriteInteger(string.IsNullOrEmpty(hotelName) ? 2 : 4);
             WriteString("title");
-            WriteString(Title);
+            WriteString(title);
             WriteString("message");
-            WriteString(Message);
-            if (!string.IsNullOrEmpty(HotelName))
+            WriteString(message);
+
+            if (string.IsNullOrEmpty(hotelName))
             {
-                WriteString("linkUrl");
-                WriteString(HotelURL);
-                WriteString("linkTitle");
-                WriteString(HotelName);
+                return;
             }
+
+            WriteString("linkUrl");
+            WriteString(hotelUrl);
+            WriteString("linkTitle");
+            WriteString(hotelName);
         }
     }
 }

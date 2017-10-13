@@ -18,40 +18,38 @@
     using Outgoing.Inventory.Purse;
     using Outgoing.Moderation;
 
-    public sealed class PurchaseFromCatalogEvent : IPacketEvent
+    internal class PurchaseFromCatalogEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
             if (PlusEnvironment.GetSettingsManager().TryGetValue("catalog.enabled") != "1")
             {
-                Session.SendNotification("The hotel managers have disabled the catalogue");
+                session.SendNotification("The hotel managers have disabled the catalogue");
                 return;
             }
 
-            var PageId = Packet.PopInt();
-            var ItemId = Packet.PopInt();
-            var ExtraData = Packet.PopString();
-            var Amount = Packet.PopInt();
-            CatalogPage Page = null;
-            if (!PlusEnvironment.GetGame().GetCatalog().TryGetPage(PageId, out Page))
-            {
-                return;
-            }
-            if (!Page.Enabled ||
-                !Page.Visible ||
-                Page.MinimumRank > Session.GetHabbo().Rank ||
-                Page.MinimumVIP > Session.GetHabbo().VIPRank && Session.GetHabbo().Rank == 1)
+            var pageId = packet.PopInt();
+            var itemId = packet.PopInt();
+            var extraData = packet.PopString();
+            var amount = packet.PopInt();
+
+            CatalogPage page;
+            if (!PlusEnvironment.GetGame().GetCatalog().TryGetPage(pageId, out page))
             {
                 return;
             }
 
-            CatalogItem Item = null;
-            if (!Page.Items.TryGetValue(ItemId, out Item))
+            if (!page.Enabled || !page.Visible || page.MinimumRank > session.GetHabbo().Rank || page.MinimumRank > session.GetHabbo().VipRank && session.GetHabbo().Rank == 1)
             {
-                if (Page.ItemOffers.ContainsKey(ItemId))
+                return;
+            }
+
+            if (!page.Items.TryGetValue(itemId, out var item))
+            {
+                if (page.ItemOffers.ContainsKey(itemId))
                 {
-                    Item = Page.ItemOffers[ItemId];
-                    if (Item == null)
+                    item = page.ItemOffers[itemId];
+                    if (item == null)
                     {
                         return;
                     }
@@ -62,60 +60,63 @@
                 }
             }
 
-            if (Amount < 1 || Amount > 100 || !Item.HaveOffer)
+            if (amount < 1 || amount > 100 || !item.HaveOffer)
             {
-                Amount = 1;
+                amount = 1;
             }
-            var AmountPurchase = Item.Amount > 1 ? Item.Amount : Amount;
-            var TotalCreditsCost = Amount > 1
-                ? Item.CostCredits * Amount - (int) Math.Floor((double) Amount / 6) * Item.CostCredits
-                : Item.CostCredits;
-            var TotalPixelCost = Amount > 1
-                ? Item.CostPixels * Amount - (int) Math.Floor((double) Amount / 6) * Item.CostPixels
-                : Item.CostPixels;
-            var TotalDiamondCost =
-                Amount > 1
-                    ? Item.CostDiamonds * Amount - (int) Math.Floor((double) Amount / 6) * Item.CostDiamonds
-                    : Item.CostDiamonds;
-            if (Session.GetHabbo().Credits < TotalCreditsCost ||
-                Session.GetHabbo().Duckets < TotalPixelCost ||
-                Session.GetHabbo().Diamonds < TotalDiamondCost)
+
+            var amountPurchase = item.Amount > 1 ? item.Amount : amount;
+
+            var totalCreditsCost = amount > 1 ? item.CostCredits * amount - (int) Math.Floor((double) amount / 6) * item.CostCredits : item.CostCredits;
+            var totalPixelCost = amount > 1 ? item.CostPixels * amount - (int) Math.Floor((double) amount / 6) * item.CostPixels : item.CostPixels;
+            var totalDiamondCost = amount > 1 ? item.CostDiamonds * amount - (int) Math.Floor((double) amount / 6) * item.CostDiamonds : item.CostDiamonds;
+
+            if (session.GetHabbo().Credits < totalCreditsCost || session.GetHabbo().Duckets < totalPixelCost || session.GetHabbo().Diamonds < totalDiamondCost)
             {
                 return;
             }
 
-            var LimitedEditionSells = 0;
-            var LimitedEditionStack = 0;
-            switch (Item.Data.InteractionType)
+            var limitedEditionSells = 0;
+            var limitedEditionStack = 0;
+
+            switch (item.Data.InteractionType)
             {
-                case InteractionType.NONE:
-                    ExtraData = "";
+                case InteractionType.None:
+                    extraData = "";
                     break;
-                case InteractionType.GUILD_ITEM:
-                case InteractionType.GUILD_GATE:
+
+                case InteractionType.GuildItem:
+                case InteractionType.GuildGate:
                     break;
-                case InteractionType.PET:
+
+                #region Pet handling
+
+                case InteractionType.Pet:
                     try
                     {
-                        var Bits = ExtraData.Split('\n');
-                        var PetName = Bits[0];
-                        var Race = Bits[1];
-                        var Color = Bits[2];
-                        int.Parse(Race); // to trigger any possible errors
-                        if (!PetUtility.CheckPetName(PetName))
-                        {
-                            return;
-                        }
-                        if (Race.Length > 2)
-                        {
-                            return;
-                        }
-                        if (Color.Length != 6)
+                        var bits = extraData.Split('\n');
+                        var petName = bits[0];
+                        var race = bits[1];
+                        var color = bits[2];
+
+                        int.Parse(race); // to trigger any possible errors
+
+                        if (!PetUtility.CheckPetName(petName))
                         {
                             return;
                         }
 
-                        PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(Session, "ACH_PetLover", 1);
+                        if (race.Length > 2)
+                        {
+                            return;
+                        }
+
+                        if (color.Length != 6)
+                        {
+                            return;
+                        }
+
+                        PlusEnvironment.GetGame().GetAchievementManager().ProgressAchievement(session, "ACH_PetLover", 1);
                     }
                     catch (Exception e)
                     {
@@ -124,201 +125,194 @@
                     }
 
                     break;
-                case InteractionType.FLOOR:
-                case InteractionType.WALLPAPER:
-                case InteractionType.LANDSCAPE:
-                    double Number = 0;
+
+                #endregion
+
+                case InteractionType.Floor:
+                case InteractionType.Wallpaper:
+                case InteractionType.Landscape:
+
+                    double number = 0;
+
                     try
                     {
-                        if (string.IsNullOrEmpty(ExtraData))
+                        if (string.IsNullOrEmpty(extraData))
                         {
-                            Number = 0;
+                            number = 0;
                         }
                         else
                         {
-                            Number = double.Parse(ExtraData, PlusEnvironment.CultureInfo);
+                            number = double.Parse(extraData, PlusEnvironment.CultureInfo);
                         }
                     }
                     catch (Exception e)
                     {
                         ExceptionLogger.LogException(e);
                     }
-                    ExtraData = Number.ToString().Replace(',', '.');
+
+                    extraData = number.ToString().Replace(',', '.');
                     break; // maintain extra data // todo: validate
-                case InteractionType.POSTIT:
-                    ExtraData = "FFFF33";
+
+                case InteractionType.Postit:
+                    extraData = "FFFF33";
                     break;
-                case InteractionType.MOODLIGHT:
-                    ExtraData = "1,1,1,#000000,255";
+
+                case InteractionType.Moodlight:
+                    extraData = "1,1,1,#000000,255";
                     break;
-                case InteractionType.TROPHY:
-                    ExtraData = Session.GetHabbo().Username +
-                                Convert.ToChar(9) +
-                                DateTime.Now.Day +
-                                "-" +
-                                DateTime.Now.Month +
-                                "-" +
-                                DateTime.Now.Year +
-                                Convert.ToChar(9) +
-                                ExtraData;
+
+                case InteractionType.Trophy:
+                    extraData = session.GetHabbo().Username + Convert.ToChar(9) + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + Convert.ToChar(9) +
+                                extraData;
                     break;
-                case InteractionType.MANNEQUIN:
-                    ExtraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) + "Default Mannequin";
+
+                case InteractionType.Mannequin:
+                    extraData = "m" + Convert.ToChar(5) + ".ch-210-1321.lg-285-92" + Convert.ToChar(5) + "Default Mannequin";
                     break;
-                case InteractionType.BADGE_DISPLAY:
-                    if (!Session.GetHabbo().GetBadgeComponent().HasBadge(ExtraData))
+
+                case InteractionType.BadgeDisplay:
+                    if (!session.GetHabbo().GetBadgeComponent().HasBadge(extraData))
                     {
-                        Session.SendPacket(new BroadcastMessageAlertComposer("Oops, it appears that you do not own this badge."));
+                        session.SendPacket(new BroadcastMessageAlertComposer("Oops, it appears that you do not own this badge."));
                         return;
                     }
 
-                    ExtraData = ExtraData +
-                                Convert.ToChar(9) +
-                                Session.GetHabbo().Username +
-                                Convert.ToChar(9) +
-                                DateTime.Now.Day +
-                                "-" +
-                                DateTime.Now.Month +
-                                "-" +
+                    extraData = extraData + Convert.ToChar(9) + session.GetHabbo().Username + Convert.ToChar(9) + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" +
                                 DateTime.Now.Year;
                     break;
-                case InteractionType.BADGE:
+
+                case InteractionType.Badge:
                 {
-                    if (Session.GetHabbo().GetBadgeComponent().HasBadge(Item.Data.ItemName))
+                    if (session.GetHabbo().GetBadgeComponent().HasBadge(item.Data.ItemName))
                     {
-                        Session.SendPacket(new PurchaseErrorComposer(1));
+                        session.SendPacket(new PurchaseErrorComposer(1));
                         return;
                     }
 
                     break;
                 }
                 default:
-                    ExtraData = "";
+                    extraData = "";
                     break;
             }
-
-            if (Item.IsLimited)
+            
+            if (item.IsLimited)
             {
-                if (Item.LimitedEditionStack <= Item.LimitedEditionSells)
+                if (item.LimitedEditionStack <= item.LimitedEditionSells)
                 {
-                    Session.SendNotification("This item has sold out!\n\n" +
-                                             "Please note, you have not recieved another item (You have also not been charged for it!)");
-                    Session.SendPacket(new CatalogUpdatedComposer());
-                    Session.SendPacket(new PurchaseOKComposer());
+                    session.SendNotification("This item has sold out!\n\n" + "Please note, you have not recieved another item (You have also not been charged for it!)");
+                    session.SendPacket(new CatalogUpdatedComposer());
+                    session.SendPacket(new PurchaseOkComposer());
                     return;
                 }
 
-                Item.LimitedEditionSells++;
+                item.LimitedEditionSells++;
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
                     dbClient.SetQuery("UPDATE `catalog_items` SET `limited_sells` = @limitSells WHERE `id` = @itemId LIMIT 1");
-                    dbClient.AddParameter("limitSells", Item.LimitedEditionSells);
-                    dbClient.AddParameter("itemId", Item.Id);
+                    dbClient.AddParameter("limitSells", item.LimitedEditionSells);
+                    dbClient.AddParameter("itemId", item.Id);
                     dbClient.RunQuery();
-                    LimitedEditionSells = Item.LimitedEditionSells;
-                    LimitedEditionStack = Item.LimitedEditionStack;
+
+                    limitedEditionSells = item.LimitedEditionSells;
+                    limitedEditionStack = item.LimitedEditionStack;
                 }
             }
 
-            if (Item.CostCredits > 0)
+            if (item.CostCredits > 0)
             {
-                Session.GetHabbo().Credits -= TotalCreditsCost;
-                Session.SendPacket(new CreditBalanceComposer(Session.GetHabbo().Credits));
+                session.GetHabbo().Credits -= totalCreditsCost;
+                session.SendPacket(new CreditBalanceComposer(session.GetHabbo().Credits));
             }
-            if (Item.CostPixels > 0)
+
+            if (item.CostPixels > 0)
             {
-                Session.GetHabbo().Duckets -= TotalPixelCost;
-                Session.SendPacket(
-                    new HabboActivityPointNotificationComposer(Session.GetHabbo().Duckets,
-                        Session.GetHabbo().Duckets)); //Love you, Tom.
+                session.GetHabbo().Duckets -= totalPixelCost;
+                session.SendPacket(new HabboActivityPointNotificationComposer(session.GetHabbo().Duckets, session.GetHabbo().Duckets)); //Love you, Tom.
             }
-            if (Item.CostDiamonds > 0)
+
+            if (item.CostDiamonds > 0)
             {
-                Session.GetHabbo().Diamonds -= TotalDiamondCost;
-                Session.SendPacket(new HabboActivityPointNotificationComposer(Session.GetHabbo().Diamonds, 0, 5));
+                session.GetHabbo().Diamonds -= totalDiamondCost;
+                session.SendPacket(new HabboActivityPointNotificationComposer(session.GetHabbo().Diamonds, 0, 5));
             }
-            Item NewItem = null;
-            switch (Item.Data.Type.ToString().ToLower())
+
+            Item newItem = null;
+            switch (item.Data.Type.ToString().ToLower())
             {
                 default:
-                    var GeneratedGenericItems = new List<Item>();
-                    switch (Item.Data.InteractionType)
+                    var generatedGenericItems = new List<Item>();
+
+                    switch (item.Data.InteractionType)
                     {
                         default:
-                            if (AmountPurchase > 1)
+                            if (amountPurchase > 1)
                             {
-                                var Items = ItemFactory.CreateMultipleItems(Item.Data, Session.GetHabbo(), ExtraData,
-                                    AmountPurchase);
-                                if (Items != null)
+                                var items = ItemFactory.CreateMultipleItems(item.Data, session.GetHabbo(), extraData, amountPurchase);
+
+                                if (items != null)
                                 {
-                                    GeneratedGenericItems.AddRange(Items);
+                                    generatedGenericItems.AddRange(items);
                                 }
                             }
                             else
                             {
-                                NewItem = ItemFactory.CreateSingleItemNullable(Item.Data,
-                                    Session.GetHabbo(),
-                                    ExtraData,
-                                    ExtraData,
-                                    0,
-                                    LimitedEditionSells,
-                                    LimitedEditionStack);
-                                if (NewItem != null)
+                                newItem = ItemFactory.CreateSingleItemNullable(item.Data, session.GetHabbo(), extraData, 0, limitedEditionSells, limitedEditionStack);
+
+                                if (newItem != null)
                                 {
-                                    GeneratedGenericItems.Add(NewItem);
+                                    generatedGenericItems.Add(newItem);
                                 }
                             }
                             break;
-                        case InteractionType.GUILD_GATE:
-                        case InteractionType.GUILD_ITEM:
-                        case InteractionType.GUILD_FORUM:
-                            if (AmountPurchase > 1)
+
+                        case InteractionType.GuildGate:
+                        case InteractionType.GuildItem:
+                        case InteractionType.GuildForum:
+                            if (amountPurchase > 1)
                             {
-                                var Items = ItemFactory.CreateMultipleItems(Item.Data,
-                                    Session.GetHabbo(),
-                                    ExtraData,
-                                    AmountPurchase,
-                                    Convert.ToInt32(ExtraData));
-                                if (Items != null)
+                                var items = ItemFactory.CreateMultipleItems(item.Data, session.GetHabbo(), extraData, amountPurchase, Convert.ToInt32(extraData));
+
+                                if (items != null)
                                 {
-                                    GeneratedGenericItems.AddRange(Items);
+                                    generatedGenericItems.AddRange(items);
                                 }
                             }
                             else
                             {
-                                NewItem = ItemFactory.CreateSingleItemNullable(Item.Data,
-                                    Session.GetHabbo(),
-                                    ExtraData,
-                                    ExtraData,
-                                    Convert.ToInt32(ExtraData));
-                                if (NewItem != null)
+                                newItem = ItemFactory.CreateSingleItemNullable(item.Data, session.GetHabbo(), extraData, Convert.ToInt32(extraData));
+
+                                if (newItem != null)
                                 {
-                                    GeneratedGenericItems.Add(NewItem);
+                                    generatedGenericItems.Add(newItem);
                                 }
                             }
                             break;
-                        case InteractionType.ARROW:
-                        case InteractionType.TELEPORT:
-                            for (var i = 0; i < AmountPurchase; i++)
+
+                        case InteractionType.Arrow:
+                        case InteractionType.Teleport:
+                            for (var i = 0; i < amountPurchase; i++)
                             {
-                                var TeleItems = ItemFactory.CreateTeleporterItems(Item.Data, Session.GetHabbo());
-                                if (TeleItems != null)
+                                var teleItems = ItemFactory.CreateTeleporterItems(item.Data, session.GetHabbo());
+
+                                if (teleItems != null)
                                 {
-                                    GeneratedGenericItems.AddRange(TeleItems);
+                                    generatedGenericItems.AddRange(teleItems);
                                 }
                             }
 
                             break;
-                        case InteractionType.MOODLIGHT:
+
+                        case InteractionType.Moodlight:
                         {
-                            if (AmountPurchase > 1)
+                            if (amountPurchase > 1)
                             {
-                                var Items = ItemFactory.CreateMultipleItems(Item.Data, Session.GetHabbo(), ExtraData,
-                                    AmountPurchase);
-                                if (Items != null)
+                                var items = ItemFactory.CreateMultipleItems(item.Data, session.GetHabbo(), extraData, amountPurchase);
+
+                                if (items != null)
                                 {
-                                    GeneratedGenericItems.AddRange(Items);
-                                    foreach (var I in Items)
+                                    generatedGenericItems.AddRange(items);
+                                    foreach (var I in items)
                                     {
                                         ItemFactory.CreateMoodlightData(I);
                                     }
@@ -326,27 +320,28 @@
                             }
                             else
                             {
-                                NewItem = ItemFactory.CreateSingleItemNullable(Item.Data, Session.GetHabbo(), ExtraData,
-                                    ExtraData);
-                                if (NewItem != null)
+                                newItem = ItemFactory.CreateSingleItemNullable(item.Data, session.GetHabbo(), extraData);
+
+                                if (newItem != null)
                                 {
-                                    GeneratedGenericItems.Add(NewItem);
-                                    ItemFactory.CreateMoodlightData(NewItem);
+                                    generatedGenericItems.Add(newItem);
+                                    ItemFactory.CreateMoodlightData(newItem);
                                 }
                             }
                         }
 
                             break;
-                        case InteractionType.TONER:
+
+                        case InteractionType.Toner:
                         {
-                            if (AmountPurchase > 1)
+                            if (amountPurchase > 1)
                             {
-                                var Items = ItemFactory.CreateMultipleItems(Item.Data, Session.GetHabbo(), ExtraData,
-                                    AmountPurchase);
-                                if (Items != null)
+                                var items = ItemFactory.CreateMultipleItems(item.Data, session.GetHabbo(), extraData, amountPurchase);
+
+                                if (items != null)
                                 {
-                                    GeneratedGenericItems.AddRange(Items);
-                                    foreach (var I in Items)
+                                    generatedGenericItems.AddRange(items);
+                                    foreach (var I in items)
                                     {
                                         ItemFactory.CreateTonerData(I);
                                     }
@@ -354,60 +349,52 @@
                             }
                             else
                             {
-                                NewItem = ItemFactory.CreateSingleItemNullable(Item.Data, Session.GetHabbo(), ExtraData,
-                                    ExtraData);
-                                if (NewItem != null)
+                                newItem = ItemFactory.CreateSingleItemNullable(item.Data, session.GetHabbo(), extraData);
+
+                                if (newItem != null)
                                 {
-                                    GeneratedGenericItems.Add(NewItem);
-                                    ItemFactory.CreateTonerData(NewItem);
+                                    generatedGenericItems.Add(newItem);
+                                    ItemFactory.CreateTonerData(newItem);
                                 }
                             }
                         }
 
                             break;
-                        case InteractionType.DEAL:
+
+                        case InteractionType.Deal:
                         {
                             CatalogDeal deal = null;
-                            if (PlusEnvironment.GetGame().GetCatalog().TryGetDeal(Item.Data.BehaviourData, out deal))
+                            if (PlusEnvironment.GetGame().GetCatalog().TryGetDeal(item.Data.BehaviourData, out deal))
                             {
-                                foreach (var CatalogItem in deal.ItemDataList.ToList())
+                                foreach (var catalogItem in deal.ItemDataList.ToList())
                                 {
-                                    var Items = ItemFactory.CreateMultipleItems(CatalogItem.Data, Session.GetHabbo(), "",
-                                        AmountPurchase);
-                                    if (Items != null)
+                                    var items = ItemFactory.CreateMultipleItems(catalogItem.Data, session.GetHabbo(), "", amountPurchase);
+
+                                    if (items != null)
                                     {
-                                        GeneratedGenericItems.AddRange(Items);
+                                        generatedGenericItems.AddRange(items);
                                     }
                                 }
                             }
 
                             break;
                         }
-                        case InteractionType.ROOMDEAL:
+
+                        case InteractionType.Roomdeal:
                         {
-                            CatalogDeal deal = null;
-                            if (PlusEnvironment.GetGame().GetCatalog().TryGetDeal(Item.Data.BehaviourData, out deal))
+                            CatalogDeal deal;
+                            if (PlusEnvironment.GetGame().GetCatalog().TryGetDeal(item.Data.BehaviourData, out deal))
                             {
                                 var room = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(deal.RoomId);
+
                                 if (room == null)
                                 {
-                                    Session.SendNotification(
-                                        "There was an error loading this Room Bundle, if this happens again please contact hotel management!");
+                                    session.SendNotification("There was an error loading this Room Bundle, if this happens again please contact hotel management!");
+                                    return;
                                 }
-                                var newRoom = PlusEnvironment.GetGame()
-                                    .GetRoomManager()
-                                    .CreateRoom(Session,
-                                        room.Name,
-                                        room.Description,
-                                        room.ModelName,
-                                        room.Category,
-                                        10,
-                                        room.TradeSettings,
-                                        room.Wallpaper,
-                                        room.Floor,
-                                        room.Landscape,
-                                        room.WallThickness,
-                                        room.FloorThickness);
+
+                                var newRoom = PlusEnvironment.GetGame().GetRoomManager().CreateRoom(session, room.Name, room.Description, room.ModelName, room.Category, 10,
+                                    room.TradeSettings, room.Wallpaper, room.Floor, room.Landscape, room.WallThickness, room.FloorThickness);
                                 if (newRoom == null)
                                 {
                                     return;
@@ -416,80 +403,52 @@
                                 var myRoom = PlusEnvironment.GetGame().GetRoomManager().LoadRoom(newRoom.Id);
                                 if (myRoom != null)
                                 {
-                                    var Items = ItemLoader.GetItemsForRoom(deal.RoomId, room);
+                                    var items = ItemLoader.GetItemsForRoom(deal.RoomId, room);
                                     Item teleLink = null;
-                                    foreach (var furni in Items)
+
+                                    foreach (var furni in items)
                                     {
-                                        if (furni.Data.InteractionType == InteractionType.TELEPORT)
+                                        if (furni.Data.InteractionType == InteractionType.Teleport)
                                         {
                                             if (teleLink == null)
                                             {
-                                                var TeleItems = ItemFactory.CreateTeleporterItems(furni.Data, Session.GetHabbo());
-                                                if (TeleItems != null && TeleItems.ToList().Count > 1)
+                                                var teleItems = ItemFactory.CreateTeleporterItems(furni.Data, session.GetHabbo());
+
+                                                if (teleItems != null && teleItems.ToList().Count > 1)
                                                 {
-                                                    myRoom.GetRoomItemHandler()
-                                                        .SetFloorItem(Session,
-                                                            TeleItems[0],
-                                                            furni.GetX,
-                                                            furni.GetY,
-                                                            furni.Rotation,
-                                                            true,
-                                                            true,
-                                                            true,
-                                                            false,
-                                                            furni.GetZ);
-                                                    teleLink = TeleItems[1];
+                                                    myRoom.GetRoomItemHandler().SetFloorItem(session, teleItems[0], furni.GetX, furni.GetY, furni.Rotation, true, true, true, false,
+                                                        furni.GetZ);
+                                                    teleLink = teleItems[1];
                                                 }
                                             }
                                             else
                                             {
-                                                myRoom.GetRoomItemHandler()
-                                                    .SetFloorItem(Session,
-                                                        teleLink,
-                                                        furni.GetX,
-                                                        furni.GetY,
-                                                        furni.Rotation,
-                                                        true,
-                                                        true,
-                                                        true,
-                                                        false,
-                                                        furni.GetZ);
+                                                myRoom.GetRoomItemHandler().SetFloorItem(session, teleLink, furni.GetX, furni.GetY, furni.Rotation, true, true, true, false,
+                                                    furni.GetZ);
                                                 teleLink = null;
                                             }
                                         }
                                         else
                                         {
-                                            NewItem = ItemFactory.CreateSingleItemNullable(furni.Data,
-                                                Session.GetHabbo(),
-                                                furni.ExtraData,
-                                                "",
-                                                furni.GroupId);
-                                            if (NewItem != null)
+                                            newItem = ItemFactory.CreateSingleItemNullable(furni.Data, session.GetHabbo(), furni.ExtraData, furni.GroupId);
+
+                                            if (newItem != null)
                                             {
-                                                if (NewItem.IsWallItem)
+                                                if (newItem.IsWallItem)
                                                 {
-                                                    NewItem.wallCoord = furni.wallCoord;
-                                                    myRoom.GetRoomItemHandler().SetWallItem(Session, NewItem);
+                                                    newItem.WallCoord = furni.WallCoord;
+                                                    myRoom.GetRoomItemHandler().SetWallItem(session, newItem);
                                                 }
                                                 else
                                                 {
-                                                    myRoom.GetRoomItemHandler()
-                                                        .SetFloorItem(Session,
-                                                            NewItem,
-                                                            furni.GetX,
-                                                            furni.GetY,
-                                                            furni.Rotation,
-                                                            true,
-                                                            true,
-                                                            true,
-                                                            false,
-                                                            furni.GetZ);
+                                                    myRoom.GetRoomItemHandler().SetFloorItem(session, newItem, furni.GetX, furni.GetY, furni.Rotation, true, true, true, false,
+                                                        furni.GetZ);
                                                 }
                                             }
                                         }
                                     }
 
-                                    Session.GetHabbo().PrepareRoom(myRoom.Id, "");
+                                    session.GetHabbo().PrepareRoom(myRoom.Id, "");
                                 }
                             }
 
@@ -497,73 +456,81 @@
                         }
                     }
 
-                    foreach (var PurchasedItem in GeneratedGenericItems)
+                    foreach (var purchasedItem in generatedGenericItems)
                     {
-                        if (Session.GetHabbo().GetInventoryComponent().TryAddItem(PurchasedItem))
+                        if (session.GetHabbo().GetInventoryComponent().TryAddItem(purchasedItem))
                         {
                             //Session.SendMessage(new FurniListAddComposer(PurchasedItem));
-                            Session.SendPacket(new FurniListNotificationComposer(PurchasedItem.Id, 1));
+                            session.SendPacket(new FurniListNotificationComposer(purchasedItem.Id, 1));
                         }
                     }
 
                     break;
+
                 case "e":
-                    AvatarEffect Effect = null;
-                    if (Session.GetHabbo().Effects().HasEffect(Item.Data.SpriteId))
+                    AvatarEffect effect = null;
+
+                    if (session.GetHabbo().Effects().HasEffect(item.Data.SpriteId))
                     {
-                        Effect = Session.GetHabbo().Effects().GetEffectNullable(Item.Data.SpriteId);
-                        if (Effect != null)
+                        effect = session.GetHabbo().Effects().GetEffectNullable(item.Data.SpriteId);
+
+                        if (effect != null)
                         {
-                            Effect.AddToQuantity();
+                            effect.AddToQuantity();
                         }
                     }
                     else
                     {
-                        Effect = AvatarEffectFactory.CreateNullable(Session.GetHabbo(), Item.Data.SpriteId, 3600);
+                        effect = AvatarEffectFactory.CreateNullable(session.GetHabbo(), item.Data.SpriteId, 3600);
                     }
-                    if (Effect != null) // && Session.GetHabbo().Effects().TryAdd(Effect))
+
+                    if (effect != null) // && Session.GetHabbo().Effects().TryAdd(Effect))
                     {
-                        Session.SendPacket(new AvatarEffectAddedComposer(Item.Data.SpriteId, 3600));
+                        session.SendPacket(new AvatarEffectAddedComposer(item.Data.SpriteId, 3600));
                     }
                     break;
+
                 case "r":
-                    var Bot = BotUtility.CreateBot(Item.Data, Session.GetHabbo().Id);
-                    if (Bot != null)
+                    var bot = BotUtility.CreateBot(item.Data, session.GetHabbo().Id);
+                    if (bot != null)
                     {
-                        Session.GetHabbo().GetInventoryComponent().TryAddBot(Bot);
-                        Session.SendPacket(new BotInventoryComposer(Session.GetHabbo().GetInventoryComponent().GetBots()));
-                        Session.SendPacket(new FurniListNotificationComposer(Bot.Id, 5));
+                        session.GetHabbo().GetInventoryComponent().TryAddBot(bot);
+                        session.SendPacket(new BotInventoryComposer(session.GetHabbo().GetInventoryComponent().GetBots()));
+                        session.SendPacket(new FurniListNotificationComposer(bot.Id, 5));
                     }
                     else
                     {
-                        Session.SendNotification(
-                            "Oops! There was an error whilst purchasing this bot. It seems that there is no bot data for the bot!");
+                        session.SendNotification("Oops! There was an error whilst purchasing this bot. It seems that there is no bot data for the bot!");
                     }
                     break;
+
                 case "b":
                 {
-                    Session.GetHabbo().GetBadgeComponent().GiveBadge(Item.Data.ItemName, true, Session);
-                    Session.SendPacket(new FurniListNotificationComposer(0, 4));
+                    session.GetHabbo().GetBadgeComponent().GiveBadge(item.Data.ItemName, true, session);
+                    session.SendPacket(new FurniListNotificationComposer(0, 4));
                     break;
                 }
+
                 case "p":
                 {
-                    var PetData = ExtraData.Split('\n');
-                    var GeneratedPet = PetUtility.CreatePet(Session.GetHabbo().Id, PetData[0], Item.Data.BehaviourData,
-                        PetData[1], PetData[2]);
-                    if (GeneratedPet != null)
+                    var petData = extraData.Split('\n');
+
+                    var generatedPet = PetUtility.CreatePet(session.GetHabbo().Id, petData[0], item.Data.BehaviourData, petData[1], petData[2]);
+                    if (generatedPet != null)
                     {
-                        Session.GetHabbo().GetInventoryComponent().TryAddPet(GeneratedPet);
-                        Session.SendPacket(new FurniListNotificationComposer(GeneratedPet.PetId, 3));
-                        Session.SendPacket(new PetInventoryComposer(Session.GetHabbo().GetInventoryComponent().GetPets()));
-                        ItemData PetFood = null;
-                        if (PlusEnvironment.GetGame().GetItemManager().GetItem(320, out PetFood))
+                        session.GetHabbo().GetInventoryComponent().TryAddPet(generatedPet);
+
+                        session.SendPacket(new FurniListNotificationComposer(generatedPet.PetId, 3));
+                        session.SendPacket(new PetInventoryComposer(session.GetHabbo().GetInventoryComponent().GetPets()));
+
+                        ItemData petFood = null;
+                        if (PlusEnvironment.GetGame().GetItemManager().GetItem(320, out petFood))
                         {
-                            var Food = ItemFactory.CreateSingleItemNullable(PetFood, Session.GetHabbo(), "", "");
-                            if (Food != null)
+                            var food = ItemFactory.CreateSingleItemNullable(petFood, session.GetHabbo(), "");
+                            if (food != null)
                             {
-                                Session.GetHabbo().GetInventoryComponent().TryAddItem(Food);
-                                Session.SendPacket(new FurniListNotificationComposer(Food.Id, 1));
+                                session.GetHabbo().GetInventoryComponent().TryAddItem(food);
+                                session.SendPacket(new FurniListNotificationComposer(food.Id, 1));
                             }
                         }
                     }
@@ -571,15 +538,17 @@
                 }
             }
 
-            BadgeDefinition Badge;
-            if (!string.IsNullOrEmpty(Item.Badge) &&
-                PlusEnvironment.GetGame().GetBadgeManager().TryGetBadge(Item.Badge, out Badge) &&
-                (string.IsNullOrEmpty(Badge.RequiredRight) || Session.GetHabbo().GetPermissions().HasRight(Badge.RequiredRight)))
+            BadgeDefinition badge;
+
+            if (!string.IsNullOrEmpty(item.Badge) &&
+                PlusEnvironment.GetGame().GetBadgeManager().TryGetBadge(item.Badge, out badge) &&
+                (string.IsNullOrEmpty(badge.RequiredRight) || session.GetHabbo().GetPermissions().HasRight(badge.RequiredRight)))
             {
-                Session.GetHabbo().GetBadgeComponent().GiveBadge(Badge.Code, true, Session);
+                session.GetHabbo().GetBadgeComponent().GiveBadge(badge.Code, true, session);
             }
-            Session.SendPacket(new PurchaseOKComposer(Item, Item.Data));
-            Session.SendPacket(new FurniListUpdateComposer());
+
+            session.SendPacket(new PurchaseOkComposer(item, item.Data));
+            session.SendPacket(new FurniListUpdateComposer());
         }
     }
 }

@@ -4,48 +4,43 @@
     using HabboHotel.GameClients;
     using Outgoing.Moderation;
 
-    internal sealed class GetModeratorUserInfoEvent : IPacketEvent
+    internal class GetModeratorUserInfoEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().GetPermissions().HasRight("mod_tool"))
+            if (!session.GetHabbo().GetPermissions().HasRight("mod_tool"))
             {
                 return;
             }
 
-            var UserId = Packet.PopInt();
-            DataRow User = null;
-            DataRow Info = null;
+            var userId = packet.PopInt();
+
+            DataRow user;
+            DataRow info;
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
-                dbClient.SetQuery(
-                    "SELECT `id`,`username`,`online`,`mail`,`ip_last`,`look`,`account_created`,`last_online` FROM `users` WHERE `id` = '" +
-                    UserId +
-                    "' LIMIT 1");
-                User = dbClient.GetRow();
-                if (User == null)
+                dbClient.SetQuery("SELECT `id`,`username`,`online`,`mail`,`ip_last`,`look`,`account_created`,`last_online` FROM `users` WHERE `id` = '" + userId + "' LIMIT 1");
+                user = dbClient.GetRow();
+
+                if (user == null)
                 {
-                    Session.SendNotification(PlusEnvironment.GetLanguageManager().TryGetValue("user.not_found"));
+                    session.SendNotification(PlusEnvironment.GetLanguageManager().TryGetValue("user.not_found"));
                     return;
                 }
 
-                dbClient.SetQuery(
-                    "SELECT `cfhs`,`cfhs_abusive`,`cautions`,`bans`,`trading_locked`,`trading_locks_count` FROM `user_info` WHERE `user_id` = '" +
-                    UserId +
-                    "' LIMIT 1");
-                Info = dbClient.GetRow();
-                if (Info == null)
+                dbClient.SetQuery("SELECT `cfhs`,`cfhs_abusive`,`cautions`,`bans`,`trading_locked`,`trading_locks_count` FROM `user_info` WHERE `user_id` = '" + userId +
+                                  "' LIMIT 1");
+                info = dbClient.GetRow();
+                if (info == null)
                 {
-                    dbClient.RunQuery("INSERT INTO `user_info` (`user_id`) VALUES ('" + UserId + "')");
-                    dbClient.SetQuery(
-                        "SELECT `cfhs`,`cfhs_abusive`,`cautions`,`bans`,`trading_locked`,`trading_locks_count` FROM `user_info` WHERE `user_id` = '" +
-                        UserId +
-                        "' LIMIT 1");
-                    Info = dbClient.GetRow();
+                    dbClient.RunQuery("INSERT INTO `user_info` (`user_id`) VALUES ('" + userId + "')");
+                    dbClient.SetQuery("SELECT `cfhs`,`cfhs_abusive`,`cautions`,`bans`,`trading_locked`,`trading_locks_count` FROM `user_info` WHERE `user_id` = '" + userId +
+                                      "' LIMIT 1");
+                    info = dbClient.GetRow();
                 }
             }
 
-            Session.SendPacket(new ModeratorUserInfoComposer(User, Info));
+            session.SendPacket(new ModeratorUserInfoComposer(user, info));
         }
     }
 }

@@ -322,7 +322,7 @@
             {
                 if (GetClient() != null && GetClient().GetHabbo() != null)
                 {
-                    GetClient().GetHabbo().TimeAFK = 0;
+                    GetClient().GetHabbo().TimeAfk = 0;
                 }
             }
             IdleTime = 0;

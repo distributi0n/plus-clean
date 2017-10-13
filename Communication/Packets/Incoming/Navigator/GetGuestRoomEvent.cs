@@ -5,18 +5,20 @@
 
     internal class GetGuestRoomEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            var roomID = Packet.PopInt();
-            var roomData = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomID);
+            var roomId = packet.PopInt();
+
+            var roomData = PlusEnvironment.GetGame().GetRoomManager().GenerateRoomData(roomId);
             if (roomData == null)
             {
                 return;
             }
 
-            var isLoading = Packet.PopInt() == 1;
-            var checkEntry = Packet.PopInt() == 1;
-            Session.SendPacket(new GetGuestRoomResultComposer(Session, roomData, isLoading, checkEntry));
+            var isLoading = packet.PopInt() == 1;
+            var checkEntry = packet.PopInt() == 1;
+
+            session.SendPacket(new GetGuestRoomResultComposer(session, roomData, isLoading, checkEntry));
         }
     }
 }

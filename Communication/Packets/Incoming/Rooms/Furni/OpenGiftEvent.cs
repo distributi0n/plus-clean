@@ -11,137 +11,146 @@
 
     internal class OpenGiftEvent : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (Session == null || Session.GetHabbo() == null || !Session.GetHabbo().InRoom)
+            if (session?.GetHabbo() == null || !session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Room = Session.GetHabbo().CurrentRoom;
-            if (Room == null)
+            var room = session.GetHabbo().CurrentRoom;
+            if (room == null)
             {
                 return;
             }
 
-            var PresentId = Packet.PopInt();
-            var Present = Room.GetRoomItemHandler().GetItem(PresentId);
-            if (Present == null)
-            {
-                return;
-            }
-            if (Present.UserID != Session.GetHabbo().Id)
+            var presentId = packet.PopInt();
+            var present = room.GetRoomItemHandler().GetItem(presentId);
+
+            if (present?.UserId != session.GetHabbo().Id)
             {
                 return;
             }
 
-            DataRow Data = null;
+            DataRow data;
+
             using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
             {
                 dbClient.SetQuery("SELECT `base_id`,`extra_data` FROM `user_presents` WHERE `item_id` = @presentId LIMIT 1");
-                dbClient.AddParameter("presentId", Present.Id);
-                Data = dbClient.GetRow();
+                dbClient.AddParameter("presentId", present.Id);
+                data = dbClient.GetRow();
             }
-            if (Data == null)
+
+            if (data == null)
             {
-                Session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
-                Room.GetRoomItemHandler().RemoveFurniture(null, Present.Id, false);
+                session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
+                room.GetRoomItemHandler().RemoveFurniture(null, present.Id, false);
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + Present.Id + "' LIMIT 1");
-                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + Present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + present.Id + "' LIMIT 1");
                 }
-                Session.GetHabbo().GetInventoryComponent().RemoveItem(Present.Id);
+
+                session.GetHabbo().GetInventoryComponent().RemoveItem(present.Id);
                 return;
             }
 
-            var PurchaserId = 0;
-            if (!int.TryParse(Present.ExtraData.Split(Convert.ToChar(5))[2], out PurchaserId))
+            if (!int.TryParse(present.ExtraData.Split(Convert.ToChar(5))[2], out var purchaserId))
             {
-                Session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
-                Room.GetRoomItemHandler().RemoveFurniture(null, Present.Id, false);
+                session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
+                room.GetRoomItemHandler().RemoveFurniture(null, present.Id, false);
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + Present.Id + "' LIMIT 1");
-                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + Present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + present.Id + "' LIMIT 1");
                 }
-                Session.GetHabbo().GetInventoryComponent().RemoveItem(Present.Id);
+                session.GetHabbo().GetInventoryComponent().RemoveItem(present.Id);
+
                 return;
             }
 
-            var Purchaser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(PurchaserId);
-            if (Purchaser == null)
+            var purchaser = PlusEnvironment.GetGame().GetCacheManager().GenerateUser(purchaserId);
+            if (purchaser == null)
             {
-                Session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
-                Room.GetRoomItemHandler().RemoveFurniture(null, Present.Id, false);
+                session.SendNotification("Oops! Appears there was a bug with this gift.\nWe'll just get rid of it for you.");
+                room.GetRoomItemHandler().RemoveFurniture(null, present.Id, false);
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + Present.Id + "' LIMIT 1");
-                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + Present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + present.Id + "' LIMIT 1");
                 }
-                Session.GetHabbo().GetInventoryComponent().RemoveItem(Present.Id);
+
+                session.GetHabbo().GetInventoryComponent().RemoveItem(present.Id);
                 return;
             }
 
-            ItemData BaseItem = null;
-            if (!PlusEnvironment.GetGame().GetItemManager().GetItem(Convert.ToInt32(Data["base_id"]), out BaseItem))
+            if (!PlusEnvironment.GetGame().GetItemManager().GetItem(Convert.ToInt32(data["base_id"]), out var baseItem))
             {
-                Session.SendNotification("Oops, it appears that the item within the gift is no longer in the hotel!");
-                Room.GetRoomItemHandler().RemoveFurniture(null, Present.Id, false);
+                session.SendNotification("Oops, it appears that the item within the gift is no longer in the hotel!");
+                room.GetRoomItemHandler().RemoveFurniture(null, present.Id, false);
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + Present.Id + "' LIMIT 1");
-                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + Present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `items` WHERE `id` = '" + present.Id + "' LIMIT 1");
+                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = '" + present.Id + "' LIMIT 1");
                 }
-                Session.GetHabbo().GetInventoryComponent().RemoveItem(Present.Id);
+
+                session.GetHabbo().GetInventoryComponent().RemoveItem(present.Id);
                 return;
             }
 
-            Present.MagicRemove = true;
-            Room.SendPacket(new ObjectUpdateComposer(Present, Convert.ToInt32(Session.GetHabbo().Id)));
-            var thread = new Thread(() => FinishOpenGift(Session, BaseItem, Present, Room, Data));
+            present.MagicRemove = true;
+            room.SendPacket(new ObjectUpdateComposer(present, Convert.ToInt32(session.GetHabbo().Id)));
+
+            var thread = new Thread(() => FinishOpenGift(session, baseItem, present, room, data));
             thread.Start();
         }
 
-        private void FinishOpenGift(GameClient Session, ItemData BaseItem, Item Present, Room Room, DataRow Row)
+        private static void FinishOpenGift(GameClient session, ItemData baseItem, Item present, Room room, DataRow row)
         {
             try
             {
-                if (BaseItem == null || Present == null || Room == null || Row == null)
+                if (baseItem == null || present == null || room == null || row == null)
                 {
                     return;
                 }
 
                 Thread.Sleep(1500);
-                var ItemIsInRoom = true;
-                Room.GetRoomItemHandler().RemoveFurniture(Session, Present.Id);
+
+                var itemIsInRoom = true;
+
+                room.GetRoomItemHandler().RemoveFurniture(session, present.Id);
+
                 using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                 {
-                    dbClient.SetQuery(
-                        "UPDATE `items` SET `base_item` = @BaseItem, `extra_data` = @edata WHERE `id` = @itemId LIMIT 1");
-                    dbClient.AddParameter("itemId", Present.Id);
-                    dbClient.AddParameter("BaseItem", Row["base_id"]);
-                    dbClient.AddParameter("edata", Row["extra_data"]);
+                    dbClient.SetQuery("UPDATE `items` SET `base_item` = @BaseItem, `extra_data` = @edata WHERE `id` = @itemId LIMIT 1");
+                    dbClient.AddParameter("itemId", present.Id);
+                    dbClient.AddParameter("BaseItem", row["base_id"]);
+                    dbClient.AddParameter("edata", row["extra_data"]);
                     dbClient.RunQuery();
-                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = " + Present.Id + " LIMIT 1");
+
+                    dbClient.RunQuery("DELETE FROM `user_presents` WHERE `item_id` = " + present.Id + " LIMIT 1");
                 }
-                Present.BaseItem = Convert.ToInt32(Row["base_id"]);
-                Present.ResetBaseItem();
-                Present.ExtraData = !string.IsNullOrEmpty(Convert.ToString(Row["extra_data"]))
-                    ? Convert.ToString(Row["extra_data"])
-                    : "";
-                if (Present.Data.Type == 's')
+
+                present.BaseItem = Convert.ToInt32(row["base_id"]);
+                present.ResetBaseItem();
+                present.ExtraData = !string.IsNullOrEmpty(Convert.ToString(row["extra_data"])) ? Convert.ToString(row["extra_data"]) : "";
+
+                if (present.Data.Type == 's')
                 {
-                    if (!Room.GetRoomItemHandler().SetFloorItem(Session, Present, Present.GetX, Present.GetY, Present.Rotation,
-                        true, false, true))
+                    if (!room.GetRoomItemHandler().SetFloorItem(session, present, present.GetX, present.GetY, present.Rotation, true, false, true))
                     {
                         using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                         {
                             dbClient.SetQuery("UPDATE `items` SET `room_id` = '0' WHERE `id` = @itemId LIMIT 1");
-                            dbClient.AddParameter("itemId", Present.Id);
+                            dbClient.AddParameter("itemId", present.Id);
                             dbClient.RunQuery();
                         }
-                        ItemIsInRoom = false;
+
+                        itemIsInRoom = false;
                     }
                 }
                 else
@@ -149,16 +158,20 @@
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
                         dbClient.SetQuery("UPDATE `items` SET `room_id` = '0' WHERE `id` = @itemId LIMIT 1");
-                        dbClient.AddParameter("itemId", Present.Id);
+                        dbClient.AddParameter("itemId", present.Id);
                         dbClient.RunQuery();
                     }
-                    ItemIsInRoom = false;
+
+                    itemIsInRoom = false;
                 }
-                Session.SendPacket(new OpenGiftComposer(Present.Data, Present.ExtraData, Present, ItemIsInRoom));
-                Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
+
+                session.SendPacket(new OpenGiftComposer(present.Data, present.ExtraData, present, itemIsInRoom));
+
+                session.GetHabbo().GetInventoryComponent().UpdateItems(true);
             }
             catch
             {
+                // ignored
             }
         }
     }

@@ -9,23 +9,32 @@
     using PathFinding;
     using Teams;
 
-    public class Soccer
+    public class Soccer : IDisposable
     {
         private ConcurrentDictionary<int, Item> _balls;
+        private Item[] _gates;
         private Room _room;
-        private Item[] gates;
 
-        public Soccer(Room room)
+        internal Soccer(Room room)
         {
             _room = room;
-            gates = new Item[4];
+            _gates = new Item[4];
             _balls = new ConcurrentDictionary<int, Item>();
             GameIsStarted = false;
         }
 
-        public bool GameIsStarted { get; private set; }
+        internal bool GameIsStarted { get; private set; }
 
-        public void StopGame(bool userTriggered = false)
+        public void Dispose()
+        {
+            Array.Clear(_gates, 0, _gates.Length);
+            _gates = null;
+            _room = null;
+            _balls.Clear();
+            _balls = null;
+        }
+
+        internal void StopGame(bool userTriggered = false)
         {
             GameIsStarted = false;
             if (!userTriggered)
@@ -34,23 +43,23 @@
             }
         }
 
-        public void StartGame()
+        internal void StartGame()
         {
             GameIsStarted = true;
         }
 
-        public void AddBall(Item item)
+        internal void AddBall(Item item)
         {
             _balls.TryAdd(item.Id, item);
         }
 
-        public void RemoveBall(int itemID)
+        internal void RemoveBall(int itemID)
         {
             Item Item = null;
             _balls.TryRemove(itemID, out Item);
         }
 
-        public void OnUserWalk(RoomUser User)
+        internal void OnUserWalk(RoomUser User)
         {
             if (User == null)
             {
@@ -171,81 +180,81 @@
         private bool VerifyBall(RoomUser user, int actualx, int actualy) =>
             Rotation.Calculate(user.X, user.Y, actualx, actualy) == user.RotBody;
 
-        public void RegisterGate(Item item)
+        internal void RegisterGate(Item item)
         {
-            if (gates[0] == null)
+            if (_gates[0] == null)
             {
-                item.team = TEAM.BLUE;
-                gates[0] = item;
+                item.Team = TEAM.BLUE;
+                _gates[0] = item;
             }
-            else if (gates[1] == null)
+            else if (_gates[1] == null)
             {
-                item.team = TEAM.RED;
-                gates[1] = item;
+                item.Team = TEAM.RED;
+                _gates[1] = item;
             }
-            else if (gates[2] == null)
+            else if (_gates[2] == null)
             {
-                item.team = TEAM.GREEN;
-                gates[2] = item;
+                item.Team = TEAM.GREEN;
+                _gates[2] = item;
             }
-            else if (gates[3] == null)
+            else if (_gates[3] == null)
             {
-                item.team = TEAM.YELLOW;
-                gates[3] = item;
+                item.Team = TEAM.YELLOW;
+                _gates[3] = item;
             }
         }
 
-        public void UnRegisterGate(Item item)
+        internal void UnRegisterGate(Item item)
         {
-            switch (item.team)
+            switch (item.Team)
             {
                 case TEAM.BLUE:
                 {
-                    gates[0] = null;
+                    _gates[0] = null;
                     break;
                 }
                 case TEAM.RED:
                 {
-                    gates[1] = null;
+                    _gates[1] = null;
                     break;
                 }
                 case TEAM.GREEN:
                 {
-                    gates[2] = null;
+                    _gates[2] = null;
                     break;
                 }
                 case TEAM.YELLOW:
                 {
-                    gates[3] = null;
+                    _gates[3] = null;
                     break;
                 }
             }
         }
 
-        public void onGateRemove(Item item)
+        internal void OnGateRemove(Item item)
         {
             switch (item.GetBaseItem().InteractionType)
             {
-                case InteractionType.FOOTBALL_GOAL_RED:
-                case InteractionType.footballcounterred:
+                case InteractionType.FootballGoalRed:
+                case InteractionType.Footballcounterred:
                 {
                     _room.GetGameManager().RemoveFurnitureFromTeam(item, TEAM.RED);
                     break;
                 }
-                case InteractionType.FOOTBALL_GOAL_GREEN:
-                case InteractionType.footballcountergreen:
+                case InteractionType.FootballGoalGreen:
+                case InteractionType.Footballcountergreen:
                 {
                     _room.GetGameManager().RemoveFurnitureFromTeam(item, TEAM.GREEN);
                     break;
                 }
-                case InteractionType.FOOTBALL_GOAL_BLUE:
-                case InteractionType.footballcounterblue:
+                case InteractionType.FootballGoalBlue:
+                case InteractionType.Footballcounterblue:
                 {
                     _room.GetGameManager().RemoveFurnitureFromTeam(item, TEAM.BLUE);
                     break;
                 }
-                case InteractionType.FOOTBALL_GOAL_YELLOW:
-                case InteractionType.footballcounteryellow:
+                case InteractionType.FootballGoalYellow:
+                case InteractionType.Footballcounteryellow:
                 {
                     _room.GetGameManager().RemoveFurnitureFromTeam(item, TEAM.YELLOW);
                     break;
@@ -253,13 +262,13 @@
             }
         }
 
-        public void MoveBall(Item item, int newX, int newY, RoomUser user)
+        internal void MoveBall(Item item, int newX, int newY, RoomUser user)
         {
             if (item == null || user == null)
             {
                 return;
             }
-            if (!_room.GetGameMap().itemCanBePlacedHere(newX, newY))
+            if (!_room.GetGameMap().ItemCanBePlacedHere(newX, newY))
             {
                 return;
             }
@@ -276,17 +285,8 @@
                     item.Id));
             item.ExtraData = "11";
             item.UpdateNeeded = true;
-            _room.GetRoomItemHandler().SetFloorItem(null, item, newX, newY, item.Rotation, false, false, false, false);
+            _room.GetRoomItemHandler().SetFloorItem(null, item, newX, newY, item.Rotation, false, false, false);
             _room.OnUserShoot(user, item);
-        }
-
-        public void Dispose()
-        {
-            Array.Clear(gates, 0, gates.Length);
-            gates = null;
-            _room = null;
-            _balls.Clear();
-            _balls = null;
         }
     }
 }

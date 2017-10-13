@@ -138,7 +138,7 @@
                     continue;
                 }
 
-                if (Item.UserID == 0)
+                if (Item.UserId == 0)
                 {
                     using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                     {
@@ -156,7 +156,7 @@
                         {
                             dbClient.RunQuery("UPDATE `items` SET `room_id` = '0' WHERE `id` = '" + Item.Id + "' LIMIT 1");
                         }
-                        var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Item.UserID);
+                        var Client = PlusEnvironment.GetGame().GetClientManager().GetClientByUserID(Item.UserId);
                         if (Client != null)
                         {
                             Client.GetHabbo()
@@ -175,7 +175,7 @@
                 }
                 else if (Item.IsWallItem)
                 {
-                    if (string.IsNullOrWhiteSpace(Item.wallCoord))
+                    if (string.IsNullOrWhiteSpace(Item.WallCoord))
                     {
                         using (var dbClient = PlusEnvironment.GetDatabaseManager().GetQueryReactor())
                         {
@@ -184,11 +184,11 @@
                             dbClient.AddParameter("WallPosition", ":w=0,2 l=11,53 l");
                             dbClient.RunQuery();
                         }
-                        Item.wallCoord = ":w=0,2 l=11,53 l";
+                        Item.WallCoord = ":w=0,2 l=11,53 l";
                     }
                     try
                     {
-                        Item.wallCoord = WallPositionCheck(":" + Item.wallCoord.Split(':')[1]);
+                        Item.WallCoord = WallPositionCheck(":" + Item.WallCoord.Split(':')[1]);
                     }
                     catch
                     {
@@ -199,7 +199,7 @@
                             dbClient.AddParameter("WallPosition", ":w=0,2 l=11,53 l");
                             dbClient.RunQuery();
                         }
-                        Item.wallCoord = ":w=0,2 l=11,53 l";
+                        Item.WallCoord = ":w=0,2 l=11,53 l";
                     }
                     if (!_wallItems.ContainsKey(Item.Id))
                     {
@@ -213,14 +213,14 @@
                 {
                     GotRollers = true;
                 }
-                else if (Item.GetBaseItem().InteractionType == InteractionType.MOODLIGHT)
+                else if (Item.GetBaseItem().InteractionType == InteractionType.Moodlight)
                 {
                     if (_room.MoodlightData == null)
                     {
                         _room.MoodlightData = new MoodlightData(Item.Id);
                     }
                 }
-                else if (Item.GetBaseItem().InteractionType == InteractionType.TONER)
+                else if (Item.GetBaseItem().InteractionType == InteractionType.Toner)
                 {
                     if (_room.TonerData == null)
                     {
@@ -240,7 +240,7 @@
 
                     _room.GetWired().LoadWiredBox(Item);
                 }
-                else if (Item.GetBaseItem().InteractionType == InteractionType.HOPPER)
+                else if (Item.GetBaseItem().InteractionType == InteractionType.Hopper)
                 {
                     HopperCount++;
                 }
@@ -277,15 +277,15 @@
                 return;
             }
 
-            if (Item.GetBaseItem().InteractionType == InteractionType.FOOTBALL_GATE)
+            if (Item.GetBaseItem().InteractionType == InteractionType.FootballGate)
             {
                 _room.GetSoccer().UnRegisterGate(Item);
             }
-            if (Item.GetBaseItem().InteractionType != InteractionType.GIFT)
+            if (Item.GetBaseItem().InteractionType != InteractionType.Gift)
             {
                 Item.Interactor.OnRemove(Session, Item);
             }
-            if (Item.GetBaseItem().InteractionType == InteractionType.GUILD_GATE)
+            if (Item.GetBaseItem().InteractionType == InteractionType.GuildGate)
             {
                 Item.UpdateCounter = 0;
                 Item.UpdateNeeded = false;
@@ -297,11 +297,11 @@
         {
             if (Item.IsFloorItem)
             {
-                _room.SendPacket(new ObjectRemoveComposer(Item, Item.UserID));
+                _room.SendPacket(new ObjectRemoveComposer(Item, Item.UserId));
             }
             else if (Item.IsWallItem)
             {
-                _room.SendPacket(new ItemRemoveComposer(Item, Item.UserID));
+                _room.SendPacket(new ItemRemoveComposer(Item, Item.UserId));
             }
 
             //TODO: Recode this specific part
@@ -351,7 +351,7 @@
                             .ToList();
                     }
                     var NextSquareIsRoller =
-                        ItemsOnNext.Count(x => x.GetBaseItem().InteractionType == InteractionType.ROLLER) > 0;
+                        ItemsOnNext.Count(x => x.GetBaseItem().InteractionType == InteractionType.Roller) > 0;
                     var NextRollerClear = true;
                     var NextZ = 0.0;
                     var NextRoller = false;
@@ -525,7 +525,7 @@
                             {
                                 dbClient.SetQuery("UPDATE `items` SET `wall_pos` = @wallPos WHERE `id` = '" + Item.Id +
                                                   "' LIMIT 1");
-                                dbClient.AddParameter("wallPos", Item.wallCoord);
+                                dbClient.AddParameter("wallPos", Item.WallCoord);
                                 dbClient.RunQuery();
                             }
                             dbClient.RunQuery("UPDATE `items` SET `x` = '" +
@@ -550,15 +550,15 @@
         }
 
         public bool SetFloorItem(GameClient Session,
-            Item Item,
-            int newX,
-            int newY,
-            int newRot,
-            bool newItem,
-            bool OnRoller,
-            bool sendMessage,
-            bool updateRoomUserStatuses = false,
-            double height = -1)
+                                 Item Item,
+                                 int newX,
+                                 int newY,
+                                 int newRot,
+                                 bool newItem,
+                                 bool OnRoller,
+                                 bool sendMessage,
+                                 bool updateRoomUserStatuses = false,
+                                 double height = -1)
         {
             var NeedsReAdd = false;
             if (newItem)
@@ -575,8 +575,8 @@
             }
 
             var ItemsOnTile = GetFurniObjects(newX, newY);
-            if (Item.GetBaseItem().InteractionType == InteractionType.ROLLER &&
-                ItemsOnTile.Count(x => x.GetBaseItem().InteractionType == InteractionType.ROLLER && x.Id != Item.Id) > 0)
+            if (Item.GetBaseItem().InteractionType == InteractionType.Roller &&
+                ItemsOnTile.Count(x => x.GetBaseItem().InteractionType == InteractionType.Roller && x.Id != Item.Id) > 0)
             {
                 return false;
             }
@@ -715,7 +715,7 @@
                             continue;
                         }
 
-                        if (I.GetBaseItem().InteractionType == InteractionType.STACKTOOL)
+                        if (I.GetBaseItem().InteractionType == InteractionType.Stacktool)
                         {
                             newZ = I.GetZ;
                             break;
@@ -790,8 +790,8 @@
             {
                 _room.GetRoomUserManager().UpdateUserStatusses();
             }
-            if (Item.GetBaseItem().InteractionType == InteractionType.TENT ||
-                Item.GetBaseItem().InteractionType == InteractionType.TENT_SMALL)
+            if (Item.GetBaseItem().InteractionType == InteractionType.Tent ||
+                Item.GetBaseItem().InteractionType == InteractionType.TentSmall)
             {
                 _room.RemoveTent(Item.Id);
                 _room.AddTent(Item.Id);
@@ -827,7 +827,7 @@
             _room.GetGameMap().RemoveFromMap(Item);
             Item.SetState(newX, newY, newZ,
                 Gamemap.GetAffectedTiles(Item.GetBaseItem().Length, Item.GetBaseItem().Width, newX, newY, Item.Rotation));
-            if (Item.GetBaseItem().InteractionType == InteractionType.TONER)
+            if (Item.GetBaseItem().InteractionType == InteractionType.Toner)
             {
                 if (_room.TonerData == null)
                 {
@@ -853,7 +853,7 @@
             }
 
             Item.Interactor.OnPlace(Session, Item);
-            if (Item.GetBaseItem().InteractionType == InteractionType.MOODLIGHT)
+            if (Item.GetBaseItem().InteractionType == InteractionType.Moodlight)
             {
                 if (_room.MoodlightData == null)
                 {
@@ -876,7 +876,7 @@
                                   "', `wall_pos` = @WallPos WHERE `id` = '" +
                                   Item.Id +
                                   "' LIMIT 1");
-                dbClient.AddParameter("WallPos", Item.wallCoord);
+                dbClient.AddParameter("WallPos", Item.WallCoord);
                 dbClient.RunQuery();
             }
             _wallItems.TryAdd(Item.Id, Item);
@@ -963,7 +963,7 @@
             var Items = new List<Item>();
             foreach (var Item in GetWallAndFloor.ToList())
             {
-                if (Item == null || Item.UserID != Session.GetHabbo().Id)
+                if (Item == null || Item.UserId != Session.GetHabbo().Id)
                 {
                     continue;
                 }
@@ -973,14 +973,14 @@
                     Item I = null;
                     _floorItems.TryRemove(Item.Id, out I);
                     Session.GetHabbo().GetInventoryComponent().TryAddFloorItem(Item.Id, I);
-                    _room.SendPacket(new ObjectRemoveComposer(Item, Item.UserID));
+                    _room.SendPacket(new ObjectRemoveComposer(Item, Item.UserId));
                 }
                 else if (Item.IsWallItem)
                 {
                     Item I = null;
                     _wallItems.TryRemove(Item.Id, out I);
                     Session.GetHabbo().GetInventoryComponent().TryAddWallItem(Item.Id, I);
-                    _room.SendPacket(new ItemRemoveComposer(Item, Item.UserID));
+                    _room.SendPacket(new ItemRemoveComposer(Item, Item.UserId));
                 }
                 Session.SendPacket(new FurniListAddComposer(Item));
             }
@@ -990,7 +990,7 @@
         }
 
         public bool CheckPosItem(GameClient Session, Item Item, int newX, int newY, int newRot, bool newItem,
-            bool SendNotify = true)
+                                 bool SendNotify = true)
         {
             try
             {

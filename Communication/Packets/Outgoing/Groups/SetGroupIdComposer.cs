@@ -2,9 +2,10 @@
 {
     internal class SetGroupIdComposer : ServerPacket
     {
-        public SetGroupIdComposer(int Id) : base(ServerPacketHeader.SetGroupIdMessageComposer)
+        public SetGroupIdComposer(int id)
+            : base(ServerPacketHeader.SetGroupIdMessageComposer)
         {
-            WriteInteger(Id);
+            WriteInteger(id);
         }
     }
 }

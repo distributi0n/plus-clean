@@ -9,36 +9,39 @@
 
     internal class YouTubeGetNextVideo : IPacketEvent
     {
-        public void Parse(GameClient Session, ClientPacket Packet)
+        public void Parse(GameClient session, ClientPacket packet)
         {
-            if (!Session.GetHabbo().InRoom)
+            if (!session.GetHabbo().InRoom)
             {
                 return;
             }
 
-            var Videos = PlusEnvironment.GetGame().GetTelevisionManager().TelevisionList;
-            if (Videos.Count == 0)
+            var videos = PlusEnvironment.GetGame().GetTelevisionManager().TelevisionList;
+
+            if (videos.Count == 0)
             {
-                Session.SendNotification("Oh, it looks like the hotel manager haven't added any videos for you to watch! :(");
+                session.SendNotification("Oh, it looks like the hotel manager haven't added any videos for you to watch! :(");
                 return;
             }
 
-            var ItemId = Packet.PopInt();
-            var Next = Packet.PopInt();
-            TelevisionItem Item = null;
-            var dict = PlusEnvironment.GetGame().GetTelevisionManager()._televisions;
+            var itemId = packet.PopInt();
+
+            packet.PopInt();
+
+            TelevisionItem item = null;
+            var dict = PlusEnvironment.GetGame().GetTelevisionManager().Televisions;
             foreach (var value in RandomValues(dict).Take(1))
             {
-                Item = value;
+                item = value;
             }
 
-            if (Item == null)
+            if (item == null)
             {
-                Session.SendNotification("Oh, it looks like their was a problem getting the video.");
+                session.SendNotification("Oh, it looks like their was a problem getting the video.");
                 return;
             }
 
-            Session.SendPacket(new GetYouTubeVideoComposer(ItemId, Item.YouTubeId));
+            session.SendPacket(new GetYouTubeVideoComposer(itemId, item.YouTubeId));
         }
 
         public IEnumerable<TValue> RandomValues<TKey, TValue>(IDictionary<TKey, TValue> dict)

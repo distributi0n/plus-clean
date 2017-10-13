@@ -102,7 +102,7 @@
                 }
                 if (ExitTeleports.Count > 0)
                 {
-                    var tile = _freezeTiles.Values.Where(x => x.GetX == User.X && x.GetY == User.Y).FirstOrDefault();
+                    var tile = _freezeTiles.Values.FirstOrDefault(x => x.GetX == User.X && x.GetY == User.Y);
                     if (tile != null)
                     {
                         var ExitTle = GetRandomExitTile();
@@ -156,7 +156,7 @@
             {
                 if (!string.IsNullOrEmpty(Item.ExtraData))
                 {
-                    Item.interactionCountHelper = 0;
+                    Item.InteractionCountHelper = 0;
                     Item.ExtraData = "";
                     Item.UpdateState(false, true);
                     _room.GetGameMap().AddItemToMap(Item, false);
@@ -184,13 +184,13 @@
             {
                 if (User.GoalX == Item.GetX && User.GoalY == Item.GetY && User.FreezeInteracting)
                 {
-                    if (Item.interactionCountHelper == 0)
+                    if (Item.InteractionCountHelper == 0)
                     {
-                        Item.interactionCountHelper = 1;
+                        Item.InteractionCountHelper = 1;
                         Item.ExtraData = "1000";
                         Item.UpdateState();
                         Item.InteractingUser = User.UserId;
-                        Item.freezePowerUp = User.banzaiPowerUp;
+                        Item.FreezePowerUp = User.banzaiPowerUp;
                         Item.RequestUpdate(4, true);
                         switch (User.banzaiPowerUp)
                         {
@@ -210,7 +210,7 @@
             {
                 if (User.GoalX == Item.GetX && User.GoalY == Item.GetY)
                 {
-                    if (Item.freezePowerUp != FreezePowerUp.NONE)
+                    if (Item.FreezePowerUp != FreezePowerUp.NONE)
                     {
                         PickUpPowerUp(Item, User);
                     }
@@ -281,13 +281,13 @@
             {
                 switch (item.GetBaseItem().InteractionType)
                 {
-                    case InteractionType.FREEZE_TILE:
+                    case InteractionType.FreezeTile:
                     {
                         item.ExtraData = "11000";
                         item.UpdateState(false, true);
                         continue;
                     }
-                    case InteractionType.FREEZE_TILE_BLOCK:
+                    case InteractionType.FreezeTileBlock:
                     {
                         SetRandomPowerUp(item);
                         item.UpdateState(false, true);
@@ -314,43 +314,43 @@
                 case 2:
                 {
                     item.ExtraData = "2000";
-                    item.freezePowerUp = FreezePowerUp.BLUEARROW;
+                    item.FreezePowerUp = FreezePowerUp.BLUEARROW;
                     break;
                 }
                 case 3:
                 {
                     item.ExtraData = "3000";
-                    item.freezePowerUp = FreezePowerUp.SNOWBALLS;
+                    item.FreezePowerUp = FreezePowerUp.SNOWBALLS;
                     break;
                 }
                 case 4:
                 {
                     item.ExtraData = "4000";
-                    item.freezePowerUp = FreezePowerUp.GREENARROW;
+                    item.FreezePowerUp = FreezePowerUp.GREENARROW;
                     break;
                 }
                 case 5:
                 {
                     item.ExtraData = "5000";
-                    item.freezePowerUp = FreezePowerUp.ORANGESNOWBALL;
+                    item.FreezePowerUp = FreezePowerUp.ORANGESNOWBALL;
                     break;
                 }
                 case 6:
                 {
                     item.ExtraData = "6000";
-                    item.freezePowerUp = FreezePowerUp.HEART;
+                    item.FreezePowerUp = FreezePowerUp.HEART;
                     break;
                 }
                 case 7:
                 {
                     item.ExtraData = "7000";
-                    item.freezePowerUp = FreezePowerUp.SHIELD;
+                    item.FreezePowerUp = FreezePowerUp.SHIELD;
                     break;
                 }
                 default:
                 {
                     item.ExtraData = "1000";
-                    item.freezePowerUp = FreezePowerUp.NONE;
+                    item.FreezePowerUp = FreezePowerUp.NONE;
                     break;
                 }
             }
@@ -361,7 +361,7 @@
 
         private void PickUpPowerUp(Item item, RoomUser User)
         {
-            switch (item.freezePowerUp)
+            switch (item.FreezePowerUp)
             {
                 case FreezePowerUp.HEART:
                 {
@@ -382,12 +382,12 @@
                 case FreezePowerUp.GREENARROW:
                 case FreezePowerUp.ORANGESNOWBALL:
                 {
-                    User.banzaiPowerUp = item.freezePowerUp;
+                    User.banzaiPowerUp = item.FreezePowerUp;
                     break;
                 }
             }
 
-            item.freezePowerUp = FreezePowerUp.NONE;
+            item.FreezePowerUp = FreezePowerUp.NONE;
             item.ExtraData = "1" + item.ExtraData;
             item.UpdateState(false, true);
         }
@@ -640,7 +640,7 @@
         {
             foreach (var item in items)
             {
-                if (item.GetBaseItem().InteractionType == InteractionType.FREEZE_TILE)
+                if (item.GetBaseItem().InteractionType == InteractionType.FreezeTile)
                 {
                     return true;
                 }
@@ -653,7 +653,7 @@
         {
             foreach (var item in items)
             {
-                if (item.GetBaseItem().InteractionType == InteractionType.FREEZE_TILE_BLOCK)
+                if (item.GetBaseItem().InteractionType == InteractionType.FreezeTileBlock)
                 {
                     return true;
                 }
